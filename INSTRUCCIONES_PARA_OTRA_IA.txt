@@ -1,0 +1,154 @@
+===============================================================================
+  INSTRUCCIONES PARA CONECTARSE A LA BASE DE DATOS ORACLE CLOUD
+===============================================================================
+
+🎯 OBJETIVO: Conectarte a la base de datos Oracle del sistema de odontología
+
+📋 LO QUE NECESITAS SABER:
+
+1. Las credenciales están en: config/oracle/credentials.json
+2. El wallet está en: config/Wallet_escanor/
+3. Oracle Instant Client YA está instalado en: /opt/oracle/instantclient_23_6
+4. La base de datos tiene 28 TABLAS YA CREADAS (no hay que crearlas)
+
+===============================================================================
+
+🚀 CÓDIGO PARA CONECTARTE (Copia y ejecuta):
+
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_23_6:$LD_LIBRARY_PATH
+
+python3 << 'EOF'
+import oracledb
+import json
+
+# Leer credenciales
+with open('config/oracle/credentials.json') as f:
+    config = json.load(f)['oracle_cloud']
+
+# Inicializar cliente Oracle
+oracledb.init_oracle_client(
+    lib_dir="/opt/oracle/instantclient_23_6",
+    config_dir=config['config_dir']
+)
+
+# Conectar
+connection = oracledb.connect(
+    user=config['user'],
+    password=config['password'],
+    dsn=config['dsn']
+)
+
+print("✅ Conectado a Oracle Cloud")
+
+# Ejemplo: Listar tablas
+cursor = connection.cursor()
+cursor.execute("SELECT table_name FROM user_tables ORDER BY table_name")
+tables = cursor.fetchall()
+print(f"\nTablas encontradas: {len(tables)}")
+for table in tables:
+    print(f"  - {table[0]}")
+
+cursor.close()
+connection.close()
+EOF
+
+===============================================================================
+
+📚 TABLAS DISPONIBLES (28):
+
+Módulo Pacientes:
+  • ODO_PACIENTES
+  • ODO_HISTORIAS_CLINICAS
+  • ODO_ODONTOGRAMAS
+
+Módulo Citas:
+  • ODO_CITAS
+  • ODO_SESIONES_TRATAMIENTO
+
+Módulo Tratamientos:
+  • ODO_CATALOGOS_TRATAMIENTOS
+  • ODO_TRATAMIENTOS_PACIENTE
+  • ODO_TRATAMIENTOS_DIENTE
+  • ODO_HALLAZGOS_DIENTE
+  • ODO_PRESCRIPCIONES
+
+Módulo Facturación:
+  • ODO_FACTURAS
+  • ODO_DETALLES_FACTURA
+  • ODO_PAGOS
+  • ODO_TIMBRADOS
+
+Módulo Usuarios:
+  • ODO_USUARIOS
+  • ODO_ROLES
+  • ODO_USUARIO_ROLES
+  • ODO_USUARIO_SUCURSALES
+
+Módulo Organización:
+  • ODO_EMPRESAS
+  • ODO_SUCURSALES
+
+Módulo Geografía:
+  • ODO_CIUDADES
+  • ODO_DEPARTAMENTOS
+  • ODO_BARRIOS
+  • CIUDAD
+
+Otros:
+  • ODO_DIENTES
+  • ODO_ARCHIVOS
+  • ODO_AUDITORIA
+  • DBTOOLS$EXECUTION_HISTORY
+
+===============================================================================
+
+🔧 HELPER PYTHON REUTILIZABLE:
+
+Si quieres simplificar la conexión, usa el helper ya creado:
+
+from database.scripts.connect_db import get_connection
+
+conn = get_connection()
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM odo_pacientes WHERE ROWNUM <= 5")
+for row in cursor:
+    print(row)
+cursor.close()
+conn.close()
+
+===============================================================================
+
+📖 DOCUMENTACIÓN COMPLETA:
+
+Lee estos archivos para más información:
+  • docs/GUIA_CONEXION_IA.md     - Guía completa de conexión
+  • ESTADO.md                    - Estado actual del proyecto
+  • README.md                    - Información general
+  • database/README.md           - Convenciones de base de datos
+
+===============================================================================
+
+⚠️ IMPORTANTE:
+
+1. NUNCA commitear credentials.json (ya está en .gitignore)
+2. La base de datos YA TIENE DATOS - explora antes de modificar
+3. Actualiza ESTADO.md cuando termines tu sesión
+4. Las tablas tienen prefijo "ODO_" (Odontología)
+
+===============================================================================
+
+✅ VERIFICACIÓN RÁPIDA:
+
+Para verificar que todo funciona, ejecuta:
+
+python3 database/scripts/connect_db.py
+
+Deberías ver:
+  ✅ Conectado como ADMIN a G04D6B70B49B5DA_ESCANOR
+  📋 Tablas encontradas: 28
+
+===============================================================================
+
+¿Problemas? Revisa docs/GUIA_CONEXION_IA.md sección "Troubleshooting"
+
+===============================================================================

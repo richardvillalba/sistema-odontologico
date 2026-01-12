@@ -1,0 +1,77 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+frontend/build/
+frontend/dist/
+*.log
+
+# Archivos de configuración sensibles
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/config/credentials.json
+**/config/database.json
+
+# Credenciales de Oracle
+tnsnames.ora
+sqlnet.ora
+wallet/
+*.ora
+config/oracle/credentials.json
+config/oracle/.env
+config/oracle/wallet/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# SQL Developer
+*.jks
+
+# Archivos temporales
+*.tmp
+*.bak
+*.backup
+temp/
+tmp/
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Oracle Instant Client (no commitear)
+instantclient*/
+
+# Archivos de configuración de Oracle (proteger wallet)
+config/Wallet_*/
+Wallet_*/
+
+# Cache y temporales
+.cache/
+*.cache
+
+# Archivos de bloqueo de sistema
+.~lock.*
+
+# Archivos de respaldo del sistema
+*~
