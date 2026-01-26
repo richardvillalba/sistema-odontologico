@@ -34,10 +34,10 @@
 - [ ] Generar packages PL/SQL para los módulos existentes
 - [ ] Configurar ORDS para APIs REST
 - [ ] Crear servicios de API en frontend para consumir ORDS
-- [ ] Crear componentes React basados en módulos identificados
-- [ ] Implementar autenticación y autorización
-- [ ] Crear módulo de reportes
-- [ ] Desarrollar módulo de Pacientes (frontend + backend)
+- [x] Implementar lista de pacientes (Table/Grid)
+- [x] Implementar formulario de creación/edición
+- [x] Implementar vista de detalle
+- [x] Desarrollar módulo de Pacientes (frontend completo)
 - [ ] Desarrollar módulo de Citas (frontend + backend)
 - [ ] Desarrollar módulo de Historia Clínica (frontend + backend)
 - [ ] Desarrollar módulo de Odontograma Digital (frontend + backend)

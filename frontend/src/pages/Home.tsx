@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
 function Home() {
     const [message] = useState('Sistema de Gestión Odontológica')
@@ -22,10 +23,10 @@ function Home() {
                     <p>Frontend inicializado con React + TypeScript + Vite</p>
 
                     <div className="modules-grid">
-                        <div className="module-card">
+                        <Link to="/pacientes" className="module-card" style={{ textDecoration: 'none', color: 'inherit' }}>
                             <h3>👥 Pacientes</h3>
                             <p>Gestión completa de pacientes</p>
-                        </div>
+                        </Link>
 
                         <div className="module-card">
                             <h3>📅 Citas</h3>
