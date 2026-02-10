@@ -26,7 +26,7 @@ const RegistrarPago = () => {
         enabled: !!facturaId
     });
 
-    const factura = facturaRes?.data?.factura?.[0] || facturaRes?.data?.factura;
+    const factura = facturaRes?.data?.items?.[0] || facturaRes?.data?.factura?.[0] || facturaRes?.data?.factura;
 
     // Mutation para registrar pago
     const pagoMutation = useMutation({
