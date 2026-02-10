@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { billingService } from '../services/api';
+import { billingService, empresaService } from '../services/api';
+import FacturaPrint from '../components/facturacion/FacturaPrint';
 
 const FacturaDetalle = () => {
     const { id } = useParams();
@@ -30,10 +31,16 @@ const FacturaDetalle = () => {
         queryFn: () => billingService.getFacturaPagos(id),
     });
 
+    const { data: empresaRes } = useQuery({
+        queryKey: ['empresa'],
+        queryFn: () => empresaService.get(),
+    });
+
     const factura = facturaRes?.data?.items?.[0] || facturaRes?.data?.factura?.[0] || facturaRes?.data?.factura;
     const detalles = detallesRes?.data?.items || [];
     const cuotas = cuotasRes?.data?.items || [];
     const pagos = pagosRes?.data?.items || [];
+    const empresa = empresaRes?.data || {};
 
     // Estado para modal de pago de cuota
     const [pagoModal, setPagoModal] = useState({ open: false, cuota: null });
@@ -186,7 +193,10 @@ const FacturaDetalle = () => {
                         </button>
                     )}
 
-                    <button className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 transition-all flex items-center gap-2">
+                    <button
+                        onClick={() => window.print()}
+                        className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 transition-all flex items-center gap-2"
+                    >
                         <span>🖨️</span> Imprimir
                     </button>
                 </div>
@@ -557,6 +567,13 @@ const FacturaDetalle = () => {
                     </div>
                 </div>
             )}
+
+            {/* Área de impresión - fuera de pantalla en modo normal, visible al imprimir */}
+            <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+                {factura && (
+                    <FacturaPrint factura={factura} detalles={detalles} empresa={empresa} />
+                )}
+            </div>
 
             {/* Modal de Anulación de Pago */}
             {anularPagoModal.open && anularPagoModal.pago && (

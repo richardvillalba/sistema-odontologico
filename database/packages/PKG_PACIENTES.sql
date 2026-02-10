@@ -294,24 +294,32 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
         -- Obtener datos paginados
         OPEN p_cursor FOR
             SELECT
-                paciente_id,
-                numero_historia,
-                nombre,
-                apellido,
-                nombre || ' ' || apellido AS nombre_completo,
-                documento_tipo,
-                documento_numero,
-                fecha_nacimiento,
-                calc_edad(fecha_nacimiento) AS edad,
-                genero,
-                email,
-                telefono_principal,
-                activo,
-                fecha_registro
-            FROM odo_pacientes
-            WHERE empresa_id = p_empresa_id
-              AND (p_activo IS NULL OR activo = p_activo)
-            ORDER BY apellido, nombre
+                p.paciente_id,
+                p.numero_historia,
+                p.nombre,
+                p.apellido,
+                p.nombre || ' ' || p.apellido AS nombre_completo,
+                p.documento_tipo,
+                p.documento_numero,
+                p.fecha_nacimiento,
+                calc_edad(p.fecha_nacimiento) AS edad,
+                p.genero,
+                p.email,
+                p.telefono_principal,
+                p.activo,
+                p.fecha_registro,
+                NVL((SELECT SUM(f.total)
+                     FROM odo_facturas f
+                     WHERE f.paciente_id = p.paciente_id
+                       AND f.estado != 'ANULADA'), 0) AS monto_total,
+                NVL((SELECT SUM(f.saldo_pendiente)
+                     FROM odo_facturas f
+                     WHERE f.paciente_id = p.paciente_id
+                       AND f.estado IN ('PENDIENTE', 'PARCIAL')), 0) AS saldo_pendiente
+            FROM odo_pacientes p
+            WHERE p.empresa_id = p_empresa_id
+              AND (p_activo IS NULL OR p.activo = p_activo)
+            ORDER BY p.apellido, p.nombre
             OFFSET p_offset ROWS FETCH NEXT p_limit ROWS ONLY;
 
         p_status := 'SUCCESS';
