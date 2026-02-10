@@ -402,8 +402,6 @@ const Pacientes = () => {
                                     <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Documento / HC</th>
                                     <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Edad</th>
                                     <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Contacto</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-right">Total Facturado</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-right">Saldo Pendiente</th>
                                     <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Estado</th>
                                     <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Acciones</th>
                                 </tr>
@@ -411,7 +409,7 @@ const Pacientes = () => {
                             <tbody className="divide-y divide-slate-50">
                                 {pacientes.length === 0 ? (
                                     <tr>
-                                        <td colSpan="8" className="p-20 text-center">
+                                        <td colSpan="6" className="p-20 text-center">
                                             <div className="flex flex-col items-center gap-3">
                                                 <div className="text-5xl">👥</div>
                                                 <p className="text-slate-400 font-bold">No se encontraron pacientes</p>
@@ -455,26 +453,6 @@ const Pacientes = () => {
                                             <td className="p-5">
                                                 <div className="text-sm font-bold text-slate-700">{p.telefono_principal || 'Sin teléfono'}</div>
                                                 <div className="text-xs text-slate-500 truncate max-w-[150px]">{p.email || 'Sin correo'}</div>
-                                            </td>
-                                            <td className="p-5 text-right">
-                                                {p.monto_total > 0 ? (
-                                                    <span className="font-bold text-slate-800 text-sm">
-                                                        {new Intl.NumberFormat('es-PY').format(p.monto_total)} Gs
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-xs text-slate-400 font-medium">Sin facturas</span>
-                                                )}
-                                            </td>
-                                            <td className="p-5 text-right">
-                                                {p.saldo_pendiente > 0 ? (
-                                                    <span className="font-black text-rose-600 text-sm">
-                                                        {new Intl.NumberFormat('es-PY').format(p.saldo_pendiente)} Gs
-                                                    </span>
-                                                ) : p.monto_total > 0 ? (
-                                                    <span className="text-xs font-black text-emerald-600">Al día</span>
-                                                ) : (
-                                                    <span className="text-xs text-slate-400 font-medium">-</span>
-                                                )}
                                             </td>
                                             <td className="p-5 text-center">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${p.activo === 'S'

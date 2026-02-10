@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { billingService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,8 +7,9 @@ import { useAuth } from '../contexts/AuthContext';
 const RegistrarPago = () => {
     const navigate = useNavigate();
     const { usuario } = useAuth();
+    const { id: idFromParams } = useParams();
     const [searchParams] = useSearchParams();
-    const facturaId = searchParams.get('facturaId');
+    const facturaId = idFromParams || searchParams.get('facturaId');
 
     const [formData, setFormData] = useState({
         monto: '',

@@ -177,7 +177,7 @@ const FacturaDetalle = () => {
 
                     {(factura.estado === 'PENDIENTE' || factura.estado === 'PARCIAL') && (
                         <button
-                            onClick={() => navigate(`/pagos/registrar?facturaId=${id}`)}
+                            onClick={() => navigate(`/facturas/${id}/registrar-pago`)}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-emerald-200 transition-all"
                         >
                             Registrar Pago
