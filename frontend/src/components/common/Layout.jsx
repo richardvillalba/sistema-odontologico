@@ -73,10 +73,14 @@ export default function Layout({ children }) {
                 <div className="p-4 border-t border-slate-800/50">
                     <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/30 rounded-2xl border border-white/5">
                         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center font-black shadow-inner uppercase text-sm">
-                            AD
+                            {usuario?.nombre?.charAt(0) || ''}{usuario?.apellido?.charAt(0) || '?'}
                         </div>
                         <div className="overflow-hidden">
-                            <p className="text-sm font-black truncate leading-tight">Dr. Administrador</p>
+                            <p className="text-sm font-black truncate leading-tight">
+                                {usuario?.nombre && usuario?.apellido
+                                    ? `${usuario.nombre} ${usuario.apellido}`
+                                    : usuario?.username || 'Usuario'}
+                            </p>
                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                 {selectedPoint ? `${selectedPoint.establecimiento}-${selectedPoint.punto_expedicion}` : "Sin Punto"}
                             </p>

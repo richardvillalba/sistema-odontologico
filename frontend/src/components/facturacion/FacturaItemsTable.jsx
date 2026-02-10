@@ -89,8 +89,18 @@ const FacturaItemsTable = ({ items, onRemove, onUpdateQuantity, onUpdateDiscount
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="px-6 py-12 text-center text-slate-400 italic font-medium">
-                                    No hay ítems cargados en esta factura.
+                                <td colSpan="6" className="px-6 py-10 text-center">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-black text-slate-600">Sin ítems en la factura</p>
+                                        <p className="text-xs text-slate-400 max-w-xs">
+                                            Agregue tratamientos desde el panel izquierdo o ingrese un concepto manual para continuar.
+                                        </p>
+                                    </div>
                                 </td>
                             </tr>
                         )}

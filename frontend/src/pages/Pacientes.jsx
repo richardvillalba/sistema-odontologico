@@ -2,17 +2,20 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { pacientesService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { calculateAge, formatDate } from '../utils/format';
 
 const Pacientes = () => {
     const navigate = useNavigate();
+    const { usuario } = useAuth();
+    const empresaId = usuario?.empresa_id || 1;
     const [searchTerm, setSearchTerm] = useState('');
 
     const { data, isLoading, isError, error } = useQuery({
-        queryKey: ['pacientes', searchTerm],
+        queryKey: ['pacientes', searchTerm, empresaId],
         queryFn: () => searchTerm
             ? pacientesService.search(searchTerm)
-            : pacientesService.getAll({ empresa_id: 1 }),
+            : pacientesService.getAll({ empresa_id: empresaId }),
     });
 
     const pacientes = data?.data?.items || [];

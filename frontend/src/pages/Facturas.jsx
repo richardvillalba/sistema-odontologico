@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { billingService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import FacturasList from '../components/facturacion/FacturasList';
 
 const Facturas = () => {
     const navigate = useNavigate();
+    const { usuario } = useAuth();
+    const empresaId = usuario?.empresa_id || 1;
     const [filters, setFilters] = useState({
         estado: '',
         fecha_desde: '',
@@ -13,8 +16,6 @@ const Facturas = () => {
         limit: 50,
         offset: 0
     });
-
-    const empresaId = 1; // Simplificado para este contexto
 
     const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['facturas', filters],

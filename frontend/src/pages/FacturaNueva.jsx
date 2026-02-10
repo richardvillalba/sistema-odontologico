@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePointOfSale } from '../context/PointOfSaleContext';
+import { useAuth } from '../contexts/AuthContext';
 import { billingService } from '../services/api';
 import PacienteSelector from '../components/facturacion/PacienteSelector';
 import TratamientosPendientes from '../components/facturacion/TratamientosPendientes';
@@ -8,6 +9,7 @@ import FacturaItemsTable from '../components/facturacion/FacturaItemsTable';
 
 const FacturaNueva = () => {
     const navigate = useNavigate();
+    const { usuario } = useAuth();
     const { selectedPoint, isValid, refreshPoints } = usePointOfSale();
 
     // Form State
@@ -64,9 +66,9 @@ const FacturaNueva = () => {
             // 1. Crear Cabecera
             const facturaRes = await billingService.createFactura({
                 paciente_id: selectedPaciente.paciente_id,
-                usuario_id: 1, // TODO: Auth
-                empresa_id: 1, // TODO: Context/Auth
-                sucursal_id: 1, // TODO: Context/Auth
+                usuario_id: usuario?.usuario_id || 1,
+                empresa_id: usuario?.empresa_id || 1,
+                sucursal_id: 1, // TODO: Context/Sucursal
                 timbrado_id: selectedPoint?.timbrado_id, // Punto de expedición seleccionado
                 tipo_factura: headerData.tipo_factura,
                 condicion_operacion: headerData.condicion_operacion,
@@ -104,7 +106,7 @@ const FacturaNueva = () => {
                 await billingService.registrarPago(facturaId, {
                     monto: subtotal,
                     metodo_pago: 'EFECTIVO',
-                    registrado_por: 1 // TODO: Auth
+                    registrado_por: usuario?.usuario_id || 1
                 });
             }
 
@@ -322,6 +324,18 @@ const FacturaNueva = () => {
                         />
                     </div>
 
+                    {/* Aviso de validación: paciente seleccionado pero sin ítems */}
+                    {selectedPaciente && items.length === 0 && (
+                        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3">
+                            <svg className="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            </svg>
+                            <p className="text-sm text-amber-700 font-semibold">
+                                Debe agregar al menos un ítem para poder emitir la factura.
+                            </p>
+                        </div>
+                    )}
+
                     {/* Submit Bar */}
                     <div className="pt-4 flex justify-end gap-4">
                         <button
@@ -334,8 +348,13 @@ const FacturaNueva = () => {
                         <button
                             disabled={isSubmitting || items.length === 0 || !selectedPaciente || !isValid}
                             onClick={handleSubmit}
-                            className={`px-12 py-4 rounded-2xl font-black shadow-xl transition-all flex items-center gap-3 ${isSubmitting ? 'bg-slate-200 text-slate-400' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200 hover:scale-105 active:scale-95'
-                                }`}
+                            className={`px-12 py-4 rounded-2xl font-black shadow-xl transition-all flex items-center gap-3 ${
+                                isSubmitting
+                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                    : (items.length === 0 || !selectedPaciente || !isValid)
+                                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200 hover:scale-105 active:scale-95'
+                            }`}
                         >
                             {isSubmitting ? (
                                 <>
