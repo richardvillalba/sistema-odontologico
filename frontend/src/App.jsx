@@ -13,34 +13,105 @@ import OdontogramaPaciente from './pages/OdontogramaPaciente';
 import Citas from './pages/Citas';
 import AgendaDoctor from './pages/AgendaDoctor';
 
-const queryClient = new QueryClient();
+import Configuraciones from './pages/Configuraciones';
+import Compras from './pages/Compras';
+import Proveedores from './pages/Proveedores';
+import Timbrados from './pages/Timbrados';
+import DatosClinica from './pages/configuraciones/DatosClinica';
+import ConfiguracionCajas from './pages/configuraciones/ConfiguracionCajas';
+import GestionUsuarios from './pages/GestionUsuarios';
+import GestionRoles from './pages/GestionRoles';
+import Facturas from './pages/Facturas';
+import FacturasDebug from './pages/FacturasDebug';
+import FacturaNueva from './pages/FacturaNueva';
+import FacturaDetalle from './pages/FacturaDetalle';
+import RegistrarPago from './pages/RegistrarPago';
+import Caja from './pages/Caja';
+import CajaDetalle from './pages/CajaDetalle';
+
+import { PointOfSaleProvider } from './context/PointOfSaleContext';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import SinAcceso from './pages/SinAcceso';
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 30000, // Los datos se consideran frescos por 30 segundos
+            cacheTime: 300000, // Mantener en caché por 5 minutos
+            refetchOnWindowFocus: false, // No refrescar al volver a la ventana
+            refetchOnMount: false, // No refrescar al montar si hay datos en caché
+            retry: 1, // Solo 1 reintento en caso de error
+        },
+    },
+});
 
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <Router>
-                <Layout>
+            <AuthProvider>
+                <Router>
                     <Routes>
-                        <Route path="/" element={<Dashboard />} />
+                        {/* Ruta pública - Login */}
+                        <Route path="/login" element={<Login />} />
 
-                        {/* Pacientes */}
-                        <Route path="/pacientes" element={<Pacientes />} />
-                        <Route path="/pacientes/:id" element={<PacienteDetalle />} />
-                        <Route path="/pacientes/:id/odontograma" element={<OdontogramaPaciente />} />
+                        {/* Ruta de error de acceso */}
+                        <Route path="/sin-acceso" element={<SinAcceso />} />
 
-                        {/* Citas & Agenda */}
-                        <Route path="/citas" element={<Citas />} />
-                        <Route path="/agenda" element={<AgendaDoctor />} />
-                        <Route path="/agenda/:doctorId" element={<AgendaDoctor />} />
+                        {/* Rutas protegidas */}
+                        <Route path="/*" element={
+                            <ProtectedRoute>
+                                <PointOfSaleProvider>
+                                    <Layout>
+                                        <Routes>
+                                            <Route path="/" element={<Dashboard />} />
 
-                        {/* Placeholders */}
-                        <Route path="/historias" element={<div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200 text-center font-bold">Historias Clínicas - Módulo en Desarrollo</div>} />
-                        <Route path="/tratamientos" element={<div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200 text-center font-bold">Catálogo de Tratamientos - Módulo en Desarrollo</div>} />
+                                            {/* Pacientes */}
+                                            <Route path="/pacientes" element={<Pacientes />} />
+                                            <Route path="/pacientes/:id" element={<PacienteDetalle />} />
+                                            <Route path="/pacientes/:id/odontograma" element={<OdontogramaPaciente />} />
 
-                        <Route path="*" element={<Navigate to="/" replace />} />
+                                            {/* Citas */}
+                                            <Route path="/citas" element={<Citas />} />
+                                            <Route path="/agenda" element={<AgendaDoctor />} />
+
+                                            {/* Compras */}
+                                            <Route path="/compras" element={<Compras />} />
+                                            <Route path="/compras/proveedores" element={<Proveedores />} />
+
+                                            {/* Facturación */}
+                                            <Route path="/facturas" element={<Facturas />} />
+                                            <Route path="/facturas-debug" element={<FacturasDebug />} />
+                                            <Route path="/facturas/nueva" element={<FacturaNueva />} />
+                                            <Route path="/facturas/:id" element={<FacturaDetalle />} />
+                                            <Route path="/facturas/:id/registrar-pago" element={<RegistrarPago />} />
+
+                                            {/* Configuraciones */}
+                                            <Route path="/configuraciones" element={<Configuraciones />} />
+                                            <Route path="/configuraciones/timbrados" element={<Timbrados />} />
+                                            <Route path="/configuraciones/clinica" element={<DatosClinica />} />
+                                            <Route path="/configuraciones/usuarios" element={<GestionUsuarios />} />
+                                            <Route path="/configuraciones/roles" element={<GestionRoles />} />
+                                            <Route path="/configuraciones/cajas" element={<ConfiguracionCajas />} />
+
+                                            {/* Caja */}
+                                            <Route path="/caja" element={<Caja />} />
+                                            <Route path="/caja/:id" element={<CajaDetalle />} />
+
+                                            {/* Tratamientos (placeholder) */}
+                                            <Route path="/tratamientos" element={<div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200 text-center font-bold">Catálogo de Tratamientos - Módulo en Desarrollo</div>} />
+
+                                            {/* Redirección por defecto */}
+                                            <Route path="*" element={<Navigate to="/" replace />} />
+                                        </Routes>
+                                    </Layout>
+                                </PointOfSaleProvider>
+                            </ProtectedRoute>
+                        } />
                     </Routes>
-                </Layout>
-            </Router>
+                </Router>
+            </AuthProvider>
         </QueryClientProvider>
     )
 }

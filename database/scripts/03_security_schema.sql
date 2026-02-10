@@ -1,0 +1,314 @@
+-- ========================================
+-- SISTEMA DE ROLES Y PERMISOS
+-- ========================================
+-- Script para crear el módulo de seguridad
+-- Incluye: Roles, Programas, Permisos y sus relaciones
+
+-- ========================================
+-- 1. TABLA: ODO_ROLES
+-- ========================================
+CREATE TABLE ODO_ROLES (
+    ROL_ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NOMBRE              VARCHAR2(100) NOT NULL UNIQUE,
+    CODIGO              VARCHAR2(50) NOT NULL UNIQUE,
+    DESCRIPCION         VARCHAR2(500),
+    ES_SUPERADMIN       CHAR(1) DEFAULT 'N' CHECK (ES_SUPERADMIN IN ('S', 'N')),
+    ACTIVO              CHAR(1) DEFAULT 'S' CHECK (ACTIVO IN ('S', 'N')),
+    FECHA_CREACION      TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CREADO_POR          NUMBER,
+    FECHA_MODIFICACION  TIMESTAMP,
+    MODIFICADO_POR      NUMBER
+);
+
+-- Datos iniciales de roles
+INSERT INTO ODO_ROLES (NOMBRE, CODIGO, DESCRIPCION, ES_SUPERADMIN, CREADO_POR) VALUES
+('Super Administrador', 'SUPERADMIN', 'Acceso total al sistema', 'S', 1);
+
+INSERT INTO ODO_ROLES (NOMBRE, CODIGO, DESCRIPCION, CREADO_POR) VALUES
+('Administrador', 'ADMIN', 'Administrador de clínica con acceso a configuraciones', 1),
+('Doctor', 'DOCTOR', 'Profesional odontólogo con acceso a tratamientos y pacientes', 1),
+('Secretaria', 'SECRETARIA', 'Personal administrativo con acceso a agenda y facturación', 1),
+('Cajero', 'CAJERO', 'Personal de caja con acceso limitado a cobros y reportes', 1);
+
+-- ========================================
+-- 2. TABLA: ODO_PROGRAMAS
+-- ========================================
+CREATE TABLE ODO_PROGRAMAS (
+    PROGRAMA_ID         NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NOMBRE              VARCHAR2(100) NOT NULL,
+    CODIGO              VARCHAR2(50) NOT NULL UNIQUE,
+    DESCRIPCION         VARCHAR2(500),
+    RUTA_FRONTEND       VARCHAR2(200),
+    ICONO               VARCHAR2(50),
+    MODULO_PADRE_ID     NUMBER,
+    ORDEN               NUMBER DEFAULT 0,
+    ACTIVO              CHAR(1) DEFAULT 'S' CHECK (ACTIVO IN ('S', 'N')),
+    FECHA_CREACION      TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CREADO_POR          NUMBER,
+    CONSTRAINT FK_PROGRAMA_PADRE FOREIGN KEY (MODULO_PADRE_ID)
+        REFERENCES ODO_PROGRAMAS(PROGRAMA_ID)
+);
+
+-- Programas principales
+INSERT INTO ODO_PROGRAMAS (NOMBRE, CODIGO, DESCRIPCION, RUTA_FRONTEND, ICONO, ORDEN, CREADO_POR) VALUES
+('Dashboard', 'DASHBOARD', 'Página principal', '/', '📊', 1, 1),
+('Pacientes', 'PACIENTES', 'Gestión de pacientes', '/pacientes', '👥', 2, 1),
+('Citas', 'CITAS', 'Gestión de citas y agenda', '/citas', '📅', 3, 1),
+('Tratamientos', 'TRATAMIENTOS', 'Gestión de tratamientos odontológicos', '/tratamientos', '🦷', 4, 1),
+('Facturación', 'FACTURACION', 'Módulo de facturación', '/facturas', '🧾', 5, 1),
+('Caja', 'CAJA', 'Control de caja', '/caja', '💰', 6, 1),
+('Reportes', 'REPORTES', 'Reportes y estadísticas', '/reportes', '📈', 7, 1),
+('Configuraciones', 'CONFIGURACIONES', 'Configuraciones del sistema', '/configuraciones', '⚙️', 10, 1);
+
+-- Submódulos de Configuraciones
+INSERT INTO ODO_PROGRAMAS (NOMBRE, CODIGO, DESCRIPCION, RUTA_FRONTEND, ICONO, MODULO_PADRE_ID, ORDEN, CREADO_POR) VALUES
+('Gestión de Empresas', 'CONFIG_EMPRESAS', 'Administración de empresas/clínicas', '/configuraciones/empresas', '🏢',
+    (SELECT PROGRAMA_ID FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIGURACIONES'), 1, 1);
+
+INSERT INTO ODO_PROGRAMAS (NOMBRE, CODIGO, DESCRIPCION, RUTA_FRONTEND, ICONO, MODULO_PADRE_ID, ORDEN, CREADO_POR) VALUES
+('Timbrados', 'CONFIG_TIMBRADOS', 'Gestión de timbrados fiscales', '/configuraciones/timbrados', '🧾',
+    (SELECT PROGRAMA_ID FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIGURACIONES'), 2, 1);
+
+INSERT INTO ODO_PROGRAMAS (NOMBRE, CODIGO, DESCRIPCION, RUTA_FRONTEND, ICONO, MODULO_PADRE_ID, ORDEN, CREADO_POR) VALUES
+('Usuarios y Roles', 'CONFIG_USUARIOS', 'Gestión de usuarios y permisos', '/configuraciones/usuarios', '👥',
+    (SELECT PROGRAMA_ID FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIGURACIONES'), 3, 1);
+
+-- ========================================
+-- 3. TABLA: ODO_PERMISOS
+-- ========================================
+CREATE TABLE ODO_PERMISOS (
+    PERMISO_ID          NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NOMBRE              VARCHAR2(100) NOT NULL,
+    CODIGO              VARCHAR2(50) NOT NULL UNIQUE,
+    DESCRIPCION         VARCHAR2(500),
+    PROGRAMA_ID         NUMBER,
+    ACTIVO              CHAR(1) DEFAULT 'S' CHECK (ACTIVO IN ('S', 'N')),
+    FECHA_CREACION      TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CREADO_POR          NUMBER,
+    CONSTRAINT FK_PERMISO_PROGRAMA FOREIGN KEY (PROGRAMA_ID)
+        REFERENCES ODO_PROGRAMAS(PROGRAMA_ID)
+);
+
+-- Permisos generales
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, CREADO_POR) VALUES
+('Crear registros', 'CREAR', 'Permiso para crear nuevos registros', 1),
+('Editar registros', 'EDITAR', 'Permiso para modificar registros existentes', 1),
+('Eliminar registros', 'ELIMINAR', 'Permiso para eliminar registros', 1),
+('Ver registros', 'VER', 'Permiso para visualizar registros', 1),
+('Anular documentos', 'ANULAR', 'Permiso para anular documentos (facturas, recibos, etc.)', 1),
+('Exportar datos', 'EXPORTAR', 'Permiso para exportar información', 1);
+
+-- Permisos específicos para Gestión de Empresas
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Crear empresas', 'EMPRESA_CREAR', 'Crear nuevas empresas en el sistema', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIG_EMPRESAS';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Editar todas las empresas', 'EMPRESA_EDITAR_TODAS', 'Editar cualquier empresa del sistema', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIG_EMPRESAS';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Editar solo su empresa', 'EMPRESA_EDITAR_PROPIA', 'Editar solo los datos de su empresa', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIG_EMPRESAS';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Activar/Inactivar empresas', 'EMPRESA_ACTIVAR', 'Activar o inactivar empresas', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIG_EMPRESAS';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Ver todas las empresas', 'EMPRESA_VER_TODAS', 'Ver listado completo de empresas', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CONFIG_EMPRESAS';
+
+-- Permisos específicos para Facturación
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Crear facturas', 'FACTURA_CREAR', 'Crear nuevas facturas', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'FACTURACION';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Anular facturas', 'FACTURA_ANULAR', 'Anular facturas existentes', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'FACTURACION';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Ver todas las facturas', 'FACTURA_VER_TODAS', 'Ver facturas de todas las empresas', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'FACTURACION';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Aplicar descuentos', 'FACTURA_DESCUENTO', 'Aplicar descuentos en facturas', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'FACTURACION';
+
+-- Permisos específicos para Caja
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Abrir caja', 'CAJA_ABRIR', 'Abrir una caja al inicio del día', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CAJA';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Cerrar caja', 'CAJA_CERRAR', 'Cerrar caja al final del día', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CAJA';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Registrar ingresos', 'CAJA_INGRESO', 'Registrar ingresos en caja', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CAJA';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Registrar egresos', 'CAJA_EGRESO', 'Registrar egresos/gastos', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CAJA';
+
+INSERT INTO ODO_PERMISOS (NOMBRE, CODIGO, DESCRIPCION, PROGRAMA_ID, CREADO_POR)
+SELECT 'Ver arqueo de otras cajas', 'CAJA_VER_TODAS', 'Ver movimientos de todas las cajas', PROGRAMA_ID, 1
+FROM ODO_PROGRAMAS WHERE CODIGO = 'CAJA';
+
+-- ========================================
+-- 4. TABLA: ODO_ROL_PROGRAMAS
+-- ========================================
+CREATE TABLE ODO_ROL_PROGRAMAS (
+    ROL_PROGRAMA_ID     NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ROL_ID              NUMBER NOT NULL,
+    PROGRAMA_ID         NUMBER NOT NULL,
+    FECHA_ASIGNACION    TIMESTAMP DEFAULT SYSTIMESTAMP,
+    ASIGNADO_POR        NUMBER,
+    CONSTRAINT FK_ROLPROG_ROL FOREIGN KEY (ROL_ID) REFERENCES ODO_ROLES(ROL_ID),
+    CONSTRAINT FK_ROLPROG_PROG FOREIGN KEY (PROGRAMA_ID) REFERENCES ODO_PROGRAMAS(PROGRAMA_ID),
+    CONSTRAINT UK_ROL_PROGRAMA UNIQUE (ROL_ID, PROGRAMA_ID)
+);
+
+-- Asignaciones para SUPERADMIN (tiene acceso a todo)
+INSERT INTO ODO_ROL_PROGRAMAS (ROL_ID, PROGRAMA_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'SUPERADMIN'),
+    PROGRAMA_ID,
+    1
+FROM ODO_PROGRAMAS;
+
+-- Asignaciones para ADMIN
+INSERT INTO ODO_ROL_PROGRAMAS (ROL_ID, PROGRAMA_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'ADMIN'),
+    PROGRAMA_ID,
+    1
+FROM ODO_PROGRAMAS WHERE CODIGO IN ('DASHBOARD', 'PACIENTES', 'CITAS', 'TRATAMIENTOS', 'FACTURACION', 'CAJA', 'REPORTES', 'CONFIGURACIONES', 'CONFIG_TIMBRADOS', 'CONFIG_EMPRESAS');
+
+-- Asignaciones para DOCTOR
+INSERT INTO ODO_ROL_PROGRAMAS (ROL_ID, PROGRAMA_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'DOCTOR'),
+    PROGRAMA_ID,
+    1
+FROM ODO_PROGRAMAS WHERE CODIGO IN ('DASHBOARD', 'PACIENTES', 'CITAS', 'TRATAMIENTOS');
+
+-- Asignaciones para SECRETARIA
+INSERT INTO ODO_ROL_PROGRAMAS (ROL_ID, PROGRAMA_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'SECRETARIA'),
+    PROGRAMA_ID,
+    1
+FROM ODO_PROGRAMAS WHERE CODIGO IN ('DASHBOARD', 'PACIENTES', 'CITAS', 'FACTURACION');
+
+-- Asignaciones para CAJERO
+INSERT INTO ODO_ROL_PROGRAMAS (ROL_ID, PROGRAMA_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'CAJERO'),
+    PROGRAMA_ID,
+    1
+FROM ODO_PROGRAMAS WHERE CODIGO IN ('DASHBOARD', 'FACTURACION', 'CAJA');
+
+-- ========================================
+-- 5. TABLA: ODO_ROL_PERMISOS
+-- ========================================
+CREATE TABLE ODO_ROL_PERMISOS (
+    ROL_PERMISO_ID      NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ROL_ID              NUMBER NOT NULL,
+    PERMISO_ID          NUMBER NOT NULL,
+    FECHA_ASIGNACION    TIMESTAMP DEFAULT SYSTIMESTAMP,
+    ASIGNADO_POR        NUMBER,
+    CONSTRAINT FK_ROLPERM_ROL FOREIGN KEY (ROL_ID) REFERENCES ODO_ROLES(ROL_ID),
+    CONSTRAINT FK_ROLPERM_PERM FOREIGN KEY (PERMISO_ID) REFERENCES ODO_PERMISOS(PERMISO_ID),
+    CONSTRAINT UK_ROL_PERMISO UNIQUE (ROL_ID, PERMISO_ID)
+);
+
+-- Asignaciones para SUPERADMIN (tiene todos los permisos)
+INSERT INTO ODO_ROL_PERMISOS (ROL_ID, PERMISO_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'SUPERADMIN'),
+    PERMISO_ID,
+    1
+FROM ODO_PERMISOS;
+
+-- Asignaciones para ADMIN
+INSERT INTO ODO_ROL_PERMISOS (ROL_ID, PERMISO_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'ADMIN'),
+    PERMISO_ID,
+    1
+FROM ODO_PERMISOS WHERE CODIGO IN (
+    'VER', 'CREAR', 'EDITAR', 'ANULAR', 'EXPORTAR',
+    'EMPRESA_EDITAR_PROPIA', 'EMPRESA_VER_TODAS',
+    'FACTURA_CREAR', 'FACTURA_ANULAR', 'FACTURA_VER_TODAS', 'FACTURA_DESCUENTO',
+    'CAJA_ABRIR', 'CAJA_CERRAR', 'CAJA_INGRESO', 'CAJA_EGRESO', 'CAJA_VER_TODAS'
+);
+
+-- Asignaciones para DOCTOR
+INSERT INTO ODO_ROL_PERMISOS (ROL_ID, PERMISO_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'DOCTOR'),
+    PERMISO_ID,
+    1
+FROM ODO_PERMISOS WHERE CODIGO IN ('VER', 'CREAR', 'EDITAR');
+
+-- Asignaciones para SECRETARIA
+INSERT INTO ODO_ROL_PERMISOS (ROL_ID, PERMISO_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'SECRETARIA'),
+    PERMISO_ID,
+    1
+FROM ODO_PERMISOS WHERE CODIGO IN (
+    'VER', 'CREAR', 'EDITAR',
+    'FACTURA_CREAR', 'FACTURA_VER_TODAS'
+);
+
+-- Asignaciones para CAJERO
+INSERT INTO ODO_ROL_PERMISOS (ROL_ID, PERMISO_ID, ASIGNADO_POR)
+SELECT
+    (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'CAJERO'),
+    PERMISO_ID,
+    1
+FROM ODO_PERMISOS WHERE CODIGO IN (
+    'VER', 'FACTURA_VER_TODAS',
+    'CAJA_ABRIR', 'CAJA_CERRAR', 'CAJA_INGRESO', 'CAJA_EGRESO'
+);
+
+-- ========================================
+-- 6. MODIFICAR TABLA: ODO_USUARIOS
+-- ========================================
+-- Agregar columna ROL_ID a la tabla de usuarios existente
+ALTER TABLE ODO_USUARIOS ADD (
+    ROL_ID NUMBER,
+    CONSTRAINT FK_USUARIO_ROL FOREIGN KEY (ROL_ID)
+        REFERENCES ODO_ROLES(ROL_ID)
+);
+
+-- Asignar rol SUPERADMIN al usuario 1 (por defecto)
+UPDATE ODO_USUARIOS 
+SET ROL_ID = (SELECT ROL_ID FROM ODO_ROLES WHERE CODIGO = 'SUPERADMIN') 
+WHERE USUARIO_ID = 1;
+
+-- ========================================
+-- 7. MODIFICAR TABLA: ODO_EMPRESAS
+-- ========================================
+-- Agregar columna ACTIVO para poder activar/inactivar empresas
+-- Usar BEGIN/END para evitar error si ya existe
+BEGIN
+    EXECUTE IMMEDIATE 'ALTER TABLE ODO_EMPRESAS ADD (ACTIVO CHAR(1) DEFAULT ''S'' CHECK (ACTIVO IN (''S'', ''N'')))';
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE = -1430 THEN
+            NULL; -- La columna ya existe, ignorar error
+        ELSE
+            RAISE;
+        END IF;
+END;
+/
+
+-- Actualizar registros existentes
+UPDATE ODO_EMPRESAS SET ACTIVO = 'S' WHERE ACTIVO IS NULL;
+
+COMMIT;

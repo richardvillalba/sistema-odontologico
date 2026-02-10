@@ -164,14 +164,122 @@ BEGIN
     -- 3. RESTO DEL SISTEMA (SQL Directo)
     -- =======================================================================
     
-    -- CITAS
+    -- CITAS - GET con filtros mejorados
     ORDS.define_template(p_module_name => 'odontologia', p_pattern => 'citas');
     ORDS.define_handler(
       p_module_name    => 'odontologia',
       p_pattern        => 'citas',
       p_method         => 'GET',
       p_source_type    => 'json/query',
-      p_source         => 'SELECT c.*, p.nombre || '' '' || p.apellido as paciente_nombre FROM odo_citas c LEFT JOIN odo_pacientes p ON c.paciente_id = p.paciente_id WHERE (c.empresa_id = :empresa_id OR :empresa_id IS NULL)'
+      p_source         => 'SELECT
+                            c.CITA_ID,
+                            c.PACIENTE_ID,
+                            p.NOMBRE || '' '' || p.APELLIDO as PACIENTE_NOMBRE,
+                            p.TELEFONO_PRINCIPAL as PACIENTE_TELEFONO,
+                            c.DOCTOR_ID,
+                            u.NOMBRE || '' '' || u.APELLIDO as DOCTOR_NOMBRE,
+                            TO_CHAR(c.FECHA_HORA_INICIO, ''YYYY-MM-DD'') as FECHA,
+                            TO_CHAR(c.FECHA_HORA_INICIO, ''HH24:MI'') as HORA_INICIO,
+                            TO_CHAR(c.FECHA_HORA_FIN, ''HH24:MI'') as HORA_FIN,
+                            c.DURACION_MINUTOS,
+                            c.MOTIVO_CONSULTA,
+                            c.TIPO_CITA,
+                            c.ESTADO,
+                            c.CONSULTORIO,
+                            c.OBSERVACIONES,
+                            c.EMPRESA_ID,
+                            c.SUCURSAL_ID
+                          FROM ODO_CITAS c
+                          LEFT JOIN ODO_PACIENTES p ON c.PACIENTE_ID = p.PACIENTE_ID
+                          LEFT JOIN ODO_USUARIOS u ON c.DOCTOR_ID = u.USUARIO_ID
+                          WHERE (c.EMPRESA_ID = :empresa_id OR :empresa_id IS NULL)
+                            AND (:fecha IS NULL OR TRUNC(c.FECHA_HORA_INICIO) = TO_DATE(:fecha, ''YYYY-MM-DD''))
+                            AND (:estado IS NULL OR c.ESTADO = :estado)
+                          ORDER BY c.FECHA_HORA_INICIO'
+    );
+
+    -- CITAS - POST crear nueva cita
+    ORDS.define_handler(
+      p_module_name    => 'odontologia',
+      p_pattern        => 'citas',
+      p_method         => 'POST',
+      p_source_type    => 'plsql/block',
+      p_source         => 'DECLARE
+                             v_id NUMBER;
+                             v_fecha_hora TIMESTAMP;
+                           BEGIN
+                             -- Construir timestamp desde fecha y hora
+                             v_fecha_hora := TO_TIMESTAMP(:fecha || '' '' || :hora_inicio, ''YYYY-MM-DD HH24:MI'');
+
+                             INSERT INTO ODO_CITAS (
+                               PACIENTE_ID, DOCTOR_ID, FECHA_HORA_INICIO, FECHA_HORA_FIN,
+                               DURACION_MINUTOS, MOTIVO_CONSULTA, TIPO_CITA, ESTADO,
+                               CONSULTORIO, OBSERVACIONES, EMPRESA_ID, SUCURSAL_ID,
+                               FECHA_CREACION, CREADO_POR
+                             ) VALUES (
+                               :paciente_id,
+                               NVL(:doctor_id, 1),
+                               v_fecha_hora,
+                               v_fecha_hora + NUMTODSINTERVAL(NVL(:duracion_minutos, 30), ''MINUTE''),
+                               NVL(:duracion_minutos, 30),
+                               :motivo_consulta,
+                               NVL(:tipo_cita, ''CONSULTA''),
+                               ''PENDIENTE'',
+                               :consultorio,
+                               :notas,
+                               NVL(:empresa_id, 1),
+                               NVL(:sucursal_id, 1),
+                               SYSTIMESTAMP,
+                               NVL(:creado_por, 1)
+                             ) RETURNING CITA_ID INTO v_id;
+
+                             APEX_JSON.open_object;
+                             APEX_JSON.write(''success'', TRUE);
+                             APEX_JSON.write(''cita_id'', v_id);
+                             APEX_JSON.write(''message'', ''Cita creada correctamente'');
+                             APEX_JSON.close_object;
+                           EXCEPTION
+                             WHEN OTHERS THEN
+                               APEX_JSON.open_object;
+                               APEX_JSON.write(''success'', FALSE);
+                               APEX_JSON.write(''message'', SQLERRM);
+                               APEX_JSON.close_object;
+                           END;'
+    );
+
+    -- CITAS - PUT cambiar estado
+    ORDS.define_template(p_module_name => 'odontologia', p_pattern => 'citas/:id/estado');
+    ORDS.define_handler(
+      p_module_name    => 'odontologia',
+      p_pattern        => 'citas/:id/estado',
+      p_method         => 'PUT',
+      p_source_type    => 'plsql/block',
+      p_source         => 'BEGIN
+                             UPDATE ODO_CITAS
+                             SET ESTADO = :estado,
+                                 MOTIVO_CANCELACION = CASE WHEN :estado = ''CANCELADA'' THEN :motivo_cancelacion ELSE MOTIVO_CANCELACION END,
+                                 FECHA_MODIFICACION = SYSTIMESTAMP,
+                                 MODIFICADO_POR = NVL(:usuario_id, 1)
+                             WHERE CITA_ID = :id;
+
+                             IF SQL%ROWCOUNT > 0 THEN
+                               APEX_JSON.open_object;
+                               APEX_JSON.write(''success'', TRUE);
+                               APEX_JSON.write(''message'', ''Estado actualizado correctamente'');
+                               APEX_JSON.close_object;
+                             ELSE
+                               APEX_JSON.open_object;
+                               APEX_JSON.write(''success'', FALSE);
+                               APEX_JSON.write(''message'', ''Cita no encontrada'');
+                               APEX_JSON.close_object;
+                             END IF;
+                           EXCEPTION
+                             WHEN OTHERS THEN
+                               APEX_JSON.open_object;
+                               APEX_JSON.write(''success'', FALSE);
+                               APEX_JSON.write(''message'', SQLERRM);
+                               APEX_JSON.close_object;
+                           END;'
     );
 
     -- DOCTORES
