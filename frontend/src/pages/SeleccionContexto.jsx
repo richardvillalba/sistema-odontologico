@@ -76,15 +76,13 @@ const SeleccionContexto = () => {
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/40 border border-blue-400/30">
-                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
-                            </svg>
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 border border-blue-400/20">
+                            <svg className="w-8 h-8 text-white" viewBox="0 0 64 64" fill="currentColor"><path d="M32 4C24.5 4 20 8 18 12C16 16 14 18 10 20C6 22 4 28 6 34C8 40 12 44 16 52C18 56 20 60 24 60C28 60 28 52 30 46C31 43 32 42 32 42C32 42 33 43 34 46C36 52 36 60 40 60C44 60 46 56 48 52C52 44 56 40 58 34C60 28 58 22 54 20C50 18 48 16 46 12C44 8 39.5 4 32 4Z"/></svg>
                         </div>
                         <div>
-                            <span className="text-white font-black text-2xl tracking-tight block">Pro-Odonto</span>
-                            <span className="bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border border-blue-500/30">
-                                Enterprise Suite
+                            <span className="text-white font-black text-3xl tracking-tight block leading-none">Denta</span>
+                            <span className="text-blue-400/60 text-xs font-bold tracking-[0.15em] uppercase">
+                                Gestión Odontológica
                             </span>
                         </div>
                     </div>
@@ -106,7 +104,7 @@ const SeleccionContexto = () => {
                 </div>
 
                 <div className="relative z-10 flex items-center justify-between border-t border-white/5 pt-8">
-                    <p className="text-slate-500 text-xs font-bold tracking-widest uppercase">2026 Pro-Odonto Cloud</p>
+                    <p className="text-slate-600 text-xs font-bold tracking-widest uppercase">© 2026 Denta</p>
                     <div className="flex gap-4">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Conectado como {usuario?.nombre}</span>
@@ -121,12 +119,10 @@ const SeleccionContexto = () => {
 
                         {/* Logo mobile */}
                         <div className="lg:hidden mb-8 flex flex-col items-center">
-                            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-600/20 mb-3">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
-                                </svg>
+                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-600/20 mb-3">
+                                <svg className="w-8 h-8 text-white" viewBox="0 0 64 64" fill="currentColor"><path d="M32 4C24.5 4 20 8 18 12C16 16 14 18 10 20C6 22 4 28 6 34C8 40 12 44 16 52C18 56 20 60 24 60C28 60 28 52 30 46C31 43 32 42 32 42C32 42 33 43 34 46C36 52 36 60 40 60C44 60 46 56 48 52C52 44 56 40 58 34C60 28 58 22 54 20C50 18 48 16 46 12C44 8 39.5 4 32 4Z"/></svg>
                             </div>
-                            <h1 className="text-2xl font-black text-slate-900">Pro-Odonto</h1>
+                            <h1 className="text-2xl font-black text-slate-900">Denta</h1>
                         </div>
 
                         {/* Header */}

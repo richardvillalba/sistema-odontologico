@@ -74,8 +74,9 @@ export default function Layout({ children }) {
                 lg:relative lg:translate-x-0 lg:z-20
             `}>
                 <div className="p-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-black flex items-center gap-2 tracking-tight">
-                        <span className="text-3xl filter drop-shadow-md">🦷</span> Pro-Odonto
+                    <h1 className="text-2xl font-black flex items-center gap-2.5 tracking-tight">
+                        <svg className="w-8 h-8 text-blue-400" viewBox="0 0 64 64" fill="currentColor"><path d="M32 4C24.5 4 20 8 18 12C16 16 14 18 10 20C6 22 4 28 6 34C8 40 12 44 16 52C18 56 20 60 24 60C28 60 28 52 30 46C31 43 32 42 32 42C32 42 33 43 34 46C36 52 36 60 40 60C44 60 46 56 48 52C52 44 56 40 58 34C60 28 58 22 54 20C50 18 48 16 46 12C44 8 39.5 4 32 4Z"/></svg>
+                        Denta
                     </h1>
                     {/* Botón cerrar sidebar en mobile */}
                     <button
