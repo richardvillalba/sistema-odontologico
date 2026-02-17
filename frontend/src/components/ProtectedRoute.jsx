@@ -1,11 +1,38 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const ProtectedRoute = ({ children, requierePrograma, requierePermiso }) => {
-    const { isAuthenticated, tieneAccesoPrograma, tienePermiso, loading } = useAuth();
+// Mapa de rutas a codigo de programa requerido
+// IMPORTANTE: Sub-rutas específicas ANTES de las genéricas (usa startsWith)
+const RUTA_PROGRAMA = [
+    // Sub-rutas de compras
+    { path: '/compras/proveedores', codigo: 'COMPRAS_PROVEEDORES' },
+    { path: '/compras/articulos', codigo: 'COMPRAS_ARTICULOS' },
+    { path: '/compras/inventario', codigo: 'COMPRAS_INVENTARIO' },
+    { path: '/compras/facturas/nueva', codigo: 'COMPRAS_REGISTRO' },
+    // Sub-rutas de configuraciones
+    { path: '/configuraciones/timbrados', codigo: 'CONFIG_TIMBRADOS' },
+    { path: '/configuraciones/usuarios', codigo: 'CONFIG_USUARIOS' },
+    { path: '/configuraciones/roles', codigo: 'CONFIG_ROLES' },
+    { path: '/configuraciones/clinica', codigo: 'CONFIG_CLINICA' },
+    { path: '/configuraciones/tratamientos', codigo: 'CONFIG_TRATAMIENTOS' },
+    { path: '/configuraciones/cajas', codigo: 'CONFIG_CAJAS' },
+    { path: '/configuraciones/empresas', codigo: 'CONFIG_EMPRESAS' },
+    { path: '/configuraciones/sucursales', codigo: 'CONFIG_SUCURSALES' },
+    // Rutas principales
+    { path: '/pacientes', codigo: 'PACIENTES' },
+    { path: '/citas', codigo: 'CITAS' },
+    { path: '/agenda', codigo: 'CITAS' },
+    { path: '/caja', codigo: 'CAJA' },
+    { path: '/compras', codigo: 'COMPRAS' },
+    { path: '/facturas', codigo: 'FACTURACION' },
+    { path: '/configuraciones', codigo: 'CONFIGURACIONES' },
+];
 
-    // Mostrar loading mientras verifica autenticación
+const ProtectedRoute = ({ children, requierePrograma, requierePermiso, skipContextCheck }) => {
+    const { isAuthenticated, tieneAccesoPrograma, tienePermiso, loading, usuario, esSuperAdmin, contextoListo } = useAuth();
+    const location = useLocation();
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-50">
@@ -17,22 +44,34 @@ const ProtectedRoute = ({ children, requierePrograma, requierePermiso }) => {
         );
     }
 
-    // Si no está autenticado, redirigir al login
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
-    // Verificar acceso a programa específico
+    // Verificar si el usuario tiene rol asignado (superadmin no necesita rol)
+    if (!esSuperAdmin() && !usuario?.rol_id) {
+        return <Navigate to="/sin-acceso" state={{ sinRol: true }} replace />;
+    }
+
+    // Verificar contexto empresa/sucursal (saltar para la pagina de seleccion)
+    if (!skipContextCheck && !contextoListo) {
+        return <Navigate to="/seleccionar-contexto" replace />;
+    }
+
     if (requierePrograma && !tieneAccesoPrograma(requierePrograma)) {
         return <Navigate to="/sin-acceso" replace />;
     }
 
-    // Verificar permiso específico
     if (requierePermiso && !tienePermiso(requierePermiso)) {
         return <Navigate to="/sin-acceso" replace />;
     }
 
-    // Usuario autenticado y con permisos adecuados
+    const rutaActual = location.pathname;
+    const rutaConfig = RUTA_PROGRAMA.find(r => rutaActual.startsWith(r.path));
+    if (rutaConfig && !tieneAccesoPrograma(rutaConfig.codigo)) {
+        return <Navigate to="/sin-acceso" replace />;
+    }
+
     return children;
 };
 

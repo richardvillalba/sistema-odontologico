@@ -8,11 +8,12 @@ import PointOfSaleSelector from '../facturacion/PointOfSaleSelector';
 export default function Layout({ children }) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { logout, usuario } = useAuth();
+    const { logout, usuario, tieneAccesoPrograma, empresaActiva, sucursalActiva } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
-    const { alertas, count, hasCritical } = useTimbradoAlerts({ usuarioId: usuario?.usuario_id || 1 });
+    const { alertas, count, hasCritical } = useTimbradoAlerts({ empresaId: empresaActiva?.empresa_id, usuarioId: usuario?.usuario_id });
     const { selectedPoint, setShowSelector, isValid } = usePointOfSale();
     const notificationRef = useRef(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Cerrar notificaciones al hacer clic fuera
     useEffect(() => {
@@ -25,32 +26,67 @@ export default function Layout({ children }) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const menuItems = [
-        { name: 'Inicio', path: '/', icon: '📊' },
-        { name: 'Pacientes', path: '/pacientes', icon: '👥' },
-        { name: 'Citas', path: '/citas', icon: '📅' },
-        { name: 'Agenda', path: '/agenda', icon: '🕒' },
-        { name: 'Historias', path: '/historias', icon: '📋' },
-        { name: 'Tratamientos', path: '/tratamientos', icon: '💊' },
-        { name: 'Caja', path: '/caja', icon: '💵' },
-        { name: 'Compras', path: '/compras', icon: '🛒' },
-        { name: 'Facturación', path: '/facturas', icon: '🧾' },
-        { name: 'Configuraciones', path: '/configuraciones', icon: '⚙️' },
+    // Cerrar sidebar al cambiar de ruta en mobile
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [location.pathname]);
+
+    // Cerrar sidebar al hacer resize a desktop
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setSidebarOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const allMenuItems = [
+        { name: 'Inicio', path: '/', icon: '📊', codigo: 'DASHBOARD' },
+        { name: 'Pacientes', path: '/pacientes', icon: '👥', codigo: 'PACIENTES' },
+        { name: 'Citas', path: '/citas', icon: '📅', codigo: 'CITAS' },
+        { name: 'Agenda', path: '/agenda', icon: '🕒', codigo: 'CITAS' },
+        { name: 'Caja', path: '/caja', icon: '💵', codigo: 'CAJA' },
+        { name: 'Compras', path: '/compras', icon: '🛒', codigo: 'COMPRAS' },
+        { name: 'Facturación', path: '/facturas', icon: '🧾', codigo: 'FACTURACION' },
+        { name: 'Configuraciones', path: '/configuraciones', icon: '⚙️', codigo: 'CONFIGURACIONES' },
     ];
+    const menuItems = allMenuItems.filter(item => tieneAccesoPrograma(item.codigo));
 
     return (
         <div className="flex h-screen bg-slate-100 font-sans">
             <PointOfSaleSelector />
 
+            {/* Backdrop overlay for mobile sidebar */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 text-white flex flex-col shadow-xl z-20">
-                <div className="p-6">
+            <aside className={`
+                fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white flex flex-col shadow-xl
+                transform transition-transform duration-300 ease-in-out
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                lg:relative lg:translate-x-0 lg:z-20
+            `}>
+                <div className="p-6 flex items-center justify-between">
                     <h1 className="text-2xl font-black flex items-center gap-2 tracking-tight">
                         <span className="text-3xl filter drop-shadow-md">🦷</span> Pro-Odonto
                     </h1>
+                    {/* Botón cerrar sidebar en mobile */}
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="lg:hidden w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400"
+                    >
+                        ✕
+                    </button>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-1 mt-4">
+                <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.path ||
                             (item.path !== '/' && location.pathname.startsWith(item.path));
@@ -70,7 +106,32 @@ export default function Layout({ children }) {
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-slate-800/50">
+                <div className="p-4 border-t border-slate-800/50 space-y-2">
+                    {/* Empresa y Sucursal activa */}
+                    <button
+                        onClick={() => navigate('/seleccionar-contexto')}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl border border-indigo-500/20 transition-all group text-left"
+                        title="Cambiar empresa o sucursal"
+                    >
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
+                            <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <div className="overflow-hidden flex-1">
+                            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest truncate">
+                                {empresaActiva?.nombre || 'Sin empresa'}
+                            </p>
+                            <p className="text-xs text-slate-400 truncate">
+                                {sucursalActiva?.nombre || 'Sin sucursal'}
+                            </p>
+                        </div>
+                        <svg className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                        </svg>
+                    </button>
+
+                    {/* Usuario */}
                     <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/30 rounded-2xl border border-white/5">
                         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center font-black shadow-inner uppercase text-sm">
                             {usuario?.nombre?.charAt(0) || ''}{usuario?.apellido?.charAt(0) || '?'}
@@ -90,20 +151,30 @@ export default function Layout({ children }) {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-8 z-10">
-                    <div className="flex items-center gap-6">
+            <main className="flex-1 flex flex-col overflow-hidden w-full">
+                <header className="h-16 lg:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-4 lg:px-8 z-10">
+                    <div className="flex items-center gap-3 lg:gap-6">
+                        {/* Hamburger menu - mobile only */}
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="lg:hidden w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-all"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+
                         {location.pathname !== '/' && (
                             <button
                                 onClick={() => navigate(-1)}
                                 className="flex items-center gap-2 group transition-all"
                             >
-                                <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:border-blue-500 group-hover:text-blue-600 transition-all shadow-sm group-hover:shadow-md">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                                <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-xl lg:rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:border-blue-500 group-hover:text-blue-600 transition-all shadow-sm group-hover:shadow-md">
+                                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                                 </div>
-                                <div className="flex flex-col text-left">
+                                <div className="hidden sm:flex flex-col text-left">
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Volver</span>
-                                    <h2 className="text-lg font-black text-slate-800 leading-tight">
+                                    <h2 className="text-base lg:text-lg font-black text-slate-800 leading-tight">
                                         {menuItems.find(i => i.path !== '/' && location.pathname.startsWith(i.path))?.name || 'Detalle'}
                                     </h2>
                                 </div>
@@ -111,17 +182,17 @@ export default function Layout({ children }) {
                         )}
                         {location.pathname === '/' && (
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Resumen</span>
-                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Panel de Control</h2>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none hidden sm:block">Resumen</span>
+                                <h2 className="text-lg lg:text-2xl font-black text-slate-900 tracking-tight">Panel de Control</h2>
                             </div>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 lg:gap-4">
                         {/* Selector de Punto Activo en Header */}
                         <button
                             onClick={() => setShowSelector(true)}
-                            className={`hidden md:flex items-center gap-3 px-4 py-2 border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95 ${!isValid ? 'bg-red-50 border-red-100 hover:bg-red-100' : 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100'}`}
+                            className={`hidden md:flex items-center gap-3 px-3 lg:px-4 py-2 border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95 ${!isValid ? 'bg-red-50 border-red-100 hover:bg-red-100' : 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100'}`}
                         >
                             <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-sm border ${!isValid ? 'bg-white text-red-600 border-red-100' : 'bg-white text-indigo-600 border-indigo-100'}`}>
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,26 +208,26 @@ export default function Layout({ children }) {
                             </div>
                         </button>
 
-                        <div className="h-8 w-px bg-slate-200"></div>
+                        <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
 
                         <div className="relative" ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className={`p-2.5 rounded-xl transition-all relative ${showNotifications ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+                                className={`p-2 lg:p-2.5 rounded-xl transition-all relative ${showNotifications ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
                                     }`}
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                                 {count > 0 && (
-                                    <span className={`absolute top-1.5 right-1.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-white ${hasCritical ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`}>
+                                    <span className={`absolute top-1 right-1 lg:top-1.5 lg:right-1.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-white ${hasCritical ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`}>
                                         {count}
                                     </span>
                                 )}
                             </button>
 
                             {showNotifications && (
-                                <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-5 duration-200">
+                                <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-5 duration-200">
                                     <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                         <span className="text-xs font-black text-slate-800 uppercase tracking-widest">Notificaciones</span>
                                         <span className="text-[10px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{count} nuevas</span>
@@ -188,15 +259,16 @@ export default function Layout({ children }) {
                                 </div>
                             )}
                         </div>
-                        <div className="h-8 w-px bg-slate-200"></div>
+
+                        <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
 
                         {/* Botón Cerrar Sesión con icono */}
                         <button
                             onClick={logout}
-                            className="p-2.5 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all group"
+                            className="p-2 lg:p-2.5 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all group"
                             title="Cerrar Sesión"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
                         </button>
@@ -204,7 +276,7 @@ export default function Layout({ children }) {
                 </header>
 
                 <div className="flex-1 overflow-auto bg-slate-50/50">
-                    <div className="p-8 max-w-[1600px] mx-auto">
+                    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto">
                         {children}
                     </div>
                 </div>

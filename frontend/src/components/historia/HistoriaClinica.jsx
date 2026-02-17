@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { historiasService, doctoresService, odontogramaService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
+import ModalReceta from './ModalReceta';
 
 const HistoriaClinica = ({ pacienteId, paciente }) => {
     const queryClient = useQueryClient();
+    const { usuario, empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [consultaDetalle, setConsultaDetalle] = useState(null);
+    const [mostrarRecetaForm, setMostrarRecetaForm] = useState(false);
+    const [recetaHistoriaId, setRecetaHistoriaId] = useState(null);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -20,13 +26,13 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
         temperatura: '',
         proxima_cita: '',
         observaciones: '',
-        doctor_id: 1
+        doctor_id: usuario?.usuario_id || ''
     });
 
     const { data: historiaRes, isLoading } = useQuery({
-        queryKey: ['historia-clinica', pacienteId],
-        queryFn: () => historiasService.getByPaciente(pacienteId),
-        enabled: !!pacienteId
+        queryKey: ['historia-clinica', pacienteId, empresaId],
+        queryFn: () => historiasService.getByPaciente(pacienteId, empresaId),
+        enabled: !!pacienteId && !!empresaId
     });
 
     const { data: doctoresRes } = useQuery({
@@ -36,15 +42,15 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
 
     // Datos del odontograma
     const { data: odontogramaRes } = useQuery({
-        queryKey: ['odontograma', pacienteId],
-        queryFn: () => odontogramaService.getActual(pacienteId),
-        enabled: !!pacienteId
+        queryKey: ['odontograma', pacienteId, empresaId],
+        queryFn: () => odontogramaService.getActual(pacienteId, empresaId),
+        enabled: !!pacienteId && !!empresaId
     });
 
     const { data: tratamientosRes } = useQuery({
-        queryKey: ['tratamientos-odontograma', pacienteId],
-        queryFn: () => odontogramaService.getTratamientosPaciente(pacienteId),
-        enabled: !!pacienteId
+        queryKey: ['tratamientos-odontograma', pacienteId, empresaId],
+        queryFn: () => odontogramaService.getTratamientosPaciente(pacienteId, empresaId),
+        enabled: !!pacienteId && !!empresaId
     });
 
     const crearHistoriaMutation = useMutation({
@@ -172,7 +178,7 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
             temperatura: '',
             proxima_cita: '',
             observaciones: '',
-            doctor_id: 1
+            doctor_id: usuario?.usuario_id || ''
         });
     };
 
@@ -180,6 +186,7 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
         e.preventDefault();
         crearHistoriaMutation.mutate({
             paciente_id: pacienteId,
+            empresa_id: empresaId,
             ...formData
         });
     };
@@ -598,9 +605,20 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden">
                 <div className="bg-slate-900 text-white p-5">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Consulta</p>
-                            <p className="text-lg font-black">{formatDate(historia.fecha_consulta || historia.FECHA_CONSULTA)}</p>
+                        <div className="flex items-center gap-4">
+                            <div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Consulta</p>
+                                <p className="text-lg font-black">{formatDate(historia.fecha_consulta || historia.FECHA_CONSULTA)}</p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setRecetaHistoriaId(historia.historia_id || historia.HISTORIA_ID);
+                                    setMostrarRecetaForm(true);
+                                }}
+                                className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl text-xs font-bold border border-white/10 transition-all flex items-center gap-2"
+                            >
+                                <span>💊</span> Ver Receta
+                            </button>
                         </div>
                         {(historia.doctor_nombre || historia.DOCTOR_NOMBRE) && (
                             <div className="text-right">
@@ -622,32 +640,32 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
                     )}
 
                     {(historia.presion_arterial || historia.PRESION_ARTERIAL ||
-                      historia.frecuencia_cardiaca || historia.FRECUENCIA_CARDIACA ||
-                      historia.temperatura || historia.TEMPERATURA) && (
-                        <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Signos Vitales</p>
-                            <div className="grid grid-cols-3 gap-4">
-                                {(historia.presion_arterial || historia.PRESION_ARTERIAL) && (
-                                    <div className="bg-blue-50 p-4 rounded-xl text-center">
-                                        <p className="text-2xl font-black text-blue-600">{historia.presion_arterial || historia.PRESION_ARTERIAL}</p>
-                                        <p className="text-[10px] font-bold text-blue-400 uppercase mt-1">Presión Arterial</p>
-                                    </div>
-                                )}
-                                {(historia.frecuencia_cardiaca || historia.FRECUENCIA_CARDIACA) && (
-                                    <div className="bg-rose-50 p-4 rounded-xl text-center">
-                                        <p className="text-2xl font-black text-rose-600">{historia.frecuencia_cardiaca || historia.FRECUENCIA_CARDIACA} <span className="text-sm">bpm</span></p>
-                                        <p className="text-[10px] font-bold text-rose-400 uppercase mt-1">Frec. Cardíaca</p>
-                                    </div>
-                                )}
-                                {(historia.temperatura || historia.TEMPERATURA) && (
-                                    <div className="bg-amber-50 p-4 rounded-xl text-center">
-                                        <p className="text-2xl font-black text-amber-600">{historia.temperatura || historia.TEMPERATURA}°C</p>
-                                        <p className="text-[10px] font-bold text-amber-400 uppercase mt-1">Temperatura</p>
-                                    </div>
-                                )}
+                        historia.frecuencia_cardiaca || historia.FRECUENCIA_CARDIACA ||
+                        historia.temperatura || historia.TEMPERATURA) && (
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Signos Vitales</p>
+                                <div className="grid grid-cols-3 gap-4">
+                                    {(historia.presion_arterial || historia.PRESION_ARTERIAL) && (
+                                        <div className="bg-blue-50 p-4 rounded-xl text-center">
+                                            <p className="text-2xl font-black text-blue-600">{historia.presion_arterial || historia.PRESION_ARTERIAL}</p>
+                                            <p className="text-[10px] font-bold text-blue-400 uppercase mt-1">Presión Arterial</p>
+                                        </div>
+                                    )}
+                                    {(historia.frecuencia_cardiaca || historia.FRECUENCIA_CARDIACA) && (
+                                        <div className="bg-rose-50 p-4 rounded-xl text-center">
+                                            <p className="text-2xl font-black text-rose-600">{historia.frecuencia_cardiaca || historia.FRECUENCIA_CARDIACA} <span className="text-sm">bpm</span></p>
+                                            <p className="text-[10px] font-bold text-rose-400 uppercase mt-1">Frec. Cardíaca</p>
+                                        </div>
+                                    )}
+                                    {(historia.temperatura || historia.TEMPERATURA) && (
+                                        <div className="bg-amber-50 p-4 rounded-xl text-center">
+                                            <p className="text-2xl font-black text-amber-600">{historia.temperatura || historia.TEMPERATURA}°C</p>
+                                            <p className="text-[10px] font-bold text-amber-400 uppercase mt-1">Temperatura</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
                     {(historia.anamnesis || historia.ANAMNESIS) && (
                         <div>
@@ -761,6 +779,22 @@ const HistoriaClinica = ({ pacienteId, paciente }) => {
                         ))}
                     </div>
                 </div>
+            )}
+            {/* Modal de Recetas */}
+            {mostrarRecetaForm && (
+                <ModalReceta
+                    historiaId={recetaHistoriaId}
+                    pacienteId={pacienteId}
+                    doctorId={usuario?.usuario_id}
+                    empresaId={empresaId}
+                    pacienteNombre={paciente?.nombre_completo || `${paciente?.nombre || ''} ${paciente?.apellido || ''}`}
+                    doctorNombre={`${usuario?.nombre || ''} ${usuario?.apellido || ''}`}
+                    clinicaNombre={empresaActiva?.nombre || ''}
+                    onClose={() => {
+                        setMostrarRecetaForm(false);
+                        setRecetaHistoriaId(null);
+                    }}
+                />
             )}
         </div>
     );

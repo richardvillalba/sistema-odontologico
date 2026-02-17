@@ -1,11 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { odontogramaService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TratamientosPendientes = ({ pacienteId, onAdd, addedItems }) => {
+    const { empresaActiva } = useAuth();
     const { data: tratamientosRes, isLoading } = useQuery({
-        queryKey: ['tratamientos-pendientes', pacienteId],
-        queryFn: () => odontogramaService.getTratamientosPaciente(pacienteId),
+        queryKey: ['tratamientos-pendientes', pacienteId, empresaActiva?.empresa_id],
+        queryFn: () => odontogramaService.getTratamientosPaciente(pacienteId, empresaActiva?.empresa_id),
         enabled: !!pacienteId
     });
 
@@ -35,8 +37,8 @@ const TratamientosPendientes = ({ pacienteId, onAdd, addedItems }) => {
                     <div
                         key={trat.id || trat.ID}
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between h-full ${isAdded
-                                ? 'bg-slate-50 border-slate-100 opacity-50 pointer-events-none'
-                                : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-md'
+                            ? 'bg-slate-50 border-slate-100 opacity-50 pointer-events-none'
+                            : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-md'
                             }`}
                         onClick={() => !isAdded && onAdd({
                             tratamiento_paciente_id: null, // No vinculamos directamente, solo referencia informativa

@@ -1,6 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { rolesService, securityService } from '../services/api';
 import '../styles/GestionRoles.css';
+
+const ProgramsGrouped = ({ allPrograms, rolePrograms, onToggle }) => {
+    // Separar programas principales (sin padre) y sub-programas (con padre)
+    const parentPrograms = allPrograms.filter(p => !p.modulo_padre_id);
+    const childPrograms = allPrograms.filter(p => p.modulo_padre_id);
+
+    // Agrupar hijos por padre
+    const childrenByParent = {};
+    childPrograms.forEach(child => {
+        if (!childrenByParent[child.modulo_padre_id]) {
+            childrenByParent[child.modulo_padre_id] = [];
+        }
+        childrenByParent[child.modulo_padre_id].push(child);
+    });
+
+    const renderItem = (prog) => {
+        const isAssigned = rolePrograms.some(rp => rp.programa_id === prog.programa_id);
+        return (
+            <div
+                key={prog.programa_id}
+                className={`selection-item ${isAssigned ? 'selected' : ''}`}
+                onClick={() => onToggle(prog.programa_id, isAssigned)}
+            >
+                <span className="icon">{prog.icono || '📄'}</span>
+                <div className="info">
+                    <span className="title">{prog.nombre}</span>
+                    <span className="subtitle">{prog.codigo}</span>
+                </div>
+                <div className="checkbox">{isAssigned ? '✓' : ''}</div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="programs-grouped">
+            {parentPrograms.map(parent => {
+                const children = childrenByParent[parent.programa_id] || [];
+                const hasChildren = children.length > 0;
+
+                return (
+                    <div key={parent.programa_id} className="program-group">
+                        {/* Programa padre */}
+                        <div className="items-selection-grid">
+                            {renderItem(parent)}
+                        </div>
+
+                        {/* Sub-programas agrupados */}
+                        {hasChildren && (
+                            <div style={{ marginLeft: '1.5rem', marginTop: '0.25rem', marginBottom: '0.75rem', borderLeft: '2px solid #e2e8f0', paddingLeft: '0.75rem' }}>
+                                <p style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                                    Sub-módulos de {parent.nombre}
+                                </p>
+                                <div className="items-selection-grid">
+                                    {children.map(child => renderItem(child))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
 
 const GestionRoles = () => {
     const [roles, setRoles] = useState([]);
@@ -234,25 +297,11 @@ const GestionRoles = () => {
                             <h2>📦 Módulos para: {selectedRole.nombre}</h2>
                         </div>
                         <div className="modal-body">
-                            <div className="items-selection-grid">
-                                {allPrograms.map(prog => {
-                                    const isAssigned = rolePrograms.some(rp => rp.programa_id === prog.programa_id);
-                                    return (
-                                        <div
-                                            key={prog.programa_id}
-                                            className={`selection-item ${isAssigned ? 'selected' : ''}`}
-                                            onClick={() => toggleProgram(prog.programa_id, isAssigned)}
-                                        >
-                                            <span className="icon">{prog.icono || '📄'}</span>
-                                            <div className="info">
-                                                <span className="title">{prog.nombre}</span>
-                                                <span className="subtitle">{prog.codigo}</span>
-                                            </div>
-                                            <div className="checkbox">{isAssigned ? '✓' : ''}</div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                            <ProgramsGrouped
+                                allPrograms={allPrograms}
+                                rolePrograms={rolePrograms}
+                                onToggle={toggleProgram}
+                            />
                         </div>
                         <div className="modal-footer">
                             <button onClick={() => setShowProgramsModal(false)}>Cerrar</button>

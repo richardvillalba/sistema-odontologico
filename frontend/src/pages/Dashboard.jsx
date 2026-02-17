@@ -7,7 +7,7 @@ import { formatDate } from '../utils/format';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { usuario } = useAuth();
+    const { usuario, empresaActiva } = useAuth();
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     const hour = today.getHours();
@@ -16,7 +16,7 @@ const Dashboard = () => {
     const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
     const nombreUsuario = usuario?.nombre || usuario?.username || 'Doctor';
 
-    const empresaId = usuario?.empresa_id || 1;
+    const empresaId = empresaActiva?.empresa_id;
 
     // Queries canónicas de Dashboard
     const { data: statsRes, isLoading: loadingStats } = useQuery({
@@ -162,28 +162,28 @@ const Dashboard = () => {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {/* Header Greeting Section */}
-            <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl md:rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 md:p-8 text-white shadow-2xl">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl"></div>
                 <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl"></div>
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
 
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                            <span className="text-4xl">👋</span>
-                            <h1 className="text-3xl font-black tracking-tight">{greeting}, {nombreUsuario}</h1>
+                            <span className="text-3xl md:text-4xl">👋</span>
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight">{greeting}, {nombreUsuario}</h1>
                         </div>
-                        <p className="text-slate-400 text-base font-medium">
+                        <p className="text-slate-400 text-sm md:text-base font-medium">
                             Tienes <span className="text-white font-bold">{loadingStats ? '...' : statsData.citas_hoy || 0} cita{statsData.citas_hoy !== 1 ? 's' : ''}</span> programada{statsData.citas_hoy !== 1 ? 's' : ''} para hoy
                         </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex items-center gap-4">
+                    <div className="hidden sm:flex items-center gap-4">
+                        <div className="bg-white/10 backdrop-blur-md border border-white/10 p-3 md:p-4 rounded-2xl flex items-center gap-3 md:gap-4">
                             <div className="text-right">
                                 <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Hoy es</p>
-                                <p className="text-lg font-bold">{formatDate(todayStr)}</p>
+                                <p className="text-base md:text-lg font-bold">{formatDate(todayStr)}</p>
                             </div>
-                            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center text-xl md:text-2xl shadow-lg">
                                 🗓️
                             </div>
                         </div>
@@ -436,26 +436,26 @@ const Dashboard = () => {
             </div>
 
             {/* Footer Stats Bar */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4 text-white">
-                <div className="flex items-center gap-8">
-                    <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tasa de Asistencia</p>
-                        <p className="text-2xl font-black">94%</p>
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-4 md:p-6 flex flex-col sm:flex-row flex-wrap items-center justify-between gap-4 text-white">
+                <div className="flex items-center gap-4 sm:gap-8 w-full sm:w-auto justify-around sm:justify-start">
+                    <div className="text-center sm:text-left">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asistencia</p>
+                        <p className="text-xl md:text-2xl font-black">94%</p>
                     </div>
-                    <div className="w-px h-10 bg-slate-700"></div>
-                    <div>
+                    <div className="w-px h-10 bg-slate-700 hidden sm:block"></div>
+                    <div className="text-center sm:text-left">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Satisfacción</p>
-                        <p className="text-2xl font-black">4.8 <span className="text-amber-400">★</span></p>
+                        <p className="text-xl md:text-2xl font-black">4.8 <span className="text-amber-400">★</span></p>
                     </div>
-                    <div className="w-px h-10 bg-slate-700"></div>
-                    <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Citas Esta Semana</p>
-                        <p className="text-2xl font-black">{weeklyData.reduce((acc, d) => acc + d.citas, 0)}</p>
+                    <div className="w-px h-10 bg-slate-700 hidden sm:block"></div>
+                    <div className="text-center sm:text-left">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Semana</p>
+                        <p className="text-xl md:text-2xl font-black">{weeklyData.reduce((acc, d) => acc + d.citas, 0)}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span className="text-sm font-medium text-slate-400">Sistema operativo al 100%</span>
+                    <span className="text-xs md:text-sm font-medium text-slate-400">Sistema operativo al 100%</span>
                 </div>
             </div>
         </div>

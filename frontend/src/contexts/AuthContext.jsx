@@ -15,11 +15,13 @@ export const AuthProvider = ({ children }) => {
     const [usuario, setUsuario] = useState(null);
     const [programas, setProgramas] = useState([]);
     const [permisos, setPermisos] = useState([]);
+    const [empresas, setEmpresas] = useState([]);
+    const [empresaActiva, setEmpresaActivaState] = useState(null);
+    const [sucursalActiva, setSucursalActivaState] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        // Verificar si hay sesión guardada
         verificarSesion();
     }, []);
 
@@ -28,11 +30,23 @@ export const AuthProvider = ({ children }) => {
             const usuarioGuardado = localStorage.getItem('usuario');
             if (usuarioGuardado) {
                 const userData = JSON.parse(usuarioGuardado);
-                // Cargar datos completos del usuario
                 await cargarDatosUsuario(userData.usuario_id);
+
+                // Restaurar empresa y sucursal de localStorage
+                const empresaGuardada = localStorage.getItem('empresa_activa');
+                const sucursalGuardada = localStorage.getItem('sucursal_activa');
+                if (empresaGuardada) {
+                    const emp = JSON.parse(empresaGuardada);
+                    setEmpresaActivaState(emp);
+                    // Restaurar programas de la empresa activa si existen
+                    if (emp.programas && emp.programas.length > 0) {
+                        setProgramas(emp.programas);
+                    }
+                }
+                if (sucursalGuardada) setSucursalActivaState(JSON.parse(sucursalGuardada));
             }
         } catch (error) {
-            console.error('Error verificando sesión:', error);
+            console.error('Error verificando sesion:', error);
             logout();
         } finally {
             setLoading(false);
@@ -42,27 +56,65 @@ export const AuthProvider = ({ children }) => {
     const cargarDatosUsuario = async (usuarioId) => {
         try {
             const response = await authService.getMe(usuarioId);
+            const data = response.data;
 
-            // El endpoint retorna { items: [...] }
-            const userData = response.data.items && response.data.items.length > 0
-                ? response.data.items[0]
-                : null;
-
-            if (!userData) {
+            let userData;
+            if (data.items && data.items.length > 0) {
+                userData = data.items[0];
+            } else if (data.usuario_id) {
+                userData = data;
+            } else {
                 throw new Error('No se encontraron datos del usuario');
             }
 
+            // Extraer programas y empresas del response
+            const userProgramas = userData.programas || [];
+            const userEmpresas = userData.empresas || [];
+            delete userData.programas;
+            delete userData.empresas;
+
             setUsuario(userData);
-            // Por ahora, programas y permisos vacíos (hasta implementar las tablas)
-            setProgramas([]);
+            setProgramas(userProgramas);
+            setEmpresas(userEmpresas);
             setPermisos([]);
             setIsAuthenticated(true);
 
-            // Guardar en localStorage
             localStorage.setItem('usuario', JSON.stringify(userData));
+            localStorage.setItem('programas', JSON.stringify(userProgramas));
+
+            // Auto-seleccionar empresa si tiene solo una
+            if (userEmpresas.length === 1) {
+                setEmpresaActiva(userEmpresas[0]);
+            }
         } catch (error) {
             console.error('Error cargando datos de usuario:', error);
             throw error;
+        }
+    };
+
+    const setEmpresaActiva = (empresa) => {
+        setEmpresaActivaState(empresa);
+        if (empresa) {
+            localStorage.setItem('empresa_activa', JSON.stringify(empresa));
+            // Usar programas específicos de la empresa si existen
+            if (empresa.programas && empresa.programas.length > 0) {
+                setProgramas(empresa.programas);
+                localStorage.setItem('programas', JSON.stringify(empresa.programas));
+            }
+        } else {
+            localStorage.removeItem('empresa_activa');
+        }
+        // Al cambiar empresa, limpiar sucursal
+        setSucursalActivaState(null);
+        localStorage.removeItem('sucursal_activa');
+    };
+
+    const setSucursalActiva = (sucursal) => {
+        setSucursalActivaState(sucursal);
+        if (sucursal) {
+            localStorage.setItem('sucursal_activa', JSON.stringify(sucursal));
+        } else {
+            localStorage.removeItem('sucursal_activa');
         }
     };
 
@@ -71,7 +123,6 @@ export const AuthProvider = ({ children }) => {
             const response = await authService.login(username, password);
 
             if (response.data.resultado === 1) {
-                // Login exitoso, cargar datos completos
                 await cargarDatosUsuario(response.data.usuario_id);
                 return { success: true, mensaje: response.data.mensaje };
             } else {
@@ -81,7 +132,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Error en login:', error);
             return {
                 success: false,
-                mensaje: error.response?.data?.mensaje || 'Error al iniciar sesión'
+                mensaje: error.response?.data?.mensaje || 'Error al iniciar sesion'
             };
         }
     };
@@ -90,28 +141,27 @@ export const AuthProvider = ({ children }) => {
         setUsuario(null);
         setProgramas([]);
         setPermisos([]);
+        setEmpresas([]);
+        setEmpresaActivaState(null);
+        setSucursalActivaState(null);
         setIsAuthenticated(false);
         localStorage.removeItem('usuario');
+        localStorage.removeItem('programas');
+        localStorage.removeItem('empresa_activa');
+        localStorage.removeItem('sucursal_activa');
 
-        // Redirigir al login
         window.location.href = '/login';
     };
 
     const tieneAccesoPrograma = (codigoPrograma) => {
         if (!isAuthenticated) return false;
-
-        // Si es superadmin, tiene acceso a todo
         if (usuario?.es_superadmin === 'S') return true;
-
         return programas.some(p => p.codigo === codigoPrograma);
     };
 
     const tienePermiso = (codigoPermiso) => {
         if (!isAuthenticated) return false;
-
-        // Si es superadmin, tiene todos los permisos
         if (usuario?.es_superadmin === 'S') return true;
-
         return permisos.some(p => p.codigo === codigoPermiso);
     };
 
@@ -119,10 +169,18 @@ export const AuthProvider = ({ children }) => {
         return usuario?.es_superadmin === 'S';
     };
 
+    const contextoListo = !!empresaActiva && !!sucursalActiva;
+
     const value = {
         usuario,
         programas,
         permisos,
+        empresas,
+        empresaActiva,
+        sucursalActiva,
+        setEmpresaActiva,
+        setSucursalActiva,
+        contextoListo,
         loading,
         isAuthenticated,
         login,

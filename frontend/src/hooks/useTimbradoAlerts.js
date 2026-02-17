@@ -7,15 +7,15 @@ import { billingService } from '../services/api';
  * @param {number} options.empresaId - ID de la empresa.
  * @param {number} options.usuarioId - ID del usuario (opcional, para filtrar por sus puntos asignados).
  */
-export const useTimbradoAlerts = ({ empresaId = 1, usuarioId = null } = {}) => {
+export const useTimbradoAlerts = ({ empresaId = null, usuarioId = null } = {}) => {
     const [alertas, setAlertas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const loadAlertas = useCallback(async () => {
+        if (!empresaId) { setLoading(false); return; }
         try {
             setLoading(true);
-            // Pasamos usuario_id como parámetro de consulta
             const response = await billingService.getAlertasTimbrados(empresaId, 30, 100, usuarioId);
             setAlertas(response.data.items || []);
             setError(null);

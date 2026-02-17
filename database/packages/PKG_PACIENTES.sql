@@ -229,7 +229,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
                 p.documento_tipo,
                 p.documento_numero,
                 p.fecha_nacimiento,
-                calc_edad(p.fecha_nacimiento) AS edad,
+                TRUNC(MONTHS_BETWEEN(SYSDATE, p.fecha_nacimiento) / 12) AS edad,
                 p.genero,
                 p.grupo_sanguineo,
                 p.email,
@@ -302,7 +302,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
                 p.documento_tipo,
                 p.documento_numero,
                 p.fecha_nacimiento,
-                calc_edad(p.fecha_nacimiento) AS edad,
+                TRUNC(MONTHS_BETWEEN(SYSDATE, p.fecha_nacimiento) / 12) AS edad,
                 p.genero,
                 p.email,
                 p.telefono_principal,
@@ -374,7 +374,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
                 documento_tipo,
                 documento_numero,
                 fecha_nacimiento,
-                calc_edad(fecha_nacimiento) AS edad,
+                TRUNC(MONTHS_BETWEEN(SYSDATE, fecha_nacimiento) / 12) AS edad,
                 email,
                 telefono_principal,
                 activo
@@ -451,14 +451,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
         -- Generar número de historia
         p_numero_historia := generate_numero_historia(p_empresa_id);
 
-        -- Obtener siguiente ID
-        SELECT NVL(MAX(paciente_id), 0) + 1
-        INTO p_paciente_id
-        FROM odo_pacientes;
-
-        -- Insertar paciente
+        -- Insertar paciente (paciente_id es GENERATED ALWAYS AS IDENTITY, se obtiene con RETURNING)
         INSERT INTO odo_pacientes (
-            paciente_id,
             numero_historia,
             nombre,
             apellido,
@@ -486,7 +480,6 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
             registrado_por,
             empresa_id
         ) VALUES (
-            p_paciente_id,
             p_numero_historia,
             INITCAP(p_nombre),
             INITCAP(p_apellido),
@@ -513,7 +506,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
             SYSTIMESTAMP,
             p_registrado_por,
             p_empresa_id
-        );
+        ) RETURNING paciente_id INTO p_paciente_id;
 
         COMMIT;
 
@@ -697,7 +690,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_PACIENTES AS
                 documento_tipo,
                 documento_numero,
                 fecha_nacimiento,
-                calc_edad(fecha_nacimiento) AS edad,
+                TRUNC(MONTHS_BETWEEN(SYSDATE, fecha_nacimiento) / 12) AS edad,
                 genero,
                 email,
                 telefono_principal,

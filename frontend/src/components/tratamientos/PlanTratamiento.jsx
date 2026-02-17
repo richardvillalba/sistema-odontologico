@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { odontogramaService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PlanTratamiento = ({ pacienteId }) => {
+    const { empresaActiva } = useAuth();
     const queryClient = useQueryClient();
     const [selectedTratamiento, setSelectedTratamiento] = useState(null);
 
     const { data: tratamientosRes, isLoading } = useQuery({
-        queryKey: ['tratamientos-odontograma', pacienteId],
-        queryFn: () => odontogramaService.getTratamientosPaciente(pacienteId),
+        queryKey: ['tratamientos-odontograma', pacienteId, empresaActiva?.empresa_id],
+        queryFn: () => odontogramaService.getTratamientosPaciente(pacienteId, empresaActiva?.empresa_id),
         enabled: !!pacienteId
     });
 

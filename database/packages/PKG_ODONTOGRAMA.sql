@@ -327,6 +327,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_ODONTOGRAMA AS
     -- Obtener odontograma actual de un paciente
     -- ============================================
     PROCEDURE get_odontograma_actual(
+        p_empresa_id        IN  NUMBER,
         p_paciente_id       IN  ODO_PACIENTES.PACIENTE_ID%TYPE,
         p_cursor            OUT t_cursor,
         p_resultado         OUT NUMBER,
@@ -334,11 +335,12 @@ CREATE OR REPLACE PACKAGE BODY PKG_ODONTOGRAMA AS
     ) IS
         v_odontograma_id ODO_ODONTOGRAMAS.ODONTOGRAMA_ID%TYPE;
     BEGIN
-        -- Obtener el odontograma más reciente
+        -- Obtener el odontograma más reciente para esta empresa
         BEGIN
             SELECT ODONTOGRAMA_ID INTO v_odontograma_id
             FROM ODO_ODONTOGRAMAS
             WHERE PACIENTE_ID = p_paciente_id
+              AND (EMPRESA_ID = p_empresa_id OR p_empresa_id IS NULL)
               AND ACTIVO = 'S'
             ORDER BY FECHA_CREACION DESC
             FETCH FIRST 1 ROW ONLY;
@@ -372,6 +374,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_ODONTOGRAMA AS
             JOIN ODO_PACIENTES p ON o.PACIENTE_ID = p.PACIENTE_ID
             JOIN ODO_DIENTES d ON o.ODONTOGRAMA_ID = d.ODONTOGRAMA_ID
             WHERE o.ODONTOGRAMA_ID = v_odontograma_id
+              AND (o.EMPRESA_ID = p_empresa_id OR p_empresa_id IS NULL)
               AND d.ACTIVO = 'S'
             ORDER BY d.CUADRANTE, d.POSICION;
 

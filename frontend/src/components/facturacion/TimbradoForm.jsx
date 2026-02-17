@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { billingService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
+    const { usuario, empresaActiva } = useAuth();
     const [formData, setFormData] = useState({
         numero_timbrado: '',
         establecimiento: '',
@@ -41,7 +43,7 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
         setLoading(true);
         try {
             const dataToSave = {
-                empresa_id: 1, // TODO: Obtener contexto
+                empresa_id: empresaActiva?.empresa_id,
                 numero_timbrado: formData.numero_timbrado,
                 establecimiento: formData.establecimiento,
                 punto_expedicion: formData.punto_expedicion,
@@ -50,7 +52,7 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
                 numero_fin: parseInt(formData.numero_fin),
                 fecha_inicio: formData.fecha_inicio,
                 fecha_vencimiento: formData.fecha_vencimiento,
-                creado_por: 1 // TODO: Obtener usuario actual
+                creado_por: usuario?.usuario_id
             };
 
             let response;

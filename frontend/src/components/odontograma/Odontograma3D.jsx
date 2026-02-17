@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { odontogramaService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import FindingSelector from './FindingSelector';
 
 /**
@@ -10,6 +11,7 @@ import FindingSelector from './FindingSelector';
  */
 const Odontograma3D = () => {
     const { id: pacienteId } = useParams();
+    const { usuario, empresaActiva } = useAuth();
     const mountRef = useRef(null);
     const teethGroupRef = useRef(null);
 
@@ -35,8 +37,8 @@ const Odontograma3D = () => {
     const loadOdontograma = async () => {
         setLoading(true);
         try {
-            console.log("3D Debug: Fetching for patient:", pacienteId);
-            const response = await odontogramaService.getActual(pacienteId);
+            console.log("3D Debug: Fetching for patient:", pacienteId, "Empresa:", empresaActiva?.empresa_id);
+            const response = await odontogramaService.getActual(pacienteId, empresaActiva?.empresa_id);
             console.log("3D Debug: RAW API Response:", response.data);
 
             const data = response.data;
@@ -94,8 +96,8 @@ const Odontograma3D = () => {
             await odontogramaService.create({
                 paciente_id: pacienteId,
                 tipo: 'PERMANENTE',
-                empresa_id: 1,
-                creado_por: 1
+                empresa_id: empresaActiva?.empresa_id,
+                creado_por: usuario?.usuario_id
             });
             await loadOdontograma();
         } catch (error) {
@@ -361,8 +363,8 @@ const Odontograma3D = () => {
                 odontograma_id: odontograma.odontograma_id,
                 tipo_hallazgo: estadoId,
                 descripcion: obs,
-                doctor_id: 1,
-                empresa_id: 1
+                doctor_id: usuario?.usuario_id,
+                empresa_id: empresaActiva?.empresa_id
             });
 
             // 2. Actualizamos el estado general del diente para reflejarlo en el modelo
@@ -370,14 +372,14 @@ const Odontograma3D = () => {
                 numero_fdi: selection.fdi,
                 estado: estadoId,
                 observaciones: obs,
-                modificado_por: 1
+                modificado_por: usuario?.usuario_id
             });
 
             // 3. Si se seleccionó un tratamiento, lo asignamos al diente
             if (tratamiento) {
                 const catalogoId = tratamiento.id || tratamiento.ID || tratamiento.catalogo_id || tratamiento.CATALOGO_ID;
                 if (catalogoId) {
-                    await odontogramaService.asignarTratamiento(selection.dbId, catalogoId);
+                    await odontogramaService.asignarTratamiento(selection.dbId, catalogoId, usuario?.usuario_id);
                     console.log("3D: Tratamiento asignado:", tratamiento.nombre || tratamiento.NOMBRE);
                 }
             }

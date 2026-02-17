@@ -338,7 +338,7 @@ export default function CajaDetalle() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { usuario } = useAuth();
-    const usuarioId = usuario?.usuario_id || 1;
+    const usuarioId = usuario?.usuario_id;
 
     const [caja, setCaja] = useState(null);
     const [movimientos, setMovimientos] = useState([]);
@@ -412,11 +412,26 @@ export default function CajaDetalle() {
         );
     }
 
+    // Verificar que el usuario tiene acceso a esta caja
+    const esSuperAdminUser = usuario?.es_superadmin === 'S';
+    const tieneAccesoCaja = esSuperAdminUser || !caja.usuario_asignado_id || caja.usuario_asignado_id === usuarioId;
+    if (!tieneAccesoCaja) {
+        return (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center">
+                <p className="font-black text-amber-900 text-lg mb-2">No tienes acceso a esta caja</p>
+                <p className="text-amber-700 text-sm font-medium mb-4">Esta caja esta asignada a otro usuario.</p>
+                <button onClick={() => navigate('/caja')} className="px-6 py-2.5 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-colors">
+                    Volver a Cajas
+                </button>
+            </div>
+        );
+    }
+
     const isAbierta = caja.estado === 'ABIERTA';
     const saldoActual = (caja.saldo_inicial || 0) + (caja.total_ingresos || 0) - (caja.total_egresos || 0);
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-20">
             {/* Toast */}
             {toast && (
                 <div className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-xl border text-sm font-bold flex items-center gap-3 ${toast.type === 'success'
@@ -429,27 +444,27 @@ export default function CajaDetalle() {
             )}
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/caja')}
-                        className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm group"
+                        className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-blue-600 shadow-sm group transition-all"
                     >
                         <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight">{caja.nombre}</h1>
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${isAbierta ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">{caja.nombre}</h1>
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black tracking-widest ${isAbierta ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
                                 }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${isAbierta ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
                                 {isAbierta ? 'ABIERTA' : 'CERRADA'}
                             </span>
                         </div>
                         {caja.fecha_apertura && (
-                            <p className="text-slate-400 font-bold mt-1 text-xs uppercase tracking-tighter">
+                            <p className="text-slate-400 font-bold mt-1 text-[10px] sm:text-xs uppercase tracking-tighter">
                                 Sesión iniciada el <span className="text-slate-600">{formatDateTime(caja.fecha_apertura)}</span>
                             </p>
                         )}
@@ -457,10 +472,10 @@ export default function CajaDetalle() {
                 </div>
 
                 {isAbierta && (
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                         <button
                             onClick={() => setModalMovimiento('EGRESO')}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-700 border border-red-200 font-bold rounded-xl hover:bg-red-100 transition-colors"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-700 border border-red-200 font-bold rounded-2xl hover:bg-red-100 transition-colors text-sm"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 12H4" />
@@ -469,7 +484,7 @@ export default function CajaDetalle() {
                         </button>
                         <button
                             onClick={() => setModalMovimiento('INGRESO')}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 text-sm"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -478,7 +493,7 @@ export default function CajaDetalle() {
                         </button>
                         <button
                             onClick={() => setModalCerrar(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 font-bold rounded-xl hover:bg-amber-100 transition-colors"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-black transition-colors text-sm"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -490,7 +505,7 @@ export default function CajaDetalle() {
             </div>
 
             {/* Resumen financiero */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {[
                     {
                         label: 'Saldo Inicial',
@@ -533,28 +548,28 @@ export default function CajaDetalle() {
                         borderColor: isAbierta ? 'border-blue-100' : 'border-slate-100'
                     },
                 ].map(s => (
-                    <div key={s.label} className={`${s.bg} rounded-3xl p-6 border-2 ${s.borderColor} shadow-sm transition-all hover:shadow-md hover:scale-[1.02] duration-300`}>
+                    <div key={s.label} className={`${s.bg} rounded-[2rem] p-5 sm:p-6 border border-slate-200 shadow-sm transition-all hover:shadow-md duration-300`}>
                         <div className="flex items-center justify-between mb-4">
-                            <div className={`w-12 h-12 rounded-2xl ${s.iconBg} flex items-center justify-center shadow-lg shadow-${s.iconBg.split('-')[1]}-200`}>
-                                <svg className={`w-6 h-6 ${s.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={s.icon} />
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${s.iconBg} flex items-center justify-center shadow-lg shadow-${s.iconBg.split('-')[1]}-100`}>
+                                <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${s.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={s.icon} />
                                 </svg>
                             </div>
                         </div>
-                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">{s.label}</p>
-                        <p className={`text-2xl font-black ${s.color} tracking-tight`}>{s.value}</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
+                        <p className={`text-xl sm:text-2xl font-black ${s.color} tracking-tight`}>{s.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* Movimientos */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-1">
+                <div className="px-6 py-5 sm:py-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/30">
                     <div>
-                        <h2 className="font-black text-slate-900 text-lg">Movimientos</h2>
-                        <p className="text-sm text-slate-500 font-medium mt-0.5">{movimientos.length} registros</p>
+                        <h2 className="font-black text-slate-900 text-lg">Movimientos del Día</h2>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">{movimientos.length} registros encontrados</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex bg-slate-100/80 p-1 rounded-xl w-fit">
                         {[
                             { label: 'Todos', value: '' },
                             { label: 'Ingresos', value: 'INGRESO' },
@@ -563,9 +578,9 @@ export default function CajaDetalle() {
                             <button
                                 key={f.value}
                                 onClick={() => setFiltroTipo(f.value)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${filtroTipo === f.value
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filtroTipo === f.value
+                                    ? 'bg-white text-blue-600 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
                                 {f.label}
@@ -575,38 +590,87 @@ export default function CajaDetalle() {
                 </div>
 
                 {movsFiltrados.length === 0 ? (
-                    <div className="py-16 text-center">
-                        <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                            <svg className="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="py-20 text-center">
+                        <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                            <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                         </div>
                         <p className="text-slate-600 font-bold">Sin movimientos{filtroTipo ? ` de tipo ${filtroTipo}` : ''}</p>
                         {isAbierta && (
                             <p className="text-slate-400 text-sm font-medium mt-1">
-                                Usá los botones de arriba para registrar ingresos o egresos
+                                Comience registrando un movimiento desde el panel superior.
                             </p>
                         )}
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200">
-                                    {['Concepto / Categoría', 'Tipo', 'Monto', 'Fecha y Hora', 'Usuario', 'Referencia'].map(h => (
-                                        <th key={h} className={`px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest ${h === 'Monto' ? 'text-right' : 'text-left'} ${['Tipo', 'Fecha y Hora', 'Usuario', 'Referencia'].includes(h) ? 'text-center' : ''}`}>
-                                            {h}
-                                        </th>
+                    <>
+                        {/* Desktop View */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        {['Concepto / Categoría', 'Tipo', 'Monto', 'Fecha y Hora', 'Usuario', 'Referencia'].map(h => (
+                                            <th key={h} className={`px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest ${h === 'Monto' ? 'text-right' : 'text-left'} ${['Tipo', 'Fecha y Hora', 'Usuario', 'Referencia'].includes(h) ? 'text-center' : ''}`}>
+                                                {h}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {movsFiltrados.map(mov => (
+                                        <MovimientoRow key={mov.movimiento_id} mov={mov} />
                                     ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {movsFiltrados.map(mov => (
-                                    <MovimientoRow key={mov.movimiento_id} mov={mov} />
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile View */}
+                        <div className="md:hidden divide-y divide-slate-100">
+                            {movsFiltrados.map(mov => {
+                                const isIngreso = mov.tipo === 'INGRESO';
+                                return (
+                                    <div key={mov.movimiento_id} className="p-6 space-y-4">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isIngreso ? 'bg-emerald-100 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        {isIngreso
+                                                            ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                                                            : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 12H4" />
+                                                        }
+                                                    </svg>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-slate-900 text-sm leading-tight truncate">{mov.concepto}</p>
+                                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{mov.categoria_nombre || 'Sin categoría'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className={`font-black text-lg ${isIngreso ? 'text-emerald-700' : 'text-red-600'}`}>
+                                                    {isIngreso ? '+' : '-'} {formatCurrency(mov.monto)}
+                                                </p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                                    {new Date(mov.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[8px] font-black text-slate-500">
+                                                    {mov.nombre_usuario?.charAt(0)}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-slate-500">{mov.nombre_usuario}</span>
+                                            </div>
+                                            <span className="px-2 py-0.5 bg-slate-50 rounded text-[8px] font-black text-slate-400 uppercase tracking-widest border border-slate-100">
+                                                {mov.referencia || 'SIN REF'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
                 )}
             </div>
 

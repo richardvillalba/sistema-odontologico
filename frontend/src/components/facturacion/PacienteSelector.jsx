@@ -75,11 +75,11 @@ const PacienteSelector = ({ onSelect, selectedPaciente }) => {
                         <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
                             {selectedPaciente.nombre?.charAt(0)}{selectedPaciente.apellido?.charAt(0)}
                         </div>
-                        <div>
-                            <p className="font-black text-indigo-900 leading-tight">
+                        <div className="min-w-0">
+                            <p className="font-black text-indigo-900 leading-tight truncate">
                                 {selectedPaciente.nombre_completo || `${selectedPaciente.nombre} ${selectedPaciente.apellido}`}
                             </p>
-                            <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest mt-0.5">
+                            <p className="text-[10px] sm:text-xs text-indigo-600 font-bold uppercase tracking-widest mt-0.5 truncate">
                                 ID: {selectedPaciente.documento_numero} • HC: {selectedPaciente.numero_historia}
                             </p>
                         </div>

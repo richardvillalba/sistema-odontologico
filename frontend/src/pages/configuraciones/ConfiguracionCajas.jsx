@@ -213,9 +213,9 @@ function CajaRow({ caja, usuarios, onEditar }) {
 
 // ─── Página Principal ─────────────────────────────────────────────────────────
 export default function ConfiguracionCajas() {
-    const { usuario } = useAuth();
-    const empresaId = usuario?.empresa_id || 1;
-    const usuarioId = usuario?.usuario_id || 1;
+    const { usuario, empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
+    const usuarioId = usuario?.usuario_id;
 
     const [cajas, setCajas] = useState([]);
     const [usuarios, setUsuarios] = useState([]);

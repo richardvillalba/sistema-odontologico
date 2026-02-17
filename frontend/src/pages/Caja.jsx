@@ -228,9 +228,9 @@ function CajaCard({ caja, onAbrir, onClick }) {
 // ─── Página Principal ─────────────────────────────────────────────────────────
 export default function Caja() {
     const navigate = useNavigate();
-    const { usuario } = useAuth();
-    const empresaId = usuario?.empresa_id || 1;
-    const usuarioId = usuario?.usuario_id || 1;
+    const { usuario, empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
+    const usuarioId = usuario?.usuario_id;
 
     const [cajas, setCajas] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -265,9 +265,14 @@ export default function Caja() {
         cargarCajas();
     };
 
-    const cajasFiltradas = cajas;
-    const cajasAbiertas = cajas.filter(c => c.estado === 'ABIERTA');
-    const cajasCerradas = cajas.filter(c => c.estado === 'CERRADA');
+    // Filtrar cajas por usuario asignado (superadmin ve todas)
+    const esSuperAdminUser = usuario?.es_superadmin === 'S';
+    const cajasUsuario = esSuperAdminUser
+        ? cajas
+        : cajas.filter(c => c.usuario_asignado_id === usuarioId || !c.usuario_asignado_id);
+    const cajasFiltradas = cajasUsuario;
+    const cajasAbiertas = cajasUsuario.filter(c => c.estado === 'ABIERTA');
+    const cajasCerradas = cajasUsuario.filter(c => c.estado === 'CERRADA');
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">

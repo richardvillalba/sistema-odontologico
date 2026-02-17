@@ -36,9 +36,12 @@ const FacturasList = ({ facturas, loading, error }) => {
         </div>
     );
 
+    const formatCurrency = (amount) => new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG' }).format(amount);
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in text-slate-900">
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left">
                     <thead className="bg-gray-50 text-gray-600 font-semibold border-b border-gray-100">
                         <tr>
@@ -66,18 +69,18 @@ const FacturasList = ({ facturas, loading, error }) => {
                                         <div className="text-xs text-gray-500">{factura.numero_documento_paciente}</div>
                                     </td>
                                     <td className="px-6 py-4 font-bold text-gray-900">
-                                        {new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG' }).format(factura.total)}
+                                        {formatCurrency(factura.total)}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`font-semibold ${factura.saldo_pendiente > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                            {new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG' }).format(factura.saldo_pendiente)}
+                                            {formatCurrency(factura.saldo_pendiente)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusStyle(factura.estado)}`}>
                                             <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${factura.estado === 'PENDIENTE' || factura.estado === 'PARCIAL' ? 'bg-amber-500 animate-pulse' :
-                                                    factura.estado === 'PAGADA' ? 'bg-green-500' :
-                                                        factura.estado === 'ANULADA' ? 'bg-red-500' : 'bg-gray-500'
+                                                factura.estado === 'PAGADA' ? 'bg-green-500' :
+                                                    factura.estado === 'ANULADA' ? 'bg-red-500' : 'bg-gray-500'
                                                 }`}></span>
                                             {factura.estado}
                                         </span>
@@ -107,6 +110,47 @@ const FacturasList = ({ facturas, loading, error }) => {
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile card layout */}
+            <div className="md:hidden divide-y divide-gray-100">
+                {facturas.length > 0 ? (
+                    facturas.map((factura) => (
+                        <div
+                            key={factura.factura_id}
+                            className="p-4 hover:bg-slate-50 active:bg-slate-100 transition-all cursor-pointer"
+                            onClick={() => navigate(`/facturas/${factura.factura_id}`)}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="font-mono font-bold text-indigo-700 text-sm">{factura.numero_factura_completo}</span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border ${getStatusStyle(factura.estado)}`}>
+                                    {factura.estado}
+                                </span>
+                            </div>
+                            <p className="font-semibold text-gray-900 text-sm">{factura.nombre_paciente}</p>
+                            <p className="text-xs text-gray-500">{factura.numero_documento_paciente}</p>
+                            <div className="flex items-center justify-between mt-2">
+                                <div>
+                                    <p className="text-[10px] text-gray-400 uppercase font-bold">Total</p>
+                                    <p className="font-bold text-gray-900 text-sm">{formatCurrency(factura.total)}</p>
+                                </div>
+                                {factura.saldo_pendiente > 0 && (
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-gray-400 uppercase font-bold">Pendiente</p>
+                                        <p className="font-bold text-red-600 text-sm">{formatCurrency(factura.saldo_pendiente)}</p>
+                                    </div>
+                                )}
+                                <p className="text-xs text-gray-500">{new Date(factura.fecha_emision).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="p-12 text-center text-gray-500">
+                        <div className="text-4xl mb-3">🧾</div>
+                        <p className="font-medium text-gray-900">No se encontraron facturas</p>
+                        <p className="text-sm mt-1">Intenta ajustar los filtros</p>
+                    </div>
+                )}
             </div>
         </div>
     );

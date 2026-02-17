@@ -29,6 +29,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Obtener historia clinica por ID
     PROCEDURE get_historia(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_historia_id   IN  ODO_HISTORIAS_CLINICAS.HISTORIA_ID%TYPE,
         p_cursor        OUT t_historia_cursor,
         p_resultado     OUT NUMBER,
@@ -37,6 +38,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Obtener historias de un paciente
     PROCEDURE get_historias_paciente(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_HISTORIAS_CLINICAS.PACIENTE_ID%TYPE,
         p_fecha_desde   IN  DATE DEFAULT NULL,
         p_fecha_hasta   IN  DATE DEFAULT NULL,
@@ -47,6 +49,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Obtener historias por doctor
     PROCEDURE get_historias_doctor(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_doctor_id     IN  ODO_HISTORIAS_CLINICAS.DOCTOR_ID%TYPE,
         p_fecha_desde   IN  DATE DEFAULT NULL,
         p_fecha_hasta   IN  DATE DEFAULT NULL,
@@ -67,6 +70,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Obtener ultima historia de un paciente
     PROCEDURE get_ultima_historia_paciente(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_HISTORIAS_CLINICAS.PACIENTE_ID%TYPE,
         p_cursor        OUT t_historia_cursor,
         p_resultado     OUT NUMBER,
@@ -102,6 +106,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Actualizar historia clinica
     PROCEDURE update_historia(
+        p_empresa_id            IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_historia_id           IN  ODO_HISTORIAS_CLINICAS.HISTORIA_ID%TYPE,
         p_motivo_consulta       IN  ODO_HISTORIAS_CLINICAS.MOTIVO_CONSULTA%TYPE DEFAULT NULL,
         p_anamnesis             IN  ODO_HISTORIAS_CLINICAS.ANAMNESIS%TYPE DEFAULT NULL,
@@ -121,6 +126,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Eliminar historia clinica
     PROCEDURE delete_historia(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_historia_id   IN  ODO_HISTORIAS_CLINICAS.HISTORIA_ID%TYPE,
         p_usuario_id    IN  NUMBER,
         p_resultado     OUT NUMBER,
@@ -133,6 +139,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Obtener prescripciones de una historia
     PROCEDURE get_prescripciones_historia(
+        p_empresa_id    IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_historia_id   IN  ODO_PRESCRIPCIONES.HISTORIA_ID%TYPE,
         p_cursor        OUT t_prescripcion_cursor,
         p_resultado     OUT NUMBER,
@@ -141,6 +148,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Obtener prescripciones de un paciente
     PROCEDURE get_prescripciones_paciente(
+        p_empresa_id    IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_PRESCRIPCIONES.PACIENTE_ID%TYPE,
         p_fecha_desde   IN  DATE DEFAULT NULL,
         p_fecha_hasta   IN  DATE DEFAULT NULL,
@@ -151,6 +159,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Insertar prescripcion
     PROCEDURE insert_prescripcion(
+        p_empresa_id            IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_historia_id           IN  ODO_PRESCRIPCIONES.HISTORIA_ID%TYPE,
         p_paciente_id           IN  ODO_PRESCRIPCIONES.PACIENTE_ID%TYPE,
         p_doctor_id             IN  ODO_PRESCRIPCIONES.DOCTOR_ID%TYPE,
@@ -169,6 +178,7 @@ CREATE OR REPLACE PACKAGE PKG_HISTORIAS_CLINICAS AS
 
     -- Eliminar prescripcion
     PROCEDURE delete_prescripcion(
+        p_empresa_id        IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_prescripcion_id   IN  ODO_PRESCRIPCIONES.PRESCRIPCION_ID%TYPE,
         p_resultado         OUT NUMBER,
         p_mensaje           OUT VARCHAR2
@@ -201,6 +211,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ========================================================================
 
     PROCEDURE get_historia(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_historia_id   IN  ODO_HISTORIAS_CLINICAS.HISTORIA_ID%TYPE,
         p_cursor        OUT t_historia_cursor,
         p_resultado     OUT NUMBER,
@@ -235,14 +246,14 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
                 h.CREADO_POR,
                 h.FECHA_MODIFICACION,
                 h.MODIFICADO_POR,
-                -- Informacion adicional del paciente
                 p.ALERGIAS AS PACIENTE_ALERGIAS,
                 p.MEDICAMENTOS_ACTUALES AS PACIENTE_MEDICAMENTOS,
                 p.ENFERMEDADES_CRONICAS AS PACIENTE_ENFERMEDADES
             FROM ODO_HISTORIAS_CLINICAS h
             JOIN ODO_PACIENTES p ON h.PACIENTE_ID = p.PACIENTE_ID
             LEFT JOIN ODO_USUARIOS u ON h.DOCTOR_ID = u.USUARIO_ID
-            WHERE h.HISTORIA_ID = p_historia_id;
+            WHERE h.HISTORIA_ID = p_historia_id
+              AND h.EMPRESA_ID = p_empresa_id;
 
         p_resultado := 1;
         p_mensaje := 'Historia clinica obtenida exitosamente';
@@ -256,6 +267,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_historias_paciente(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_HISTORIAS_CLINICAS.PACIENTE_ID%TYPE,
         p_fecha_desde   IN  DATE DEFAULT NULL,
         p_fecha_hasta   IN  DATE DEFAULT NULL,
@@ -283,6 +295,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             JOIN ODO_PACIENTES p ON h.PACIENTE_ID = p.PACIENTE_ID
             LEFT JOIN ODO_USUARIOS u ON h.DOCTOR_ID = u.USUARIO_ID
             WHERE h.PACIENTE_ID = p_paciente_id
+              AND h.EMPRESA_ID = p_empresa_id
               AND (p_fecha_desde IS NULL OR TRUNC(h.FECHA_CONSULTA) >= p_fecha_desde)
               AND (p_fecha_hasta IS NULL OR TRUNC(h.FECHA_CONSULTA) <= p_fecha_hasta)
             ORDER BY h.FECHA_CONSULTA DESC;
@@ -299,6 +312,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_historias_doctor(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_doctor_id     IN  ODO_HISTORIAS_CLINICAS.DOCTOR_ID%TYPE,
         p_fecha_desde   IN  DATE DEFAULT NULL,
         p_fecha_hasta   IN  DATE DEFAULT NULL,
@@ -321,6 +335,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             FROM ODO_HISTORIAS_CLINICAS h
             JOIN ODO_PACIENTES p ON h.PACIENTE_ID = p.PACIENTE_ID
             WHERE h.DOCTOR_ID = p_doctor_id
+              AND h.EMPRESA_ID = p_empresa_id
               AND (p_fecha_desde IS NULL OR TRUNC(h.FECHA_CONSULTA) >= p_fecha_desde)
               AND (p_fecha_hasta IS NULL OR TRUNC(h.FECHA_CONSULTA) <= p_fecha_hasta)
             ORDER BY h.FECHA_CONSULTA DESC;
@@ -377,6 +392,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_ultima_historia_paciente(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_HISTORIAS_CLINICAS.PACIENTE_ID%TYPE,
         p_cursor        OUT t_historia_cursor,
         p_resultado     OUT NUMBER,
@@ -406,10 +422,12 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             JOIN ODO_PACIENTES p ON h.PACIENTE_ID = p.PACIENTE_ID
             LEFT JOIN ODO_USUARIOS u ON h.DOCTOR_ID = u.USUARIO_ID
             WHERE h.PACIENTE_ID = p_paciente_id
+              AND h.EMPRESA_ID = p_empresa_id
               AND h.FECHA_CONSULTA = (
                   SELECT MAX(FECHA_CONSULTA)
                   FROM ODO_HISTORIAS_CLINICAS
                   WHERE PACIENTE_ID = p_paciente_id
+                    AND EMPRESA_ID = p_empresa_id
               );
 
         p_resultado := 1;
@@ -537,6 +555,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE update_historia(
+        p_empresa_id            IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_historia_id           IN  ODO_HISTORIAS_CLINICAS.HISTORIA_ID%TYPE,
         p_motivo_consulta       IN  ODO_HISTORIAS_CLINICAS.MOTIVO_CONSULTA%TYPE DEFAULT NULL,
         p_anamnesis             IN  ODO_HISTORIAS_CLINICAS.ANAMNESIS%TYPE DEFAULT NULL,
@@ -568,11 +587,12 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             OBSERVACIONES = NVL(p_observaciones, OBSERVACIONES),
             FECHA_MODIFICACION = SYSTIMESTAMP,
             MODIFICADO_POR = p_modificado_por
-        WHERE HISTORIA_ID = p_historia_id;
+        WHERE HISTORIA_ID = p_historia_id
+          AND EMPRESA_ID = p_empresa_id;
 
         IF SQL%ROWCOUNT = 0 THEN
             p_resultado := 0;
-            p_mensaje := 'Historia clinica no encontrada';
+            p_mensaje := 'Historia clinica no encontrada o no pertenece a la empresa';
             RETURN;
         END IF;
 
@@ -591,6 +611,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE delete_historia(
+        p_empresa_id    IN  ODO_HISTORIAS_CLINICAS.EMPRESA_ID%TYPE,
         p_historia_id   IN  ODO_HISTORIAS_CLINICAS.HISTORIA_ID%TYPE,
         p_usuario_id    IN  NUMBER,
         p_resultado     OUT NUMBER,
@@ -602,7 +623,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
         -- Verificar si tiene tratamientos asociados
         SELECT COUNT(*) INTO v_tiene_tratamientos
         FROM ODO_TRATAMIENTOS_PACIENTE
-        WHERE HISTORIA_ID = p_historia_id;
+        WHERE HISTORIA_ID = p_historia_id
+          AND EMPRESA_ID = p_empresa_id;
 
         IF v_tiene_tratamientos > 0 THEN
             p_resultado := 0;
@@ -613,19 +635,20 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
         -- Verificar si tiene prescripciones
         SELECT COUNT(*) INTO v_tiene_prescripciones
         FROM ODO_PRESCRIPCIONES
-        WHERE HISTORIA_ID = p_historia_id;
+        WHERE HISTORIA_ID = p_historia_id
+          AND EMPRESA_ID = p_empresa_id;
 
         -- Eliminar prescripciones primero
         IF v_tiene_prescripciones > 0 THEN
-            DELETE FROM ODO_PRESCRIPCIONES WHERE HISTORIA_ID = p_historia_id;
+            DELETE FROM ODO_PRESCRIPCIONES WHERE HISTORIA_ID = p_historia_id AND EMPRESA_ID = p_empresa_id;
         END IF;
 
         -- Eliminar historia
-        DELETE FROM ODO_HISTORIAS_CLINICAS WHERE HISTORIA_ID = p_historia_id;
+        DELETE FROM ODO_HISTORIAS_CLINICAS WHERE HISTORIA_ID = p_historia_id AND EMPRESA_ID = p_empresa_id;
 
         IF SQL%ROWCOUNT = 0 THEN
             p_resultado := 0;
-            p_mensaje := 'Historia clinica no encontrada';
+            p_mensaje := 'Historia clinica no encontrada o no pertenece a la empresa';
             RETURN;
         END IF;
 
@@ -646,6 +669,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ========================================================================
 
     PROCEDURE get_prescripciones_historia(
+        p_empresa_id    IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_historia_id   IN  ODO_PRESCRIPCIONES.HISTORIA_ID%TYPE,
         p_cursor        OUT t_prescripcion_cursor,
         p_resultado     OUT NUMBER,
@@ -671,6 +695,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             FROM ODO_PRESCRIPCIONES pr
             LEFT JOIN ODO_USUARIOS u ON pr.DOCTOR_ID = u.USUARIO_ID
             WHERE pr.HISTORIA_ID = p_historia_id
+              AND pr.EMPRESA_ID = p_empresa_id
             ORDER BY pr.FECHA_EMISION DESC;
 
         p_resultado := 1;
@@ -685,6 +710,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_prescripciones_paciente(
+        p_empresa_id    IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_PRESCRIPCIONES.PACIENTE_ID%TYPE,
         p_fecha_desde   IN  DATE DEFAULT NULL,
         p_fecha_hasta   IN  DATE DEFAULT NULL,
@@ -712,6 +738,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             FROM ODO_PRESCRIPCIONES pr
             LEFT JOIN ODO_USUARIOS u ON pr.DOCTOR_ID = u.USUARIO_ID
             WHERE pr.PACIENTE_ID = p_paciente_id
+              AND pr.EMPRESA_ID = p_empresa_id
               AND (p_fecha_desde IS NULL OR TRUNC(pr.FECHA_EMISION) >= p_fecha_desde)
               AND (p_fecha_hasta IS NULL OR TRUNC(pr.FECHA_EMISION) <= p_fecha_hasta)
             ORDER BY pr.FECHA_EMISION DESC;
@@ -728,6 +755,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE insert_prescripcion(
+        p_empresa_id            IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_historia_id           IN  ODO_PRESCRIPCIONES.HISTORIA_ID%TYPE,
         p_paciente_id           IN  ODO_PRESCRIPCIONES.PACIENTE_ID%TYPE,
         p_doctor_id             IN  ODO_PRESCRIPCIONES.DOCTOR_ID%TYPE,
@@ -745,6 +773,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     ) IS
     BEGIN
         INSERT INTO ODO_PRESCRIPCIONES (
+            EMPRESA_ID,
             HISTORIA_ID,
             PACIENTE_ID,
             DOCTOR_ID,
@@ -758,6 +787,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
             DURACION_DIAS,
             INDICACIONES
         ) VALUES (
+            p_empresa_id,
             p_historia_id,
             p_paciente_id,
             p_doctor_id,
@@ -787,16 +817,19 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE delete_prescripcion(
+        p_empresa_id        IN  ODO_PRESCRIPCIONES.EMPRESA_ID%TYPE,
         p_prescripcion_id   IN  ODO_PRESCRIPCIONES.PRESCRIPCION_ID%TYPE,
         p_resultado         OUT NUMBER,
         p_mensaje           OUT VARCHAR2
     ) IS
     BEGIN
-        DELETE FROM ODO_PRESCRIPCIONES WHERE PRESCRIPCION_ID = p_prescripcion_id;
+        DELETE FROM ODO_PRESCRIPCIONES 
+        WHERE PRESCRIPCION_ID = p_prescripcion_id
+          AND EMPRESA_ID = p_empresa_id;
 
         IF SQL%ROWCOUNT = 0 THEN
             p_resultado := 0;
-            p_mensaje := 'Prescripcion no encontrada';
+            p_mensaje := 'Prescripcion no encontrada o no pertenece a la empresa';
             RETURN;
         END IF;
 
@@ -836,15 +869,20 @@ CREATE OR REPLACE PACKAGE BODY PKG_HISTORIAS_CLINICAS AS
         v_diagnostico ODO_HISTORIAS_CLINICAS.DIAGNOSTICO%TYPE;
     BEGIN
         SELECT DIAGNOSTICO INTO v_diagnostico
-        FROM ODO_HISTORIAS_CLINICAS
-        WHERE PACIENTE_ID = p_paciente_id
-          AND DIAGNOSTICO IS NOT NULL
-          AND ROWNUM = 1
-        ORDER BY FECHA_CONSULTA DESC;
+        FROM (
+            SELECT DIAGNOSTICO 
+            FROM ODO_HISTORIAS_CLINICAS
+            WHERE PACIENTE_ID = p_paciente_id
+              AND DIAGNOSTICO IS NOT NULL
+            ORDER BY FECHA_CONSULTA DESC
+        )
+        WHERE ROWNUM = 1;
 
         RETURN v_diagnostico;
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
+            RETURN NULL;
+        WHEN OTHERS THEN
             RETURN NULL;
     END get_ultimo_diagnostico;
 

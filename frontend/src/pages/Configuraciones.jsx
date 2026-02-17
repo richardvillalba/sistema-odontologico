@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Configuraciones = () => {
     const navigate = useNavigate();
+    const { tieneAccesoPrograma } = useAuth();
 
     const configModules = [
         {
@@ -11,6 +13,7 @@ const Configuraciones = () => {
             description: 'Gestión de puntos de expedición, talonarios fiscales y alertas de vencimiento.',
             icon: '🧾',
             path: '/configuraciones/timbrados',
+            codigo: 'CONFIG_TIMBRADOS',
             color: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'
         },
         {
@@ -19,6 +22,7 @@ const Configuraciones = () => {
             description: 'Administración de usuarios y asignación de roles.',
             icon: '👤',
             path: '/configuraciones/usuarios',
+            codigo: 'CONFIG_USUARIOS',
             color: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'
         },
         {
@@ -27,6 +31,7 @@ const Configuraciones = () => {
             description: 'Configuración de roles, módulos del sistema y permisos.',
             icon: '🎭',
             path: '/configuraciones/roles',
+            codigo: 'CONFIG_ROLES',
             color: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
         },
         {
@@ -35,7 +40,17 @@ const Configuraciones = () => {
             description: 'Información general, logo, slogan y datos de contacto para impresión.',
             icon: '🏥',
             path: '/configuraciones/clinica',
+            codigo: 'CONFIG_CLINICA',
             color: 'bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white'
+        },
+        {
+            id: 'tratamientos',
+            title: 'Catálogo de Tratamientos',
+            description: 'Gestión del catálogo de tratamientos odontológicos, precios y categorías.',
+            icon: '💊',
+            path: '/configuraciones/tratamientos',
+            codigo: 'CONFIG_TRATAMIENTOS',
+            color: 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
         },
         {
             id: 'cajas',
@@ -43,9 +58,30 @@ const Configuraciones = () => {
             description: 'Configuración de cajas de la empresa y asignación de usuarios responsables.',
             icon: '💵',
             path: '/configuraciones/cajas',
+            codigo: 'CONFIG_CAJAS',
             color: 'bg-teal-50 text-teal-600 group-hover:bg-teal-600 group-hover:text-white'
+        },
+        {
+            id: 'empresas',
+            title: 'Empresas',
+            description: 'Crear, activar e inactivar empresas del sistema.',
+            icon: '🏢',
+            path: '/configuraciones/empresas',
+            codigo: 'CONFIG_EMPRESAS',
+            color: 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white'
+        },
+        {
+            id: 'sucursales',
+            title: 'Sucursales',
+            description: 'Gestión de sucursales, direcciones y asignaciones.',
+            icon: '📍',
+            path: '/configuraciones/sucursales',
+            codigo: 'CONFIG_SUCURSALES',
+            color: 'bg-cyan-50 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white'
         }
     ];
+
+    const modulosVisibles = configModules.filter(m => tieneAccesoPrograma(m.codigo));
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -55,7 +91,7 @@ const Configuraciones = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {configModules.map((module) => (
+                {modulosVisibles.map((module) => (
                     <button
                         key={module.id}
                         onClick={() => !module.disabled && navigate(module.path)}

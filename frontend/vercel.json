@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/facturas/:path*",
+      "destination": "https://g04d6b70b49b5da-escanor.adb.sa-vinhedo-1.oraclecloudapps.com/ords/admin/facturas/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://g04d6b70b49b5da-escanor.adb.sa-vinhedo-1.oraclecloudapps.com/ords/admin/api/v1/:path*"
+    },
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

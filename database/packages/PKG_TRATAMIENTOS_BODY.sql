@@ -1,253 +1,3 @@
-/*
-================================================================================
-  Package: PKG_TRATAMIENTOS
-  Descripcion: Package para la gestion de tratamientos y catalogo
-  Autor: Claude (Backend IA)
-  Fecha: 2026-01-26
-
-  Funcionalidades:
-    - CRUD de catalogo de tratamientos
-    - Gestion de tratamientos asignados a pacientes
-    - Sesiones de tratamiento
-    - Seguimiento de progreso
-================================================================================
-*/
-
--- ============================================================================
--- ESPECIFICACION DEL PACKAGE
--- ============================================================================
-CREATE OR REPLACE PACKAGE PKG_TRATAMIENTOS AS
-
-    -- Tipos de datos
-    TYPE t_tratamiento_cursor IS REF CURSOR;
-    TYPE t_sesion_cursor IS REF CURSOR;
-
-    -- Constantes de estado
-    c_estado_pendiente      CONSTANT VARCHAR2(20) := 'PENDIENTE';
-    c_estado_en_progreso    CONSTANT VARCHAR2(20) := 'EN_PROGRESO';
-    c_estado_completado     CONSTANT VARCHAR2(20) := 'COMPLETADO';
-    c_estado_cancelado      CONSTANT VARCHAR2(20) := 'CANCELADO';
-
-    -- ========================================================================
-    -- PROCEDIMIENTOS DE CATALOGO
-    -- ========================================================================
-
-    -- Obtener catalogo completo
-    PROCEDURE get_catalogo(
-        p_categoria     IN  ODO_CATALOGOS_TRATAMIENTOS.CATEGORIA%TYPE DEFAULT NULL,
-        p_activo        IN  ODO_CATALOGOS_TRATAMIENTOS.ACTIVO%TYPE DEFAULT 'S',
-        p_cursor        OUT t_tratamiento_cursor,
-        p_resultado     OUT NUMBER,
-        p_mensaje       OUT VARCHAR2
-    );
-
-    -- Obtener tratamiento del catalogo por ID
-    PROCEDURE get_catalogo_item(
-        p_catalogo_id   IN  ODO_CATALOGOS_TRATAMIENTOS.CATALOGO_ID%TYPE,
-        p_cursor        OUT t_tratamiento_cursor,
-        p_resultado     OUT NUMBER,
-        p_mensaje       OUT VARCHAR2
-    );
-
-    -- Buscar en catalogo
-    PROCEDURE search_catalogo(
-        p_termino       IN  VARCHAR2,
-        p_cursor        OUT t_tratamiento_cursor,
-        p_resultado     OUT NUMBER,
-        p_mensaje       OUT VARCHAR2
-    );
-
-    -- Insertar item en catalogo
-    PROCEDURE insert_catalogo(
-        p_codigo                IN  ODO_CATALOGOS_TRATAMIENTOS.CODIGO%TYPE,
-        p_nombre                IN  ODO_CATALOGOS_TRATAMIENTOS.NOMBRE%TYPE,
-        p_descripcion           IN  ODO_CATALOGOS_TRATAMIENTOS.DESCRIPCION%TYPE DEFAULT NULL,
-        p_categoria             IN  ODO_CATALOGOS_TRATAMIENTOS.CATEGORIA%TYPE,
-        p_precio_base           IN  ODO_CATALOGOS_TRATAMIENTOS.PRECIO_BASE%TYPE,
-        p_duracion_estimada     IN  ODO_CATALOGOS_TRATAMIENTOS.DURACION_ESTIMADA%TYPE DEFAULT NULL,
-        p_requiere_anestesia    IN  ODO_CATALOGOS_TRATAMIENTOS.REQUIERE_ANESTESIA%TYPE DEFAULT 'N',
-        p_catalogo_id           OUT ODO_CATALOGOS_TRATAMIENTOS.CATALOGO_ID%TYPE,
-        p_resultado             OUT NUMBER,
-        p_mensaje               OUT VARCHAR2
-    );
-
-    -- Actualizar item del catalogo
-    PROCEDURE update_catalogo(
-        p_catalogo_id           IN  ODO_CATALOGOS_TRATAMIENTOS.CATALOGO_ID%TYPE,
-        p_codigo                IN  ODO_CATALOGOS_TRATAMIENTOS.CODIGO%TYPE DEFAULT NULL,
-        p_nombre                IN  ODO_CATALOGOS_TRATAMIENTOS.NOMBRE%TYPE DEFAULT NULL,
-        p_descripcion           IN  ODO_CATALOGOS_TRATAMIENTOS.DESCRIPCION%TYPE DEFAULT NULL,
-        p_categoria             IN  ODO_CATALOGOS_TRATAMIENTOS.CATEGORIA%TYPE DEFAULT NULL,
-        p_precio_base           IN  ODO_CATALOGOS_TRATAMIENTOS.PRECIO_BASE%TYPE DEFAULT NULL,
-        p_duracion_estimada     IN  ODO_CATALOGOS_TRATAMIENTOS.DURACION_ESTIMADA%TYPE DEFAULT NULL,
-        p_requiere_anestesia    IN  ODO_CATALOGOS_TRATAMIENTOS.REQUIERE_ANESTESIA%TYPE DEFAULT NULL,
-        p_activo                IN  ODO_CATALOGOS_TRATAMIENTOS.ACTIVO%TYPE DEFAULT NULL,
-        p_resultado             OUT NUMBER,
-        p_mensaje               OUT VARCHAR2
-    );
-
-    -- ========================================================================
-    -- PROCEDIMIENTOS DE TRATAMIENTOS DE PACIENTE
-    -- ========================================================================
-
-    -- Obtener tratamiento de paciente por ID
-    PROCEDURE get_tratamiento_paciente(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_cursor                  OUT t_tratamiento_cursor,
-        p_resultado               OUT NUMBER,
-        p_mensaje                 OUT VARCHAR2
-    );
-
-    -- Obtener tratamientos de un paciente
-    PROCEDURE get_tratamientos_by_paciente(
-        p_paciente_id   IN  ODO_TRATAMIENTOS_PACIENTE.PACIENTE_ID%TYPE,
-        p_estado        IN  ODO_TRATAMIENTOS_PACIENTE.ESTADO%TYPE DEFAULT NULL,
-        p_cursor        OUT t_tratamiento_cursor,
-        p_resultado     OUT NUMBER,
-        p_mensaje       OUT VARCHAR2
-    );
-
-    -- Obtener tratamientos por doctor
-    PROCEDURE get_tratamientos_by_doctor(
-        p_doctor_id     IN  ODO_TRATAMIENTOS_PACIENTE.DOCTOR_ID%TYPE,
-        p_estado        IN  ODO_TRATAMIENTOS_PACIENTE.ESTADO%TYPE DEFAULT NULL,
-        p_cursor        OUT t_tratamiento_cursor,
-        p_resultado     OUT NUMBER,
-        p_mensaje       OUT VARCHAR2
-    );
-
-    -- Asignar tratamiento a paciente
-    PROCEDURE insert_tratamiento_paciente(
-        p_paciente_id       IN  ODO_TRATAMIENTOS_PACIENTE.PACIENTE_ID%TYPE,
-        p_historia_id       IN  ODO_TRATAMIENTOS_PACIENTE.HISTORIA_ID%TYPE DEFAULT NULL,
-        p_catalogo_id       IN  ODO_TRATAMIENTOS_PACIENTE.CATALOGO_ID%TYPE,
-        p_doctor_id         IN  ODO_TRATAMIENTOS_PACIENTE.DOCTOR_ID%TYPE,
-        p_numero_diente     IN  ODO_TRATAMIENTOS_PACIENTE.NUMERO_DIENTE%TYPE DEFAULT NULL,
-        p_fecha_propuesta   IN  ODO_TRATAMIENTOS_PACIENTE.FECHA_PROPUESTA%TYPE DEFAULT NULL,
-        p_precio_acordado   IN  ODO_TRATAMIENTOS_PACIENTE.PRECIO_ACORDADO%TYPE DEFAULT NULL,
-        p_descuento         IN  ODO_TRATAMIENTOS_PACIENTE.DESCUENTO%TYPE DEFAULT 0,
-        p_sesiones_totales  IN  ODO_TRATAMIENTOS_PACIENTE.SESIONES_TOTALES%TYPE DEFAULT 1,
-        p_tratamiento_paciente_id OUT ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_resultado         OUT NUMBER,
-        p_mensaje           OUT VARCHAR2
-    );
-
-    -- Actualizar tratamiento de paciente
-    PROCEDURE update_tratamiento_paciente(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_numero_diente     IN  ODO_TRATAMIENTOS_PACIENTE.NUMERO_DIENTE%TYPE DEFAULT NULL,
-        p_fecha_propuesta   IN  ODO_TRATAMIENTOS_PACIENTE.FECHA_PROPUESTA%TYPE DEFAULT NULL,
-        p_precio_acordado   IN  ODO_TRATAMIENTOS_PACIENTE.PRECIO_ACORDADO%TYPE DEFAULT NULL,
-        p_descuento         IN  ODO_TRATAMIENTOS_PACIENTE.DESCUENTO%TYPE DEFAULT NULL,
-        p_sesiones_totales  IN  ODO_TRATAMIENTOS_PACIENTE.SESIONES_TOTALES%TYPE DEFAULT NULL,
-        p_resultado         OUT NUMBER,
-        p_mensaje           OUT VARCHAR2
-    );
-
-    -- Cambiar estado de tratamiento
-    PROCEDURE cambiar_estado_tratamiento(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_nuevo_estado      IN  ODO_TRATAMIENTOS_PACIENTE.ESTADO%TYPE,
-        p_usuario_id        IN  NUMBER,
-        p_resultado         OUT NUMBER,
-        p_mensaje           OUT VARCHAR2
-    );
-
-    -- Iniciar tratamiento
-    PROCEDURE iniciar_tratamiento(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_usuario_id        IN  NUMBER,
-        p_resultado         OUT NUMBER,
-        p_mensaje           OUT VARCHAR2
-    );
-
-    -- Completar tratamiento
-    PROCEDURE completar_tratamiento(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_usuario_id        IN  NUMBER,
-        p_resultado         OUT NUMBER,
-        p_mensaje           OUT VARCHAR2
-    );
-
-    -- Cancelar tratamiento
-    PROCEDURE cancelar_tratamiento(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_usuario_id        IN  NUMBER,
-        p_resultado         OUT NUMBER,
-        p_mensaje           OUT VARCHAR2
-    );
-
-    -- ========================================================================
-    -- PROCEDIMIENTOS DE SESIONES
-    -- ========================================================================
-
-    -- Obtener sesiones de un tratamiento
-    PROCEDURE get_sesiones_tratamiento(
-        p_tratamiento_paciente_id IN ODO_SESIONES_TRATAMIENTO.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_cursor                  OUT t_sesion_cursor,
-        p_resultado               OUT NUMBER,
-        p_mensaje                 OUT VARCHAR2
-    );
-
-    -- Registrar sesion
-    PROCEDURE insert_sesion(
-        p_tratamiento_paciente_id IN ODO_SESIONES_TRATAMIENTO.TRATAMIENTO_PACIENTE_ID%TYPE,
-        p_cita_id               IN  ODO_SESIONES_TRATAMIENTO.CITA_ID%TYPE DEFAULT NULL,
-        p_doctor_id             IN  ODO_SESIONES_TRATAMIENTO.DOCTOR_ID%TYPE,
-        p_fecha_sesion          IN  ODO_SESIONES_TRATAMIENTO.FECHA_SESION%TYPE DEFAULT SYSDATE,
-        p_descripcion           IN  ODO_SESIONES_TRATAMIENTO.DESCRIPCION%TYPE DEFAULT NULL,
-        p_materiales_usados     IN  ODO_SESIONES_TRATAMIENTO.MATERIALES_USADOS%TYPE DEFAULT NULL,
-        p_observaciones         IN  ODO_SESIONES_TRATAMIENTO.OBSERVACIONES%TYPE DEFAULT NULL,
-        p_completada            IN  ODO_SESIONES_TRATAMIENTO.COMPLETADA%TYPE DEFAULT 'S',
-        p_sesion_id             OUT ODO_SESIONES_TRATAMIENTO.SESION_ID%TYPE,
-        p_resultado             OUT NUMBER,
-        p_mensaje               OUT VARCHAR2
-    );
-
-    -- Actualizar sesion
-    PROCEDURE update_sesion(
-        p_sesion_id             IN  ODO_SESIONES_TRATAMIENTO.SESION_ID%TYPE,
-        p_descripcion           IN  ODO_SESIONES_TRATAMIENTO.DESCRIPCION%TYPE DEFAULT NULL,
-        p_materiales_usados     IN  ODO_SESIONES_TRATAMIENTO.MATERIALES_USADOS%TYPE DEFAULT NULL,
-        p_observaciones         IN  ODO_SESIONES_TRATAMIENTO.OBSERVACIONES%TYPE DEFAULT NULL,
-        p_completada            IN  ODO_SESIONES_TRATAMIENTO.COMPLETADA%TYPE DEFAULT NULL,
-        p_resultado             OUT NUMBER,
-        p_mensaje               OUT VARCHAR2
-    );
-
-    -- Eliminar sesion
-    PROCEDURE delete_sesion(
-        p_sesion_id     IN  ODO_SESIONES_TRATAMIENTO.SESION_ID%TYPE,
-        p_resultado     OUT NUMBER,
-        p_mensaje       OUT VARCHAR2
-    );
-
-    -- ========================================================================
-    -- FUNCIONES DE UTILIDAD
-    -- ========================================================================
-
-    -- Calcular precio final con descuento
-    FUNCTION calcular_precio_final(
-        p_precio_base   IN NUMBER,
-        p_descuento     IN NUMBER
-    ) RETURN NUMBER;
-
-    -- Obtener progreso del tratamiento (porcentaje)
-    FUNCTION get_progreso_tratamiento(
-        p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE
-    ) RETURN NUMBER;
-
-    -- Contar tratamientos pendientes de paciente
-    FUNCTION count_tratamientos_pendientes(
-        p_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.PACIENTE_ID%TYPE
-    ) RETURN NUMBER;
-
-END PKG_TRATAMIENTOS;
-/
-
--- ============================================================================
--- CUERPO DEL PACKAGE
--- ============================================================================
 CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
 
     -- ========================================================================
@@ -255,6 +5,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ========================================================================
 
     PROCEDURE get_catalogo(
+        p_empresa_id    IN  ODO_CATALOGOS_TRATAMIENTOS.EMPRESA_ID%TYPE,
         p_categoria     IN  ODO_CATALOGOS_TRATAMIENTOS.CATEGORIA%TYPE DEFAULT NULL,
         p_activo        IN  ODO_CATALOGOS_TRATAMIENTOS.ACTIVO%TYPE DEFAULT 'S',
         p_cursor        OUT t_tratamiento_cursor,
@@ -274,7 +25,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
                 REQUIERE_ANESTESIA,
                 ACTIVO
             FROM ODO_CATALOGOS_TRATAMIENTOS
-            WHERE (p_categoria IS NULL OR CATEGORIA = p_categoria)
+            WHERE EMPRESA_ID = p_empresa_id
+              AND (p_categoria IS NULL OR CATEGORIA = p_categoria)
               AND (p_activo IS NULL OR ACTIVO = p_activo)
             ORDER BY CATEGORIA, NOMBRE;
 
@@ -290,6 +42,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_catalogo_item(
+        p_empresa_id    IN  ODO_CATALOGOS_TRATAMIENTOS.EMPRESA_ID%TYPE,
         p_catalogo_id   IN  ODO_CATALOGOS_TRATAMIENTOS.CATALOGO_ID%TYPE,
         p_cursor        OUT t_tratamiento_cursor,
         p_resultado     OUT NUMBER,
@@ -308,7 +61,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
                 REQUIERE_ANESTESIA,
                 ACTIVO
             FROM ODO_CATALOGOS_TRATAMIENTOS
-            WHERE CATALOGO_ID = p_catalogo_id;
+            WHERE CATALOGO_ID = p_catalogo_id
+              AND EMPRESA_ID = p_empresa_id;
 
         p_resultado := 1;
         p_mensaje := 'Item obtenido exitosamente';
@@ -322,6 +76,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE search_catalogo(
+        p_empresa_id    IN  ODO_CATALOGOS_TRATAMIENTOS.EMPRESA_ID%TYPE,
         p_termino       IN  VARCHAR2,
         p_cursor        OUT t_tratamiento_cursor,
         p_resultado     OUT NUMBER,
@@ -343,7 +98,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
                 REQUIERE_ANESTESIA,
                 ACTIVO
             FROM ODO_CATALOGOS_TRATAMIENTOS
-            WHERE (UPPER(NOMBRE) LIKE v_termino
+            WHERE EMPRESA_ID = p_empresa_id
+              AND (UPPER(NOMBRE) LIKE v_termino
                    OR UPPER(CODIGO) LIKE v_termino
                    OR UPPER(DESCRIPCION) LIKE v_termino)
               AND ACTIVO = 'S'
@@ -361,6 +117,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE insert_catalogo(
+        p_empresa_id            IN  ODO_CATALOGOS_TRATAMIENTOS.EMPRESA_ID%TYPE,
         p_codigo                IN  ODO_CATALOGOS_TRATAMIENTOS.CODIGO%TYPE,
         p_nombre                IN  ODO_CATALOGOS_TRATAMIENTOS.NOMBRE%TYPE,
         p_descripcion           IN  ODO_CATALOGOS_TRATAMIENTOS.DESCRIPCION%TYPE DEFAULT NULL,
@@ -373,19 +130,40 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
         p_mensaje               OUT VARCHAR2
     ) IS
         v_codigo_existe NUMBER;
+        v_codigo        ODO_CATALOGOS_TRATAMIENTOS.CODIGO%TYPE;
+        v_prefix        VARCHAR2(10);
+        v_count         NUMBER;
     BEGIN
-        -- Verificar codigo unico
+        -- Generación automática de código si es nulo o 'AUTO'
+        IF p_codigo IS NULL OR TRIM(p_codigo) = '' OR p_codigo = 'AUTO' THEN
+            v_prefix := UPPER(SUBSTR(p_categoria, 1, 4));
+            
+            -- Buscar el número más alto para este prefijo y SUMAR 1 (FILTRADO POR EMPRESA)
+            SELECT NVL(MAX(TO_NUMBER(REGEXP_SUBSTR(CODIGO, '[0-9]+$'))), 0) + 1 
+            INTO v_count
+            FROM ODO_CATALOGOS_TRATAMIENTOS
+            WHERE EMPRESA_ID = p_empresa_id
+              AND CODIGO LIKE v_prefix || '-%';
+            
+            v_codigo := v_prefix || '-' || LPAD(v_count, 3, '0');
+        ELSE
+            v_codigo := UPPER(TRIM(p_codigo));
+        END IF;
+
+        -- Verificar codigo unico final (POR EMPRESA)
         SELECT COUNT(*) INTO v_codigo_existe
         FROM ODO_CATALOGOS_TRATAMIENTOS
-        WHERE UPPER(CODIGO) = UPPER(p_codigo);
+        WHERE EMPRESA_ID = p_empresa_id
+          AND UPPER(CODIGO) = UPPER(v_codigo);
 
-        IF v_codigo_existe > 0 THEN
+        IF v_codigo_existe > 0 AND (p_codigo IS NOT NULL AND p_codigo <> 'AUTO') THEN
             p_resultado := 0;
-            p_mensaje := 'El codigo ya existe en el catalogo';
+            p_mensaje := 'El codigo ' || v_codigo || ' ya existe en el catalogo';
             RETURN;
         END IF;
 
         INSERT INTO ODO_CATALOGOS_TRATAMIENTOS (
+            EMPRESA_ID,
             CODIGO,
             NOMBRE,
             DESCRIPCION,
@@ -395,7 +173,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             REQUIERE_ANESTESIA,
             ACTIVO
         ) VALUES (
-            p_codigo,
+            p_empresa_id,
+            v_codigo,
             p_nombre,
             p_descripcion,
             p_categoria,
@@ -408,7 +187,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
         COMMIT;
 
         p_resultado := 1;
-        p_mensaje := 'Tratamiento agregado al catalogo con ID: ' || p_catalogo_id;
+        p_mensaje := 'Tratamiento agregado con codigo: ' || v_codigo;
 
     EXCEPTION
         WHEN OTHERS THEN
@@ -420,6 +199,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE update_catalogo(
+        p_empresa_id            IN  ODO_CATALOGOS_TRATAMIENTOS.EMPRESA_ID%TYPE,
         p_catalogo_id           IN  ODO_CATALOGOS_TRATAMIENTOS.CATALOGO_ID%TYPE,
         p_codigo                IN  ODO_CATALOGOS_TRATAMIENTOS.CODIGO%TYPE DEFAULT NULL,
         p_nombre                IN  ODO_CATALOGOS_TRATAMIENTOS.NOMBRE%TYPE DEFAULT NULL,
@@ -442,7 +222,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             DURACION_ESTIMADA = NVL(p_duracion_estimada, DURACION_ESTIMADA),
             REQUIERE_ANESTESIA = NVL(p_requiere_anestesia, REQUIERE_ANESTESIA),
             ACTIVO = NVL(p_activo, ACTIVO)
-        WHERE CATALOGO_ID = p_catalogo_id;
+        WHERE CATALOGO_ID = p_catalogo_id
+          AND EMPRESA_ID = p_empresa_id;
 
         IF SQL%ROWCOUNT = 0 THEN
             p_resultado := 0;
@@ -467,6 +248,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ========================================================================
 
     PROCEDURE get_tratamiento_paciente(
+        p_empresa_id              IN ODO_TRATAMIENTOS_PACIENTE.EMPRESA_ID%TYPE,
         p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
         p_cursor                  OUT t_tratamiento_cursor,
         p_resultado               OUT NUMBER,
@@ -500,7 +282,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             JOIN ODO_PACIENTES p ON tp.PACIENTE_ID = p.PACIENTE_ID
             JOIN ODO_CATALOGOS_TRATAMIENTOS ct ON tp.CATALOGO_ID = ct.CATALOGO_ID
             LEFT JOIN ODO_USUARIOS u ON tp.DOCTOR_ID = u.USUARIO_ID
-            WHERE tp.TRATAMIENTO_PACIENTE_ID = p_tratamiento_paciente_id;
+            WHERE tp.TRATAMIENTO_PACIENTE_ID = p_tratamiento_paciente_id
+              AND tp.EMPRESA_ID = p_empresa_id;
 
         p_resultado := 1;
         p_mensaje := 'Tratamiento obtenido exitosamente';
@@ -514,6 +297,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_tratamientos_by_paciente(
+        p_empresa_id    IN  ODO_TRATAMIENTOS_PACIENTE.EMPRESA_ID%TYPE,
         p_paciente_id   IN  ODO_TRATAMIENTOS_PACIENTE.PACIENTE_ID%TYPE,
         p_estado        IN  ODO_TRATAMIENTOS_PACIENTE.ESTADO%TYPE DEFAULT NULL,
         p_cursor        OUT t_tratamiento_cursor,
@@ -545,7 +329,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             FROM ODO_TRATAMIENTOS_PACIENTE tp
             JOIN ODO_CATALOGOS_TRATAMIENTOS ct ON tp.CATALOGO_ID = ct.CATALOGO_ID
             LEFT JOIN ODO_USUARIOS u ON tp.DOCTOR_ID = u.USUARIO_ID
-            WHERE tp.PACIENTE_ID = p_paciente_id
+            WHERE tp.EMPRESA_ID = p_empresa_id
+              AND tp.PACIENTE_ID = p_paciente_id
               AND (p_estado IS NULL OR tp.ESTADO = p_estado)
             ORDER BY
                 CASE tp.ESTADO
@@ -568,6 +353,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE get_tratamientos_by_doctor(
+        p_empresa_id    IN  ODO_TRATAMIENTOS_PACIENTE.EMPRESA_ID%TYPE,
         p_doctor_id     IN  ODO_TRATAMIENTOS_PACIENTE.DOCTOR_ID%TYPE,
         p_estado        IN  ODO_TRATAMIENTOS_PACIENTE.ESTADO%TYPE DEFAULT NULL,
         p_cursor        OUT t_tratamiento_cursor,
@@ -591,7 +377,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             FROM ODO_TRATAMIENTOS_PACIENTE tp
             JOIN ODO_PACIENTES p ON tp.PACIENTE_ID = p.PACIENTE_ID
             JOIN ODO_CATALOGOS_TRATAMIENTOS ct ON tp.CATALOGO_ID = ct.CATALOGO_ID
-            WHERE tp.DOCTOR_ID = p_doctor_id
+            WHERE tp.EMPRESA_ID = p_empresa_id
+              AND tp.DOCTOR_ID = p_doctor_id
               AND (p_estado IS NULL OR tp.ESTADO = p_estado)
             ORDER BY tp.FECHA_CREACION DESC;
 
@@ -607,6 +394,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE insert_tratamiento_paciente(
+        p_empresa_id        IN  ODO_TRATAMIENTOS_PACIENTE.EMPRESA_ID%TYPE,
         p_paciente_id       IN  ODO_TRATAMIENTOS_PACIENTE.PACIENTE_ID%TYPE,
         p_historia_id       IN  ODO_TRATAMIENTOS_PACIENTE.HISTORIA_ID%TYPE DEFAULT NULL,
         p_catalogo_id       IN  ODO_TRATAMIENTOS_PACIENTE.CATALOGO_ID%TYPE,
@@ -624,10 +412,11 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
         v_precio_acordado ODO_TRATAMIENTOS_PACIENTE.PRECIO_ACORDADO%TYPE;
         v_precio_final ODO_TRATAMIENTOS_PACIENTE.PRECIO_FINAL%TYPE;
     BEGIN
-        -- Obtener precio base del catalogo
+        -- Obtener precio base del catalogo (FILTRADO POR EMPRESA por seguridad)
         SELECT PRECIO_BASE INTO v_precio_base
         FROM ODO_CATALOGOS_TRATAMIENTOS
-        WHERE CATALOGO_ID = p_catalogo_id;
+        WHERE CATALOGO_ID = p_catalogo_id
+          AND EMPRESA_ID = p_empresa_id;
 
         -- Usar precio acordado o precio base
         v_precio_acordado := NVL(p_precio_acordado, v_precio_base);
@@ -637,6 +426,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
 
         -- Insertar tratamiento
         INSERT INTO ODO_TRATAMIENTOS_PACIENTE (
+            EMPRESA_ID,
             PACIENTE_ID,
             HISTORIA_ID,
             CATALOGO_ID,
@@ -652,6 +442,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             FECHA_CREACION,
             CREADO_POR
         ) VALUES (
+            p_empresa_id,
             p_paciente_id,
             p_historia_id,
             p_catalogo_id,
@@ -686,6 +477,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     PROCEDURE update_tratamiento_paciente(
+        p_empresa_id              IN ODO_TRATAMIENTOS_PACIENTE.EMPRESA_ID%TYPE,
         p_tratamiento_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.TRATAMIENTO_PACIENTE_ID%TYPE,
         p_numero_diente     IN  ODO_TRATAMIENTOS_PACIENTE.NUMERO_DIENTE%TYPE DEFAULT NULL,
         p_fecha_propuesta   IN  ODO_TRATAMIENTOS_PACIENTE.FECHA_PROPUESTA%TYPE DEFAULT NULL,
@@ -703,7 +495,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
         SELECT ESTADO, PRECIO_ACORDADO, DESCUENTO
         INTO v_estado_actual, v_precio_acordado, v_descuento
         FROM ODO_TRATAMIENTOS_PACIENTE
-        WHERE TRATAMIENTO_PACIENTE_ID = p_tratamiento_paciente_id;
+        WHERE TRATAMIENTO_PACIENTE_ID = p_tratamiento_paciente_id
+          AND EMPRESA_ID = p_empresa_id;
 
         -- No permitir modificar si esta completado o cancelado
         IF v_estado_actual IN (c_estado_completado, c_estado_cancelado) THEN
@@ -723,7 +516,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
             DESCUENTO = v_descuento,
             PRECIO_FINAL = calcular_precio_final(v_precio_acordado, v_descuento),
             SESIONES_TOTALES = NVL(p_sesiones_totales, SESIONES_TOTALES)
-        WHERE TRATAMIENTO_PACIENTE_ID = p_tratamiento_paciente_id;
+        WHERE TRATAMIENTO_PACIENTE_ID = p_tratamiento_paciente_id
+          AND EMPRESA_ID = p_empresa_id;
 
         COMMIT;
 
@@ -1084,6 +878,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
     -- ------------------------------------------------------------------------
 
     FUNCTION count_tratamientos_pendientes(
+        p_empresa_id  IN ODO_TRATAMIENTOS_PACIENTE.EMPRESA_ID%TYPE,
         p_paciente_id IN ODO_TRATAMIENTOS_PACIENTE.PACIENTE_ID%TYPE
     ) RETURN NUMBER IS
         v_count NUMBER;
@@ -1091,6 +886,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TRATAMIENTOS AS
         SELECT COUNT(*) INTO v_count
         FROM ODO_TRATAMIENTOS_PACIENTE
         WHERE PACIENTE_ID = p_paciente_id
+          AND EMPRESA_ID = p_empresa_id
           AND ESTADO IN (c_estado_pendiente, c_estado_en_progreso);
 
         RETURN v_count;

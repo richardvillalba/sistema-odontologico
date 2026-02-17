@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { empresaService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Componente de notificación personalizado
 const Toast = ({ message, type, onClose }) => {
@@ -20,6 +21,8 @@ const Toast = ({ message, type, onClose }) => {
 
 const DatosClinica = () => {
     const navigate = useNavigate();
+    const { empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
@@ -36,13 +39,13 @@ const DatosClinica = () => {
     });
 
     useEffect(() => {
-        cargarDatos();
-    }, []);
+        if (empresaId) cargarDatos();
+    }, [empresaId]);
 
     const cargarDatos = async () => {
         try {
             setLoading(true);
-            const response = await empresaService.getById(1); // Por ahora siempre empresa 1
+            const response = await empresaService.getById(empresaId);
             if (response.data.items && response.data.items.length > 0) {
                 const datos = response.data.items[0];
                 setEmpresa({
@@ -82,7 +85,7 @@ const DatosClinica = () => {
         e.preventDefault();
         try {
             setSaving(true);
-            await empresaService.update(1, empresa);
+            await empresaService.update(empresaId, empresa);
             showToast('Datos actualizados correctamente', 'success');
         } catch (error) {
             console.error('Error guardando:', error);

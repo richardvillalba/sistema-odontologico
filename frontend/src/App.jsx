@@ -12,13 +12,19 @@ import PacienteDetalle from './pages/PacienteDetalle';
 import OdontogramaPaciente from './pages/OdontogramaPaciente';
 import Citas from './pages/Citas';
 import AgendaDoctor from './pages/AgendaDoctor';
+import Historias from './pages/Historias';
 
 import Configuraciones from './pages/Configuraciones';
 import Compras from './pages/Compras';
 import Proveedores from './pages/Proveedores';
+import Articulos from './pages/Articulos';
+import Inventario from './pages/Inventario';
+import RegistroCompra from './pages/RegistroCompra';
 import Timbrados from './pages/Timbrados';
 import DatosClinica from './pages/configuraciones/DatosClinica';
 import ConfiguracionCajas from './pages/configuraciones/ConfiguracionCajas';
+import GestionEmpresas from './pages/configuraciones/GestionEmpresas';
+import GestionSucursales from './pages/configuraciones/GestionSucursales';
 import GestionUsuarios from './pages/GestionUsuarios';
 import GestionRoles from './pages/GestionRoles';
 import Facturas from './pages/Facturas';
@@ -28,12 +34,14 @@ import FacturaDetalle from './pages/FacturaDetalle';
 import RegistrarPago from './pages/RegistrarPago';
 import Caja from './pages/Caja';
 import CajaDetalle from './pages/CajaDetalle';
+import Tratamientos from './pages/Tratamientos';
 
 import { PointOfSaleProvider } from './context/PointOfSaleContext';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import SinAcceso from './pages/SinAcceso';
+import SeleccionContexto from './pages/SeleccionContexto';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -59,6 +67,13 @@ function App() {
                         {/* Ruta de error de acceso */}
                         <Route path="/sin-acceso" element={<SinAcceso />} />
 
+                        {/* Seleccion de empresa/sucursal */}
+                        <Route path="/seleccionar-contexto" element={
+                            <ProtectedRoute skipContextCheck>
+                                <SeleccionContexto />
+                            </ProtectedRoute>
+                        } />
+
                         {/* Rutas protegidas */}
                         <Route path="/*" element={
                             <ProtectedRoute>
@@ -75,10 +90,14 @@ function App() {
                                             {/* Citas */}
                                             <Route path="/citas" element={<Citas />} />
                                             <Route path="/agenda" element={<AgendaDoctor />} />
+                                            <Route path="/historias" element={<Historias />} />
 
                                             {/* Compras */}
                                             <Route path="/compras" element={<Compras />} />
                                             <Route path="/compras/proveedores" element={<Proveedores />} />
+                                            <Route path="/compras/articulos" element={<Articulos />} />
+                                            <Route path="/compras/inventario" element={<Inventario />} />
+                                            <Route path="/compras/facturas/nueva" element={<RegistroCompra />} />
 
                                             {/* Facturación */}
                                             <Route path="/facturas" element={<Facturas />} />
@@ -94,13 +113,15 @@ function App() {
                                             <Route path="/configuraciones/usuarios" element={<GestionUsuarios />} />
                                             <Route path="/configuraciones/roles" element={<GestionRoles />} />
                                             <Route path="/configuraciones/cajas" element={<ConfiguracionCajas />} />
+                                            <Route path="/configuraciones/empresas" element={<GestionEmpresas />} />
+                                            <Route path="/configuraciones/sucursales" element={<GestionSucursales />} />
 
                                             {/* Caja */}
                                             <Route path="/caja" element={<Caja />} />
                                             <Route path="/caja/:id" element={<CajaDetalle />} />
 
-                                            {/* Tratamientos (placeholder) */}
-                                            <Route path="/tratamientos" element={<div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200 text-center font-bold">Catálogo de Tratamientos - Módulo en Desarrollo</div>} />
+                                            {/* Tratamientos (dentro de Configuraciones) */}
+                                            <Route path="/configuraciones/tratamientos" element={<Tratamientos />} />
 
                                             {/* Redirección por defecto */}
                                             <Route path="*" element={<Navigate to="/" replace />} />

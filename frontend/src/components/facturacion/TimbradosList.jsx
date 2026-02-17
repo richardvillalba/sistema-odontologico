@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { billingService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import AsignacionUsuarioTimbrado from './AsignacionUsuarioTimbrado';
 import TimbradoForm from './TimbradoForm';
 
 const TimbradosList = () => {
+    const { empresaActiva, usuario } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
     const [timbrados, setTimbrados] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTimbrado, setSelectedTimbrado] = useState(null);
     const [editingTimbrado, setEditingTimbrado] = useState(null);
     const [error, setError] = useState(null);
-    const empresaId = 1;
 
     useEffect(() => {
         loadTimbrados();
@@ -34,7 +36,7 @@ const TimbradosList = () => {
         setError(null);
 
         try {
-            const response = await billingService.toggleTimbradoStatus(timbrado.timbrado_id, nuevoEstado);
+            const response = await billingService.toggleTimbradoStatus(timbrado.timbrado_id, nuevoEstado, usuario?.usuario_id);
             if (response.data && response.data.resultado === 1) {
                 loadTimbrados(); // Recargar lista
             } else {

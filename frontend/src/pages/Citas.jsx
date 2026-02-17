@@ -6,8 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Citas = () => {
     const navigate = useNavigate();
-    const { usuario } = useAuth();
-    const empresaId = usuario?.empresa_id || 1;
+    const { usuario, empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
     const queryClient = useQueryClient();
     const today = new Date();
     const [filterDate, setFilterDate] = useState(today.toISOString().split('T')[0]);
@@ -168,7 +168,7 @@ const Citas = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Agenda de Citas</h1>
+                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Agenda de Citas</h1>
                     <p className="text-slate-500 font-medium">Gestiona los turnos y el flujo de pacientes</p>
                 </div>
                 <button
@@ -345,58 +345,62 @@ const Citas = () => {
             {/* Vista Semanal */}
             {viewMode === 'week' && (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="grid grid-cols-8 border-b border-slate-200">
-                        <div className="p-3 bg-slate-50"></div>
-                        {weekDays.map((date, idx) => {
-                            const isToday = date.toDateString() === today.toDateString();
-                            const isSelected = date.toISOString().split('T')[0] === filterDate;
-                            return (
-                                <div
-                                    key={idx}
-                                    className={`p-3 text-center cursor-pointer transition-all ${isToday ? 'bg-primary/10' : 'bg-slate-50'} ${isSelected ? 'ring-2 ring-primary ring-inset' : ''}`}
-                                    onClick={() => setFilterDate(date.toISOString().split('T')[0])}
-                                >
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase">{dayNames[idx]}</p>
-                                    <p className={`text-lg font-black ${isToday ? 'text-primary' : 'text-slate-700'}`}>{date.getDate()}</p>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div className="max-h-[500px] overflow-y-auto">
-                        {hours.map((hour) => (
-                            <div key={hour} className="grid grid-cols-8 border-b border-slate-100 min-h-[60px]">
-                                <div className="p-2 text-xs font-bold text-slate-400 bg-slate-50/50 flex items-start justify-end pr-3">
-                                    {hour}
-                                </div>
+                    <div className="overflow-x-auto">
+                        <div className="min-w-[700px]">
+                            <div className="grid grid-cols-8 border-b border-slate-200">
+                                <div className="p-3 bg-slate-50"></div>
                                 {weekDays.map((date, idx) => {
-                                    const dateStr = date.toISOString().split('T')[0];
-                                    const citasHora = citas.filter(c => {
-                                        const citaFecha = c.fecha || c.FECHA || '';
-                                        const citaHora = c.hora_inicio || c.HORA_INICIO || '';
-                                        return citaFecha === dateStr && citaHora.startsWith(hour.split(':')[0]);
-                                    });
+                                    const isToday = date.toDateString() === today.toDateString();
+                                    const isSelected = date.toISOString().split('T')[0] === filterDate;
                                     return (
-                                        <div key={idx} className="p-1 border-l border-slate-100 relative">
-                                            {citasHora.map((cita) => {
-                                                const citaId = cita.cita_id || cita.CITA_ID;
-                                                const estado = cita.estado || cita.ESTADO;
-                                                const pacienteNombre = cita.paciente_nombre || cita.PACIENTE_NOMBRE || '';
-                                                return (
-                                                    <div
-                                                        key={citaId}
-                                                        className={`text-[10px] p-1 rounded mb-1 cursor-pointer truncate ${getStatusStyle(estado)}`}
-                                                        onClick={() => setCitaDetalle(cita)}
-                                                        title={pacienteNombre}
-                                                    >
-                                                        {pacienteNombre.split(' ')[0]}
-                                                    </div>
-                                                );
-                                            })}
+                                        <div
+                                            key={idx}
+                                            className={`p-3 text-center cursor-pointer transition-all ${isToday ? 'bg-primary/10' : 'bg-slate-50'} ${isSelected ? 'ring-2 ring-primary ring-inset' : ''}`}
+                                            onClick={() => setFilterDate(date.toISOString().split('T')[0])}
+                                        >
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">{dayNames[idx]}</p>
+                                            <p className={`text-lg font-black ${isToday ? 'text-primary' : 'text-slate-700'}`}>{date.getDate()}</p>
                                         </div>
                                     );
                                 })}
                             </div>
-                        ))}
+                            <div className="max-h-[500px] overflow-y-auto">
+                                {hours.map((hour) => (
+                                    <div key={hour} className="grid grid-cols-8 border-b border-slate-100 min-h-[60px]">
+                                        <div className="p-2 text-xs font-bold text-slate-400 bg-slate-50/50 flex items-start justify-end pr-3">
+                                            {hour}
+                                        </div>
+                                        {weekDays.map((date, idx) => {
+                                            const dateStr = date.toISOString().split('T')[0];
+                                            const citasHora = citas.filter(c => {
+                                                const citaFecha = c.fecha || c.FECHA || '';
+                                                const citaHora = c.hora_inicio || c.HORA_INICIO || '';
+                                                return citaFecha === dateStr && citaHora.startsWith(hour.split(':')[0]);
+                                            });
+                                            return (
+                                                <div key={idx} className="p-1 border-l border-slate-100 relative">
+                                                    {citasHora.map((cita) => {
+                                                        const citaId = cita.cita_id || cita.CITA_ID;
+                                                        const estado = cita.estado || cita.ESTADO;
+                                                        const pacienteNombre = cita.paciente_nombre || cita.PACIENTE_NOMBRE || '';
+                                                        return (
+                                                            <div
+                                                                key={citaId}
+                                                                className={`text-[10px] p-1 rounded mb-1 cursor-pointer truncate ${getStatusStyle(estado)}`}
+                                                                onClick={() => setCitaDetalle(cita)}
+                                                                title={pacienteNombre}
+                                                            >
+                                                                {pacienteNombre.split(' ')[0]}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -546,7 +550,7 @@ const Citas = () => {
                             </div>
 
                             {/* Fecha, Hora y Duración */}
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 mb-1 block">Fecha *</label>
                                     <input

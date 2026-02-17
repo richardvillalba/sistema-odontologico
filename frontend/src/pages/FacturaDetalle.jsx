@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { billingService, empresaService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import FacturaPrint from '../components/facturacion/FacturaPrint';
 
 const FacturaDetalle = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const { usuario } = useAuth();
     const [actionError, setActionError] = useState(null);
 
     // Queries
@@ -57,7 +59,7 @@ const FacturaDetalle = () => {
 
     // Mutations
     const anularMutation = useMutation({
-        mutationFn: (motivo) => billingService.anularFactura(id, motivo),
+        mutationFn: (motivo) => billingService.anularFactura(id, motivo, usuario?.usuario_id),
         onSuccess: () => {
             queryClient.invalidateQueries(['factura', id]);
             setAnularModal(false);
@@ -89,7 +91,7 @@ const FacturaDetalle = () => {
     });
 
     const anularPagoMutation = useMutation({
-        mutationFn: ({ pagoId, motivo }) => billingService.anularPago(pagoId, motivo),
+        mutationFn: ({ pagoId, motivo }) => billingService.anularPago(pagoId, motivo, usuario?.usuario_id),
         onSuccess: () => {
             queryClient.invalidateQueries(['factura', id]);
             queryClient.invalidateQueries(['factura-pagos', id]);
@@ -146,9 +148,9 @@ const FacturaDetalle = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20 px-1 sm:px-0">
             {/* Header / Actions Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4 sm:px-0">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/facturas')}
@@ -156,20 +158,20 @@ const FacturaDetalle = () => {
                     >
                         ⬅️
                     </button>
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                    <div className="min-w-0">
+                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">
                             Factura {factura.numero_factura_completo}
                         </h1>
-                        <p className="text-slate-500 font-medium">Emitida el {new Date(factura.fecha_emision).toLocaleDateString()}</p>
+                        <p className="text-slate-500 font-medium text-sm">Emitida el {new Date(factura.fecha_emision).toLocaleDateString()}</p>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                     {factura.estado === 'BORRADOR' && (
                         <button
                             onClick={() => confirmarMutation.mutate()}
                             disabled={confirmarMutation.isPending}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-indigo-200 transition-all"
+                            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-indigo-200 transition-all text-sm"
                         >
                             {confirmarMutation.isPending ? 'Confirmando...' : 'Confirmar Factura'}
                         </button>
@@ -178,7 +180,7 @@ const FacturaDetalle = () => {
                     {(factura.estado === 'PENDIENTE' || factura.estado === 'PARCIAL') && (
                         <button
                             onClick={() => navigate(`/facturas/${id}/registrar-pago`)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-emerald-200 transition-all"
+                            className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-emerald-200 transition-all text-sm"
                         >
                             Registrar Pago
                         </button>
@@ -187,7 +189,7 @@ const FacturaDetalle = () => {
                     {factura.estado !== 'ANULADA' && factura.estado !== 'PAGADA' && (
                         <button
                             onClick={() => setAnularModal(true)}
-                            className="bg-white border-2 border-slate-100 text-rose-600 hover:bg-rose-50 px-6 py-3 rounded-2xl font-black transition-all"
+                            className="flex-1 sm:flex-none bg-white border-2 border-slate-100 text-rose-600 hover:bg-rose-50 px-6 py-3 rounded-2xl font-black transition-all text-sm"
                         >
                             Anular
                         </button>
@@ -195,73 +197,101 @@ const FacturaDetalle = () => {
 
                     <button
                         onClick={() => window.print()}
-                        className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 transition-all flex items-center gap-2"
+                        className="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 transition-all flex items-center justify-center gap-2 text-sm"
                     >
-                        <span>🖨️</span> Imprimir
+                        <span>🖨️</span> <span className="hidden xs:inline">Imprimir</span>
                     </button>
                 </div>
             </div>
 
             {actionError && (
-                <div className="bg-rose-50 border-2 border-rose-100 p-4 rounded-2xl flex items-center gap-4 animate-shake">
+                <div className="bg-rose-50 border-2 border-rose-100 p-4 rounded-2xl flex items-center gap-4 animate-shake mx-4 sm:mx-0">
                     <span className="text-2xl">⚠️</span>
                     <p className="text-rose-700 font-bold">{actionError}</p>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* Info Principal */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* Items Table */}
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <h2 className="font-black text-slate-800 uppercase tracking-widest text-sm">Detalle de Conceptos</h2>
-                            <span className="text-xs font-bold text-slate-400">{detalles.length} ítems</span>
+                <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+                    {/* Items Table / Cards */}
+                    <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-2 sm:mx-0">
+                        <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h2 className="font-black text-slate-800 uppercase tracking-widest text-xs sm:text-sm">Detalle de Conceptos</h2>
+                            <span className="text-[10px] sm:text-xs font-bold text-slate-400">{detalles.length} ítems</span>
                         </div>
-                        <table className="w-full text-sm text-left">
-                            <thead className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
-                                <tr>
-                                    <th className="px-8 py-4">Descripción</th>
-                                    <th className="px-8 py-4 text-center">Cant.</th>
-                                    <th className="px-8 py-4 text-right">Precio Unit.</th>
-                                    <th className="px-8 py-4 text-right">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {detalles.map((det, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-8 py-5">
-                                            <p className="font-bold text-slate-800">{det.descripcion}</p>
-                                            {det.tratamiento_paciente_id && (
-                                                <span className="text-[9px] font-black text-indigo-400 uppercase">Tratamiento #{det.tratamiento_paciente_id}</span>
-                                            )}
-                                        </td>
-                                        <td className="px-8 py-5 text-center font-bold text-slate-600">{det.cantidad}</td>
-                                        <td className="px-8 py-5 text-right font-bold text-slate-600">
-                                            {new Intl.NumberFormat('es-PY').format(det.precio_unitario)}
-                                        </td>
-                                        <td className="px-8 py-5 text-right font-black text-slate-900">
-                                            {new Intl.NumberFormat('es-PY').format(det.subtotal)}
-                                        </td>
+
+                        {/* Desktop Table */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                                    <tr>
+                                        <th className="px-8 py-4">Descripción</th>
+                                        <th className="px-8 py-4 text-center">Cant.</th>
+                                        <th className="px-8 py-4 text-right">Precio Unit.</th>
+                                        <th className="px-8 py-4 text-right">Subtotal</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {detalles.map((det, idx) => (
+                                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-8 py-5">
+                                                <p className="font-bold text-slate-800">{det.descripcion}</p>
+                                                {det.tratamiento_paciente_id && (
+                                                    <span className="text-[9px] font-black text-indigo-400 uppercase">Tratamiento #{det.tratamiento_paciente_id}</span>
+                                                )}
+                                            </td>
+                                            <td className="px-8 py-5 text-center font-bold text-slate-600">{det.cantidad}</td>
+                                            <td className="px-8 py-5 text-right font-bold text-slate-600">
+                                                {new Intl.NumberFormat('es-PY').format(det.precio_unitario)}
+                                            </td>
+                                            <td className="px-8 py-5 text-right font-black text-slate-900">
+                                                {new Intl.NumberFormat('es-PY').format(det.subtotal)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Cards View */}
+                        <div className="md:hidden divide-y divide-slate-50">
+                            {detalles.map((det, idx) => (
+                                <div key={idx} className="px-6 py-5 space-y-3">
+                                    <div>
+                                        <p className="font-bold text-slate-800 leading-tight">{det.descripcion}</p>
+                                        {det.tratamiento_paciente_id && (
+                                            <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mt-1 block">Tratamiento #{det.tratamiento_paciente_id}</span>
+                                        )}
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <div className="flex flex-col">
+                                            <span className="text-slate-400 font-black uppercase text-[8px] tracking-widest">Cant x Precio</span>
+                                            <span className="font-bold text-slate-600">{det.cantidad} x {new Intl.NumberFormat('es-PY').format(det.precio_unitario)}</span>
+                                        </div>
+                                        <div className="text-right flex flex-col">
+                                            <span className="text-slate-400 font-black uppercase text-[8px] tracking-widest">Subtotal</span>
+                                            <span className="font-black text-slate-900">{new Intl.NumberFormat('es-PY').format(det.subtotal)} <span className="text-[10px] text-slate-400">Gs</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
                         {/* Totals Section */}
-                        <div className="bg-slate-50 p-8 flex flex-col items-end space-y-3">
-                            <div className="flex justify-between w-full max-w-xs text-slate-500 font-bold">
+                        <div className="bg-slate-50 p-6 sm:p-8 flex flex-col items-end space-y-3">
+                            <div className="flex justify-between w-full max-w-[280px] sm:max-w-xs text-xs sm:text-sm text-slate-500 font-bold">
                                 <span>Subtotal:</span>
                                 <span>{new Intl.NumberFormat('es-PY').format(factura.subtotal)} Gs</span>
                             </div>
-                            <div className="flex justify-between w-full max-w-xs text-rose-500 font-bold border-b border-slate-200 pb-3">
+                            <div className="flex justify-between w-full max-w-[280px] sm:max-w-xs text-xs sm:text-sm text-rose-500 font-bold border-b border-slate-200 pb-3">
                                 <span>Descuento:</span>
                                 <span>- {new Intl.NumberFormat('es-PY').format(factura.descuento)} Gs</span>
                             </div>
-                            <div className="flex justify-between w-full max-w-xs pt-2">
-                                <span className="text-xl font-black text-slate-900 uppercase tracking-tighter">Total Facturado:</span>
-                                <span className="text-3xl font-black text-indigo-600">
-                                    {new Intl.NumberFormat('es-PY').format(factura.total)} <span className="text-sm">Gs</span>
+                            <div className="flex justify-between items-center w-full max-w-[280px] sm:max-w-xs pt-2">
+                                <span className="text-xs sm:text-base font-black text-slate-900 uppercase tracking-widest mr-2">Total</span>
+                                <span className="text-2xl sm:text-3xl font-black text-indigo-600 flex items-baseline gap-1">
+                                    {new Intl.NumberFormat('es-PY').format(factura.total)} <span className="text-[10px] sm:text-sm uppercase tracking-tight">Gs</span>
                                 </span>
                             </div>
                         </div>
@@ -269,18 +299,18 @@ const FacturaDetalle = () => {
 
                     {/* Observaciones */}
                     {factura.observaciones && (
-                        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm mx-2 sm:mx-0">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Observaciones / Notas</h3>
-                            <p className="text-slate-600 font-medium leading-relaxed italic">"{factura.observaciones}"</p>
+                            <p className="text-slate-600 font-medium leading-relaxed italic text-sm sm:text-base">"{factura.observaciones}"</p>
                         </div>
                     )}
 
                     {/* Cuotas - Solo si es CREDITO y tiene cuotas */}
                     {cuotas.length > 0 && (
-                        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
-                                <h2 className="font-black text-amber-800 uppercase tracking-widest text-sm">Plan de Cuotas</h2>
-                                <span className="text-xs font-bold text-amber-600">{cuotas.length} cuotas</span>
+                        <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-2 sm:mx-0">
+                            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
+                                <h2 className="font-black text-amber-800 uppercase tracking-widest text-xs sm:text-sm">Plan de Cuotas</h2>
+                                <span className="text-[10px] sm:text-xs font-bold text-amber-600">{cuotas.length} cuotas</span>
                             </div>
                             <div className="divide-y divide-slate-100">
                                 {cuotas.map((cuota) => {
@@ -291,30 +321,30 @@ const FacturaDetalle = () => {
                                     return (
                                         <div
                                             key={cuota.cuota_id}
-                                            className={`px-8 py-5 flex items-center justify-between gap-4 ${isPagada ? 'bg-green-50/50' : isVencida ? 'bg-rose-50/50' : ''}`}
+                                            className={`px-6 sm:px-8 py-5 flex items-center justify-between gap-3 sm:gap-4 ${isPagada ? 'bg-green-50/25' : isVencida ? 'bg-rose-50/25' : ''}`}
                                         >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black ${isPagada ? 'bg-green-100 text-green-600' : isVencida ? 'bg-rose-100 text-rose-600' : isParcial ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
+                                            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-xs sm:text-sm font-black shrink-0 ${isPagada ? 'bg-green-100 text-green-600' : isVencida ? 'bg-rose-100 text-rose-600' : isParcial ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
                                                     {isPagada ? '✓' : cuota.numero_cuota}
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-800">
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-slate-800 text-sm sm:text-base truncate">
                                                         Cuota {cuota.numero_cuota}
-                                                        {isParcial && <span className="ml-2 text-xs text-blue-600">(Parcial)</span>}
+                                                        {isParcial && <span className="ml-2 text-[10px] text-blue-600">(Parcial)</span>}
                                                     </p>
-                                                    <p className={`text-xs font-bold ${isVencida ? 'text-rose-500' : 'text-slate-400'}`}>
+                                                    <p className={`text-[10px] sm:text-xs font-bold ${isVencida ? 'text-rose-500' : 'text-slate-400'}`}>
                                                         Vence: {new Date(cuota.fecha_vencimiento).toLocaleDateString()}
                                                         {isVencida && !isPagada && ' - VENCIDA'}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="text-right flex items-center gap-4">
-                                                <div>
-                                                    <p className={`font-black ${isPagada ? 'text-green-600 line-through' : 'text-slate-900'}`}>
-                                                        {new Intl.NumberFormat('es-PY').format(cuota.monto_cuota)} Gs
+                                            <div className="text-right flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 shrink-0">
+                                                <div className="text-right">
+                                                    <p className={`font-black text-sm sm:text-base ${isPagada ? 'text-green-600/50 line-through' : 'text-slate-900'}`}>
+                                                        {new Intl.NumberFormat('es-PY').format(cuota.monto_cuota)} <span className="text-[10px]">Gs</span>
                                                     </p>
                                                     {cuota.saldo_cuota > 0 && cuota.saldo_cuota < cuota.monto_cuota && (
-                                                        <p className="text-xs text-amber-600 font-bold">
+                                                        <p className="text-[10px] text-amber-600 font-bold">
                                                             Saldo: {new Intl.NumberFormat('es-PY').format(cuota.saldo_cuota)} Gs
                                                         </p>
                                                     )}
@@ -322,7 +352,7 @@ const FacturaDetalle = () => {
                                                 {!isPagada && factura.estado !== 'ANULADA' && (
                                                     <button
                                                         onClick={() => openPagoModal(cuota)}
-                                                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all"
+                                                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black rounded-lg sm:rounded-xl transition-all uppercase tracking-widest"
                                                     >
                                                         Pagar
                                                     </button>
@@ -337,39 +367,39 @@ const FacturaDetalle = () => {
 
                     {/* Pagos Registrados */}
                     {pagos.length > 0 && (
-                        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50">
-                                <h2 className="font-black text-emerald-800 uppercase tracking-widest text-sm">Pagos Registrados</h2>
-                                <span className="text-xs font-bold text-emerald-600">{pagos.length} pago{pagos.length > 1 ? 's' : ''}</span>
+                        <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-2 sm:mx-0">
+                            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50">
+                                <h2 className="font-black text-emerald-800 uppercase tracking-widest text-xs sm:text-sm">Pagos Registrados</h2>
+                                <span className="text-[10px] sm:text-xs font-bold text-emerald-600">{pagos.length} pago{pagos.length > 1 ? 's' : ''}</span>
                             </div>
                             <div className="divide-y divide-slate-100">
                                 {pagos.map((pago) => (
                                     <div
                                         key={pago.pago_id}
-                                        className="px-8 py-5 flex items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors"
+                                        className="px-6 sm:px-8 py-5 flex items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-black">
+                                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-black shrink-0">
                                                 💰
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-slate-800">
+                                            <div className="min-w-0">
+                                                <p className="font-bold text-slate-800 text-sm sm:text-base truncate">
                                                     {pago.metodo_pago}
-                                                    {pago.referencia && <span className="ml-2 text-xs text-slate-400">Ref: {pago.referencia}</span>}
+                                                    {pago.referencia && <span className="ml-2 text-[10px] text-slate-400 font-medium">#{pago.referencia}</span>}
                                                 </p>
-                                                <p className="text-xs font-bold text-slate-400">
-                                                    {new Date(pago.fecha_pago).toLocaleDateString()} - {new Date(pago.fecha_pago).toLocaleTimeString()}
+                                                <p className="text-[10px] sm:text-xs font-bold text-slate-400">
+                                                    {new Date(pago.fecha_pago).toLocaleDateString()}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right flex items-center gap-4">
-                                            <p className="font-black text-emerald-600 text-lg">
-                                                {new Intl.NumberFormat('es-PY').format(pago.monto)} Gs
+                                        <div className="text-right flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 shrink-0">
+                                            <p className="font-black text-emerald-600 text-base sm:text-lg">
+                                                {new Intl.NumberFormat('es-PY').format(pago.monto)} <span className="text-[10px]">Gs</span>
                                             </p>
                                             {factura.estado !== 'ANULADA' && (
                                                 <button
                                                     onClick={() => setAnularPagoModal({ open: true, pago })}
-                                                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-black rounded-xl transition-all"
+                                                    className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg transition-all"
                                                 >
                                                     Anular
                                                 </button>
@@ -383,64 +413,66 @@ const FacturaDetalle = () => {
                 </div>
 
                 {/* Sidebar Info */}
-                <div className="space-y-8 text-slate-900">
+                <div className="space-y-6 sm:space-y-8 px-2 sm:px-0">
                     {/* Status Card */}
-                    <div className={`p-8 rounded-[2rem] border-2 shadow-sm flex flex-col items-center text-center gap-4 ${getStatusStyle(factura.estado)}`}>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Estado de Factura</p>
-                        <div className="text-4xl">
+                    <div className={`p-6 sm:p-8 rounded-[2rem] border-2 shadow-sm flex items-center lg:flex-col text-left lg:text-center gap-4 ${getStatusStyle(factura.estado)}`}>
+                        <div className="text-4xl sm:text-5xl shrink-0">
                             {factura.estado === 'PAGADA' ? '✅' : factura.estado === 'ANULADA' ? '🚫' : '⏳'}
                         </div>
-                        <p className="text-2xl font-black tracking-tighter">{factura.estado}</p>
-                        {factura.saldo_pendiente > 0 && (
-                            <div className="mt-2 pt-4 border-t border-current/10 w-full text-rose-700">
-                                <p className="text-[10px] font-black uppercase tracking-widest mb-1">Saldo Pendiente</p>
-                                <p className="text-xl font-black">{new Intl.NumberFormat('es-PY').format(factura.saldo_pendiente)} Gs</p>
-                            </div>
-                        )}
+                        <div className="flex-1 lg:w-full">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 mb-1 lg:mb-2">Estado</p>
+                            <p className="text-xl sm:text-2xl font-black tracking-tighter leading-none">{factura.estado}</p>
+                            {factura.saldo_pendiente > 0 && (
+                                <div className="mt-3 pt-3 border-t border-current/10 w-full text-rose-700">
+                                    <p className="text-[9px] font-black uppercase tracking-widest mb-1">Saldo Pendiente</p>
+                                    <p className="text-lg font-black">{new Intl.NumberFormat('es-PY').format(factura.saldo_pendiente)} Gs</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Patient Card */}
-                    <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm space-y-6">
+                    <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm space-y-6">
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Información del Cliente</h3>
                         <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl font-black text-slate-400">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-xl sm:text-2xl font-black text-slate-400 shrink-0">
                                 {factura.nombre_cliente?.charAt(0)}
                             </div>
-                            <div>
-                                <p className="font-black text-slate-900 leading-tight">{factura.nombre_cliente}</p>
-                                <p className="text-xs text-slate-500 font-bold mt-1">
+                            <div className="min-w-0">
+                                <p className="font-black text-slate-900 leading-tight truncate">{factura.nombre_cliente}</p>
+                                <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-tighter">
                                     {factura.tipo_documento_cliente}: {factura.numero_documento_cliente}
                                 </p>
                             </div>
                         </div>
-                        <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
-                            <span className="text-xs font-bold text-slate-400 uppercase">Condición</span>
-                            <span className="bg-slate-100 px-3 py-1 rounded-lg text-[10px] font-black text-slate-700 uppercase">
+                        <div className="pt-4 border-t border-slate-100 flex justify-between items-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0">Condición</span>
+                            <span className="bg-slate-100 px-3 py-1 rounded-lg text-[9px] font-black text-slate-700 uppercase truncate">
                                 {factura.condicion_operacion} {factura.condicion_operacion === 'CREDITO' ? `(${factura.plazo_credito_dias} días)` : ''}
                             </span>
                         </div>
                         <button
                             onClick={() => navigate(`/pacientes/${factura.paciente_id}`)}
-                            className="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 py-3 rounded-2xl font-black text-xs transition-all uppercase"
+                            className="w-full bg-indigo-50/50 hover:bg-indigo-50 text-indigo-600 py-3.5 rounded-2xl font-black text-[10px] transition-all uppercase tracking-widest"
                         >
-                            Ver Expediente completo
+                            Ver Expediente
                         </button>
                     </div>
 
                     {/* Fiscal Info */}
-                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/50 space-y-4">
+                    <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-200/50 space-y-4">
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Datos Fiscales</h3>
                         <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-slate-400">Timbrado:</span>
+                            <div className="flex justify-between items-center gap-4">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timbrado</span>
                                 <span className="font-mono text-xs font-bold text-slate-700">{factura.numero_timbrado}</span>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-slate-400">Punto Exp:</span>
+                            <div className="flex justify-between items-center gap-4">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Punto Exp.</span>
                                 <span className="font-mono text-xs font-bold text-slate-700">{factura.establecimiento}-{factura.punto_expedicion}</span>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-slate-400">ID Factura:</span>
+                            <div className="flex justify-between items-center gap-4">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID Interno</span>
                                 <span className="font-mono text-xs font-bold text-slate-700">#{factura.factura_id}</span>
                             </div>
                         </div>
