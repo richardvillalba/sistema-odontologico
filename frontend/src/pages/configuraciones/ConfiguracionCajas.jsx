@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { cajaService, usersService } from '../../services/api';
+import { cajaService, empresasService } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 // ─── Modal: Crear / Editar Caja ───────────────────────────────────────────────
@@ -235,10 +235,10 @@ export default function ConfiguracionCajas() {
             setError('');
             const [cajasRes, usersRes] = await Promise.all([
                 cajaService.listar(empresaId),
-                usersService.getAll(),
+                empresasService.getUsuarios(empresaId),
             ]);
             setCajas(cajasRes.data.items || []);
-            setUsuarios(usersRes.data.items || usersRes.data || []);
+            setUsuarios(usersRes.data.items || []);
         } catch {
             setError('Error al cargar los datos');
         } finally {
