@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { billingService, usersService } from '../../services/api';
+import { billingService, empresasService } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AsignacionUsuarioTimbrado = ({ timbrado, onClose }) => {
-    const { usuario } = useAuth();
+    const { usuario, empresaActiva } = useAuth();
     const [usuarios, setUsuarios] = useState([]);
     const [asignados, setAsignados] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,8 +17,9 @@ const AsignacionUsuarioTimbrado = ({ timbrado, onClose }) => {
     const loadData = async () => {
         setLoading(true);
         try {
+            const empresaId = timbrado.empresa_id || empresaActiva?.empresa_id;
             const [allUsersRes, assignedUsersRes] = await Promise.all([
-                usersService.getAll(),
+                empresasService.getUsuarios(empresaId),
                 billingService.getUsuariosTimbrado(timbrado.timbrado_id)
             ]);
 
