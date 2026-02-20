@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { pacientesService } from '../services/api';
+import { pacientesService, ubicacionesService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { calculateAge, formatDate } from '../utils/format';
 
@@ -16,6 +16,9 @@ const FORM_INICIAL = {
     telefono_secundario: '',
     email: '',
     direccion: '',
+    departamento_id: '',
+    ciudad_id: '',
+    barrio_id: '',
     grupo_sanguineo: '',
     alergias: '',
     contacto_emergencia_nombre: '',
@@ -24,6 +27,7 @@ const FORM_INICIAL = {
 };
 
 const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
+    const { usuario } = useAuth();
     const [form, setForm] = useState(FORM_INICIAL);
     const [tab, setTab] = useState('basico');
     const [error, setError] = useState(null);
@@ -43,9 +47,33 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
         }
     });
 
+    const { data: deptosRes } = useQuery({
+        queryKey: ['departamentos'],
+        queryFn: () => ubicacionesService.getDepartamentos(),
+    });
+    const { data: ciudadesRes } = useQuery({
+        queryKey: ['ciudades', form.departamento_id],
+        queryFn: () => ubicacionesService.getCiudades(form.departamento_id),
+        enabled: !!form.departamento_id,
+    });
+    const { data: barriosRes } = useQuery({
+        queryKey: ['barrios', form.ciudad_id],
+        queryFn: () => ubicacionesService.getBarrios(form.ciudad_id),
+        enabled: !!form.ciudad_id,
+    });
+    const departamentos = deptosRes?.data?.items || [];
+    const ciudades = ciudadesRes?.data?.items || [];
+    const barrios = barriosRes?.data?.items || [];
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
+        if (name === 'departamento_id') {
+            setForm(prev => ({ ...prev, departamento_id: value, ciudad_id: '', barrio_id: '' }));
+        } else if (name === 'ciudad_id') {
+            setForm(prev => ({ ...prev, ciudad_id: value, barrio_id: '' }));
+        } else {
+            setForm(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = (e) => {
@@ -76,10 +104,14 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
             telefono_principal: form.telefono_principal.trim() || null,
             telefono_secundario: form.telefono_secundario.trim() || null,
             direccion: form.direccion.trim() || null,
+            departamento_id: form.departamento_id || null,
+            ciudad_id: form.ciudad_id || null,
+            barrio_id: form.barrio_id || null,
             alergias: form.alergias.trim() || null,
             contacto_emergencia_nombre: form.contacto_emergencia_nombre.trim() || null,
             contacto_emergencia_telefono: form.contacto_emergencia_telefono.trim() || null,
             contacto_emergencia_relacion: form.contacto_emergencia_relacion.trim() || null,
+            registrado_por: usuario?.usuario_id,
         });
     };
 
@@ -93,10 +125,10 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
     const labelClass = "block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1";
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl animate-in zoom-in-95 duration-300 overflow-hidden max-h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-white">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-8 py-4 sm:py-6 text-white">
                     <div className="flex justify-between items-center">
                         <div>
                             <h2 className="text-xl font-black tracking-tight">Registrar Nuevo Paciente</h2>
@@ -115,9 +147,8 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                 key={t.id}
                                 type="button"
                                 onClick={() => setTab(t.id)}
-                                className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all ${
-                                    tab === t.id ? 'bg-white text-blue-600 shadow-sm' : 'text-blue-100 hover:text-white'
-                                }`}
+                                className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all ${tab === t.id ? 'bg-white text-blue-600 shadow-sm' : 'text-blue-100 hover:text-white'
+                                    }`}
                             >
                                 {t.label}
                             </button>
@@ -126,7 +157,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="px-8 py-6 max-h-[55vh] overflow-y-auto">
+                    <div className="px-4 sm:px-8 py-4 sm:py-6 max-h-[55vh] overflow-y-auto">
                         {error && (
                             <div className="mb-4 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-center gap-3">
                                 <svg className="w-4 h-4 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +170,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                         {/* TAB: Datos Básicos */}
                         {tab === 'basico' && (
                             <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className={labelClass}>Nombre *</label>
                                         <input type="text" name="nombre" value={form.nombre} onChange={handleChange} className={inputClass} placeholder="Nombre(s)" />
@@ -149,7 +180,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                         <input type="text" name="apellido" value={form.apellido} onChange={handleChange} className={inputClass} placeholder="Apellido(s)" />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
                                         <label className={labelClass}>Tipo Doc. *</label>
                                         <select name="documento_tipo" value={form.documento_tipo} onChange={handleChange} className={inputClass}>
@@ -164,7 +195,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                         <input type="text" name="documento_numero" value={form.documento_numero} onChange={handleChange} className={inputClass} placeholder="12345678" />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className={labelClass}>Fecha de Nacimiento *</label>
                                         <input type="date" name="fecha_nacimiento" value={form.fecha_nacimiento} onChange={handleChange} className={inputClass} />
@@ -178,7 +209,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                         </select>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className={labelClass}>Teléfono Principal</label>
                                         <input type="text" name="telefono_principal" value={form.telefono_principal} onChange={handleChange} className={inputClass} placeholder="0981 000-000" />
@@ -194,7 +225,36 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                 </div>
                                 <div>
                                     <label className={labelClass}>Dirección</label>
-                                    <input type="text" name="direccion" value={form.direccion} onChange={handleChange} className={inputClass} placeholder="Av. Principal 123, Asunción" />
+                                    <input type="text" name="direccion" value={form.direccion} onChange={handleChange} className={inputClass} placeholder="Av. Principal 123" />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Departamento</label>
+                                        <select name="departamento_id" value={form.departamento_id} onChange={handleChange} className={inputClass}>
+                                            <option value="">-- Seleccionar --</option>
+                                            {departamentos.map(d => (
+                                                <option key={d.departamento_id} value={d.departamento_id}>{d.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Ciudad</label>
+                                        <select name="ciudad_id" value={form.ciudad_id} onChange={handleChange} className={inputClass} disabled={!form.departamento_id}>
+                                            <option value="">-- Seleccionar --</option>
+                                            {ciudades.map(c => (
+                                                <option key={c.ciudad_id} value={c.ciudad_id}>{c.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Barrio</label>
+                                        <select name="barrio_id" value={form.barrio_id} onChange={handleChange} className={inputClass} disabled={!form.ciudad_id}>
+                                            <option value="">-- Seleccionar --</option>
+                                            {barrios.map(b => (
+                                                <option key={b.barrio_id} value={b.barrio_id}>{b.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -206,7 +266,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                     <label className={labelClass}>Grupo Sanguíneo</label>
                                     <select name="grupo_sanguineo" value={form.grupo_sanguineo} onChange={handleChange} className={inputClass}>
                                         <option value="">-- Desconocido --</option>
-                                        {['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(g => (
+                                        {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => (
                                             <option key={g} value={g}>{g}</option>
                                         ))}
                                     </select>
@@ -235,7 +295,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                     <label className={labelClass}>Nombre del Contacto</label>
                                     <input type="text" name="contacto_emergencia_nombre" value={form.contacto_emergencia_nombre} onChange={handleChange} className={inputClass} placeholder="Nombre completo" />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className={labelClass}>Teléfono de Contacto</label>
                                         <input type="text" name="contacto_emergencia_telefono" value={form.contacto_emergencia_telefono} onChange={handleChange} className={inputClass} placeholder="0981 000-000" />
@@ -258,7 +318,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                     </div>
 
                     {/* Footer */}
-                    <div className="px-8 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div className="px-4 sm:px-8 py-4 sm:py-5 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
                         <div className="flex gap-1.5">
                             {tabs.map(t => (
                                 <div
@@ -299,8 +359,8 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
 const Pacientes = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { usuario } = useAuth();
-    const empresaId = usuario?.empresa_id || 1;
+    const { usuario, empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [toast, setToast] = useState(null);
@@ -308,7 +368,7 @@ const Pacientes = () => {
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['pacientes', searchTerm, empresaId],
         queryFn: () => searchTerm
-            ? pacientesService.search(searchTerm)
+            ? pacientesService.search(searchTerm, { empresa_id: empresaId })
             : pacientesService.getAll({ empresa_id: empresaId }),
     });
 
@@ -338,20 +398,20 @@ const Pacientes = () => {
             )}
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Pacientes</h1>
-                    <p className="text-slate-500 font-medium">Gestiona la base de datos de tu clínica de manera eficiente.</p>
+                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pacientes</h1>
+                    <p className="text-slate-500 font-medium text-sm md:text-base">Gestiona la base de datos de tu clínica.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm transition-all flex items-center gap-2">
+                    <button className="hidden sm:flex bg-white hover:bg-slate-50 text-slate-700 font-bold px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm transition-all items-center gap-2">
                         📥 Exportar
                     </button>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
-                        <span className="text-xl leading-none">+</span> Registrar Paciente
+                        <span className="text-xl leading-none">+</span> <span className="hidden sm:inline">Registrar</span> Paciente
                     </button>
                 </div>
             </div>
@@ -394,98 +454,151 @@ const Pacientes = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Paciente</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Documento / HC</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Edad</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Contacto</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Estado</th>
-                                    <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {pacientes.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="p-20 text-center">
-                                            <div className="flex flex-col items-center gap-3">
-                                                <div className="text-5xl">👥</div>
-                                                <p className="text-slate-400 font-bold">No se encontraron pacientes</p>
-                                                {!searchTerm && (
-                                                    <button
-                                                        onClick={() => setShowModal(true)}
-                                                        className="mt-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all"
-                                                    >
-                                                        + Registrar el primer paciente
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
+                    <>
+                        {/* Desktop table */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Paciente</th>
+                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Documento / HC</th>
+                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Edad</th>
+                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Contacto</th>
+                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Estado</th>
+                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Acciones</th>
                                     </tr>
-                                ) : (
-                                    pacientes.map((p) => (
-                                        <tr key={p.paciente_id} className="hover:bg-slate-50/80 transition-all group">
-                                            <td className="p-5">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`${getAvatarColor(p.nombre)} w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-sm group-hover:scale-110 transition-transform`}>
-                                                        {p.nombre?.charAt(0)}{p.apellido?.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                                                            {p.nombre_completo || `${p.nombre} ${p.apellido}`}
-                                                        </div>
-                                                        <div className="text-xs text-slate-400 font-medium">
-                                                            {p.fecha_registro ? `Registrado ${formatDate(p.fecha_registro)}` : 'En el sistema'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="font-bold text-slate-700">{p.documento_numero || '-'}</div>
-                                                <div className="text-[10px] font-black text-slate-400 uppercase">{p.numero_historia || '-'}</div>
-                                            </td>
-                                            <td className="p-5 text-center">
-                                                <div className="font-bold text-slate-700">{calculateAge(p.fecha_nacimiento)} años</div>
-                                                <div className="text-[10px] font-black text-slate-400">{formatDate(p.fecha_nacimiento)}</div>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="text-sm font-bold text-slate-700">{p.telefono_principal || 'Sin teléfono'}</div>
-                                                <div className="text-xs text-slate-500 truncate max-w-[150px]">{p.email || 'Sin correo'}</div>
-                                            </td>
-                                            <td className="p-5 text-center">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${p.activo === 'S'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : 'bg-slate-100 text-slate-500'
-                                                    }`}>
-                                                    {p.activo === 'S' ? 'Activo' : 'Inactivo'}
-                                                </span>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        className="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white hover:bg-blue-600 hover:border-blue-600 hover:shadow-md rounded-xl transition-all"
-                                                        onClick={() => navigate(`/pacientes/${p.paciente_id}`)}
-                                                        title="Ver Expediente"
-                                                    >
-                                                        👁️
-                                                    </button>
-                                                    <button
-                                                        className="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white hover:bg-emerald-600 hover:border-emerald-600 hover:shadow-md rounded-xl transition-all"
-                                                        onClick={() => navigate(`/citas`)}
-                                                        title="Nueva Cita"
-                                                    >
-                                                        📅
-                                                    </button>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {pacientes.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="p-20 text-center">
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="text-5xl">👥</div>
+                                                    <p className="text-slate-400 font-bold">No se encontraron pacientes</p>
+                                                    {!searchTerm && (
+                                                        <button
+                                                            onClick={() => setShowModal(true)}
+                                                            className="mt-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all"
+                                                        >
+                                                            + Registrar el primer paciente
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    ) : (
+                                        pacientes.map((p) => (
+                                            <tr key={p.paciente_id} className="hover:bg-slate-50/80 transition-all group">
+                                                <td className="p-5">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`${getAvatarColor(p.nombre)} w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-sm group-hover:scale-110 transition-transform`}>
+                                                            {p.nombre?.charAt(0)}{p.apellido?.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                                                                {p.nombre_completo || `${p.nombre} ${p.apellido}`}
+                                                            </div>
+                                                            <div className="text-xs text-slate-400 font-medium">
+                                                                {p.fecha_registro ? `Registrado ${formatDate(p.fecha_registro)}` : 'En el sistema'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5">
+                                                    <div className="font-bold text-slate-700">{p.documento_numero || '-'}</div>
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase">{p.numero_historia || '-'}</div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <div className="font-bold text-slate-700">{calculateAge(p.fecha_nacimiento)} años</div>
+                                                    <div className="text-[10px] font-black text-slate-400">{formatDate(p.fecha_nacimiento)}</div>
+                                                </td>
+                                                <td className="p-5">
+                                                    <div className="text-sm font-bold text-slate-700">{p.telefono_principal || 'Sin teléfono'}</div>
+                                                    <div className="text-xs text-slate-500 truncate max-w-[150px]">{p.email || 'Sin correo'}</div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${p.activo === 'S'
+                                                        ? 'bg-emerald-100 text-emerald-700'
+                                                        : 'bg-slate-100 text-slate-500'
+                                                        }`}>
+                                                        {p.activo === 'S' ? 'Activo' : 'Inactivo'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-5">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button
+                                                            className="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white hover:bg-blue-600 hover:border-blue-600 hover:shadow-md rounded-xl transition-all"
+                                                            onClick={() => navigate(`/pacientes/${p.paciente_id}`)}
+                                                            title="Ver Expediente"
+                                                        >
+                                                            👁️
+                                                        </button>
+                                                        <button
+                                                            className="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white hover:bg-emerald-600 hover:border-emerald-600 hover:shadow-md rounded-xl transition-all"
+                                                            onClick={() => navigate(`/citas`)}
+                                                            title="Nueva Cita"
+                                                        >
+                                                            📅
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile card layout */}
+                        <div className="md:hidden divide-y divide-slate-100">
+                            {pacientes.length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <div className="text-5xl mb-3">👥</div>
+                                    <p className="text-slate-400 font-bold">No se encontraron pacientes</p>
+                                    {!searchTerm && (
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="mt-3 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm"
+                                        >
+                                            + Registrar el primer paciente
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                pacientes.map((p) => (
+                                    <div
+                                        key={p.paciente_id}
+                                        className="p-4 hover:bg-slate-50 transition-all active:bg-slate-100 cursor-pointer"
+                                        onClick={() => navigate(`/pacientes/${p.paciente_id}`)}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <div className={`${getAvatarColor(p.nombre)} w-11 h-11 rounded-xl flex items-center justify-center text-white font-black shadow-sm shrink-0`}>
+                                                {p.nombre?.charAt(0)}{p.apellido?.charAt(0)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <p className="font-bold text-slate-900 truncate">
+                                                        {p.nombre_completo || `${p.nombre} ${p.apellido}`}
+                                                    </p>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 ${p.activo === 'S' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                        {p.activo === 'S' ? 'Activo' : 'Inactivo'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                                                    <span>📄 {p.documento_numero || '-'}</span>
+                                                    <span>📱 {p.telefono_principal || '-'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 mt-1 text-[10px] text-slate-400">
+                                                    <span>{calculateAge(p.fecha_nacimiento)} años</span>
+                                                    <span>HC: {p.numero_historia || '-'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 

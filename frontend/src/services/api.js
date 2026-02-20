@@ -49,7 +49,7 @@ api.interceptors.response.use(
 export const pacientesService = {
     getAll: (params) => api.get('/pacientes', { params }),
     getById: (id) => api.get(`/pacientes/${id}`),
-    search: (q) => api.get(`/pacientes/buscar/${encodeURIComponent(q)}`),
+    search: (q, params) => api.get(`/pacientes/buscar/${encodeURIComponent(q)}`, { params }),
     create: (data) => api.post('/pacientes', data),
     update: (id, data) => api.put(`/pacientes/${id}`, data),
     delete: (id) => api.delete(`/pacientes/${id}`),
@@ -301,6 +301,13 @@ export const sucursalesService = {
         api.post(`/facturas/sucursales/${sucursalId}/usuarios`, { usuario_id: usuarioId, es_principal: esPrincipal, asignado_por: asignadoPor }),
     quitarUsuario: (sucursalId, usuarioId) =>
         api.delete(`/facturas/sucursales/${sucursalId}/usuarios/${usuarioId}`),
+};
+
+export const reportesService = {
+    getResumenFinanciero: (params) => api.get('/facturas/reportes/financiero', { params }),
+    getResumenCitas: (params) => api.get('/facturas/reportes/citas', { params }),
+    getResumenPacientes: (params) => api.get('/facturas/reportes/pacientes', { params }),
+    getResumenInventario: (params) => api.get('/facturas/reportes/inventario', { params }),
 };
 
 export const ubicacionesService = {

@@ -17,8 +17,8 @@ const Historias = () => {
     // Dado que no tenemos un endpoint de "todas las historias", buscaremos pacientes primero.
 
     const { data: pacientesRes, isLoading: loadingPacientes } = useQuery({
-        queryKey: ['pacientes-search', search],
-        queryFn: () => pacientesService.search(search),
+        queryKey: ['pacientes-search', search, empresaId],
+        queryFn: () => pacientesService.search(search, { empresa_id: empresaId }),
         enabled: search.length > 2
     });
 

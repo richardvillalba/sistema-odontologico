@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { pacientesService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PacienteSelector = ({ onSelect, selectedPaciente }) => {
+    const { empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -33,7 +36,7 @@ const PacienteSelector = ({ onSelect, selectedPaciente }) => {
     const performSearch = async () => {
         setLoading(true);
         try {
-            const response = await pacientesService.search(searchTerm);
+            const response = await pacientesService.search(searchTerm, { empresa_id: empresaId });
             setResults(response.data.items || []);
             setIsOpen(true);
         } catch (error) {

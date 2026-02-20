@@ -59,8 +59,8 @@ const Citas = () => {
     });
 
     const { data: pacientesSearch } = useQuery({
-        queryKey: ['pacientes-search', searchPaciente],
-        queryFn: () => pacientesService.search(searchPaciente),
+        queryKey: ['pacientes-search', searchPaciente, empresaId],
+        queryFn: () => pacientesService.search(searchPaciente, { empresa_id: empresaId }),
         enabled: searchPaciente.length >= 2
     });
 
