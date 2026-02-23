@@ -77,15 +77,25 @@ export default function RegistroCompra() {
         if (lines.length === 0) return alert('Debe agregar al menos un ítem');
         if (!head.proveedor_id) return alert('Debe seleccionar un proveedor');
 
+        const detallesJson = JSON.stringify(
+            lines.map(({ articulo_id, cantidad, costo_unitario }) => ({
+                articulo_id: parseInt(articulo_id),
+                cantidad: parseFloat(cantidad),
+                costo_unitario: parseFloat(costo_unitario)
+            }))
+        );
+
         registrarMutation.mutate({
-            ...head,
             empresa_id: empresaActiva?.empresa_id,
             sucursal_id: sucursalActiva?.sucursal_id,
-            detalles: lines.map(({ articulo_id, cantidad, costo_unitario }) => ({
-                articulo_id,
-                cantidad,
-                costo_unitario
-            }))
+            proveedor_id: parseInt(head.proveedor_id),
+            numero_factura: head.nro_factura,
+            fecha_factura: head.fecha_emision,
+            condicion_pago: head.condicion_pago,
+            moneda: head.moneda,
+            total_general: total,
+            detalles: detallesJson,
+            usuario_id: usuario?.usuario_id
         });
     };
 
