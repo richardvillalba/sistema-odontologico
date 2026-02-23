@@ -98,10 +98,10 @@ const Citas = () => {
     // Estadísticas del día
     const stats = {
         total: citas.length,
-        pendientes: citas.filter(c => c.estado === 'PENDIENTE').length,
+        pendientes: citas.filter(c => c.estado === 'PROGRAMADA').length,
         confirmadas: citas.filter(c => c.estado === 'CONFIRMADA').length,
         completadas: citas.filter(c => c.estado === 'COMPLETADA').length,
-        canceladas: citas.filter(c => c.estado === 'CANCELADA').length,
+        canceladas: citas.filter(c => c.estado === 'CANCELADA' || c.estado === 'NO_ASISTIO').length,
     };
 
     const resetForm = () => {
@@ -139,8 +139,10 @@ const Citas = () => {
         switch (status) {
             case 'COMPLETADA': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
             case 'CANCELADA': return 'bg-rose-100 text-rose-700 border-rose-200';
+            case 'NO_ASISTIO': return 'bg-rose-100 text-rose-700 border-rose-200';
             case 'CONFIRMADA': return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'PENDIENTE': return 'bg-amber-100 text-amber-700 border-amber-200';
+            case 'EN_ATENCION': return 'bg-violet-100 text-violet-700 border-violet-200';
+            case 'PROGRAMADA': return 'bg-amber-100 text-amber-700 border-amber-200';
             default: return 'bg-slate-100 text-slate-600 border-slate-200';
         }
     };
@@ -149,8 +151,10 @@ const Citas = () => {
         switch (status) {
             case 'COMPLETADA': return '✅';
             case 'CANCELADA': return '❌';
+            case 'NO_ASISTIO': return '🚫';
             case 'CONFIRMADA': return '📋';
-            case 'PENDIENTE': return '⏳';
+            case 'EN_ATENCION': return '🦷';
+            case 'PROGRAMADA': return '⏳';
             default: return '📅';
         }
     };
@@ -235,10 +239,12 @@ const Citas = () => {
                         onChange={(e) => setFilterStatus(e.target.value)}
                     >
                         <option value="">Todos</option>
-                        <option value="PENDIENTE">Pendientes</option>
+                        <option value="PROGRAMADA">Programadas</option>
                         <option value="CONFIRMADA">Confirmadas</option>
+                        <option value="EN_ATENCION">En atención</option>
                         <option value="COMPLETADA">Completadas</option>
                         <option value="CANCELADA">Canceladas</option>
+                        <option value="NO_ASISTIO">No asistió</option>
                     </select>
                 </div>
                 <div className="flex gap-2">
@@ -300,7 +306,7 @@ const Citas = () => {
                                 const horaInicio = cita.hora_inicio || cita.HORA_INICIO || '09:00';
                                 const horaFin = cita.hora_fin || cita.HORA_FIN || '';
                                 const motivoConsulta = cita.motivo_consulta || cita.MOTIVO_CONSULTA || 'Consulta general';
-                                const estado = cita.estado || cita.ESTADO || 'PENDIENTE';
+                                const estado = cita.estado || cita.ESTADO || 'PROGRAMADA';
                                 const duracion = cita.duracion_minutos || cita.DURACION_MINUTOS || 30;
 
                                 return (
@@ -332,7 +338,7 @@ const Citas = () => {
                                             >
                                                 👁️
                                             </button>
-                                            {estado !== 'COMPLETADA' && estado !== 'CANCELADA' && (
+                                            {estado !== 'COMPLETADA' && estado !== 'CANCELADA' && estado !== 'NO_ASISTIO' && (
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -691,7 +697,7 @@ const Citas = () => {
                     horaFin: citaDetalle.hora_fin || citaDetalle.HORA_FIN || '',
                     duracion: citaDetalle.duracion_minutos || citaDetalle.DURACION_MINUTOS || 30,
                     motivoConsulta: citaDetalle.motivo_consulta || citaDetalle.MOTIVO_CONSULTA || 'Consulta general',
-                    estado: citaDetalle.estado || citaDetalle.ESTADO || 'PENDIENTE',
+                    estado: citaDetalle.estado || citaDetalle.ESTADO || 'PROGRAMADA',
                     tipoCita: citaDetalle.tipo_cita || citaDetalle.TIPO_CITA || 'CONSULTA',
                     consultorio: citaDetalle.consultorio || citaDetalle.CONSULTORIO || '',
                     observaciones: citaDetalle.observaciones || citaDetalle.OBSERVACIONES || ''
@@ -768,7 +774,7 @@ const Citas = () => {
                                         <span>👤</span> Ver Expediente del Paciente
                                     </button>
 
-                                    {detalle.estado === 'PENDIENTE' && (
+                                    {detalle.estado === 'PROGRAMADA' && (
                                         <button
                                             onClick={() => {
                                                 cambiarEstadoMutation.mutate({ id: detalle.citaId, estado: 'CONFIRMADA' });
@@ -780,7 +786,7 @@ const Citas = () => {
                                         </button>
                                     )}
 
-                                    {(detalle.estado === 'PENDIENTE' || detalle.estado === 'CONFIRMADA') && (
+                                    {(detalle.estado === 'PROGRAMADA' || detalle.estado === 'CONFIRMADA' || detalle.estado === 'EN_ATENCION') && (
                                         <div className="grid grid-cols-2 gap-2">
                                             <button
                                                 onClick={() => {
