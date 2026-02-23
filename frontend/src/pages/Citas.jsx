@@ -26,6 +26,7 @@ const Citas = () => {
         fecha: today.toISOString().split('T')[0],
         hora_inicio: '09:00',
         duracion_minutos: 30,
+        tipo_cita: 'CONSULTA_GENERAL',
         doctor_id: '',
         motivo_consulta: '',
         notas: ''
@@ -109,6 +110,7 @@ const Citas = () => {
             fecha: today.toISOString().split('T')[0],
             hora_inicio: '09:00',
             duracion_minutos: 30,
+            tipo_cita: 'CONSULTA_GENERAL',
             doctor_id: '',
             motivo_consulta: '',
             notas: ''
@@ -128,6 +130,7 @@ const Citas = () => {
             fecha: formCita.fecha,
             hora_inicio: formCita.hora_inicio,
             duracion_minutos: String(formCita.duracion_minutos),
+            tipo_cita: formCita.tipo_cita,
             motivo_consulta: formCita.motivo_consulta || null,
             notas: formCita.notas || null,
             empresa_id: String(empresaId),
@@ -619,6 +622,28 @@ const Citas = () => {
                                         <option value={120}>2 horas</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            {/* Tipo de cita */}
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 mb-1 block">Tipo de Cita</label>
+                                <select
+                                    value={formCita.tipo_cita}
+                                    onChange={(e) => setFormCita({ ...formCita, tipo_cita: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary outline-none cursor-pointer"
+                                >
+                                    <option value="CONSULTA_GENERAL">Consulta General</option>
+                                    <option value="CONTROL">Control</option>
+                                    <option value="EMERGENCIA">Emergencia</option>
+                                    <option value="LIMPIEZA">Limpieza Dental</option>
+                                    <option value="ORTODONCIA">Ortodoncia</option>
+                                    <option value="ENDODONCIA">Endodoncia</option>
+                                    <option value="CIRUGIA">Cirugía</option>
+                                    <option value="PROTESIS">Prótesis</option>
+                                    <option value="ESTETICA">Estética</option>
+                                    <option value="BLANQUEAMIENTO">Blanqueamiento</option>
+                                    <option value="IMPLANTE">Implante</option>
+                                </select>
                             </div>
 
                             {/* Doctor */}
