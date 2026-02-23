@@ -23,13 +23,18 @@ const AgendaDoctor = () => {
     });
 
     const { data: agendaData, isLoading } = useQuery({
-        queryKey: ['agenda', selectedDoctor, selectedDate],
-        queryFn: () => citasService.getAgenda(selectedDoctor, selectedDate),
-        enabled: !!selectedDoctor,
+        queryKey: ['agenda', selectedDate, empresaId],
+        queryFn: () => citasService.getAll({ empresa_id: empresaId, fecha: selectedDate }),
+        enabled: !!empresaId,
     });
 
     const doctores = doctoresData?.data?.items || [];
-    const agenda = agendaData?.data?.items || [];
+    const todasLasCitas = agendaData?.data?.items || [];
+
+    // Filtrar por doctor si hay uno seleccionado
+    const agenda = selectedDoctor
+        ? todasLasCitas.filter(c => String(c.doctor_id) === String(selectedDoctor))
+        : todasLasCitas;
 
     // Mutations
     const cambiarEstadoMutation = useMutation({
@@ -44,7 +49,7 @@ const AgendaDoctor = () => {
     // Stats
     const stats = {
         total: agenda.length,
-        pendientes: agenda.filter(c => c.estado === 'PENDIENTE').length,
+        programadas: agenda.filter(c => c.estado === 'PROGRAMADA').length,
         confirmadas: agenda.filter(c => c.estado === 'CONFIRMADA').length,
         completadas: agenda.filter(c => c.estado === 'COMPLETADA').length,
     };
@@ -68,8 +73,10 @@ const AgendaDoctor = () => {
         switch (status) {
             case 'COMPLETADA': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
             case 'CANCELADA': return 'bg-rose-100 text-rose-700 border-rose-200';
+            case 'NO_ASISTIO': return 'bg-rose-100 text-rose-700 border-rose-200';
             case 'CONFIRMADA': return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'PENDIENTE': return 'bg-amber-100 text-amber-700 border-amber-200';
+            case 'EN_ATENCION': return 'bg-violet-100 text-violet-700 border-violet-200';
+            case 'PROGRAMADA': return 'bg-amber-100 text-amber-700 border-amber-200';
             default: return 'bg-slate-100 text-slate-600 border-slate-200';
         }
     };
@@ -78,8 +85,10 @@ const AgendaDoctor = () => {
         switch (status) {
             case 'COMPLETADA': return 'border-emerald-500';
             case 'CANCELADA': return 'border-rose-400';
+            case 'NO_ASISTIO': return 'border-rose-400';
             case 'CONFIRMADA': return 'border-blue-500';
-            case 'PENDIENTE': return 'border-amber-500';
+            case 'EN_ATENCION': return 'border-violet-500';
+            case 'PROGRAMADA': return 'border-amber-500';
             default: return 'border-primary';
         }
     };
@@ -107,7 +116,7 @@ const AgendaDoctor = () => {
                         value={selectedDoctor}
                         onChange={(e) => setSelectedDoctor(e.target.value)}
                     >
-                        <option value="">Seleccione un doctor...</option>
+                        <option value="">Todos los doctores</option>
                         {doctores.map(d => (
                             <option key={d.usuario_id} value={d.usuario_id}>
                                 Dr. {d.nombre} {d.apellido}
@@ -149,15 +158,15 @@ const AgendaDoctor = () => {
             </div>
 
             {/* Stats */}
-            {selectedDoctor && !isLoading && agenda.length > 0 && (
+            {!isLoading && agenda.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total</p>
                         <p className="text-2xl font-black text-slate-800">{stats.total}</p>
                     </div>
                     <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-center">
-                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Pendientes</p>
-                        <p className="text-2xl font-black text-amber-700">{stats.pendientes}</p>
+                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Programadas</p>
+                        <p className="text-2xl font-black text-amber-700">{stats.programadas}</p>
                     </div>
                     <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 text-center">
                         <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Confirmadas</p>
@@ -176,20 +185,17 @@ const AgendaDoctor = () => {
                     <h3 className="font-bold flex items-center gap-2">
                         <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Cronograma del Día
-                        {selectedDoctorName && <span className="text-slate-400 font-normal text-sm ml-2">— {selectedDoctorName}</span>}
+                        {selectedDoctorName
+                            ? <span className="text-slate-400 font-normal text-sm ml-2">— {selectedDoctorName}</span>
+                            : <span className="text-slate-400 font-normal text-sm ml-2">— Todos los doctores</span>
+                        }
                     </h3>
                     <span className="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 font-bold">
                         {formatDateLabel(selectedDate)}
                     </span>
                 </div>
 
-                {!selectedDoctor ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                        <svg className="w-16 h-16 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                        <p className="font-bold text-slate-500">Seleccione un doctor</p>
-                        <p className="text-xs text-slate-400 mt-1">Para ver su agenda del día</p>
-                    </div>
-                ) : isLoading ? (
+                {isLoading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="w-10 h-10 border-4 border-slate-100 border-t-primary rounded-full animate-spin"></div>
                     </div>
@@ -202,11 +208,11 @@ const AgendaDoctor = () => {
                 ) : (
                     <div className="p-6 md:p-8 space-y-1">
                         {agenda.map((cita) => {
-                            const estado = cita.estado || 'PENDIENTE';
-                            const canConfirm = estado === 'PENDIENTE';
-                            const canComplete = estado === 'PENDIENTE' || estado === 'CONFIRMADA';
-                            const canCancel = estado === 'PENDIENTE' || estado === 'CONFIRMADA';
-                            const isInactive = estado === 'CANCELADA' || estado === 'COMPLETADA';
+                            const estado = cita.estado || 'PROGRAMADA';
+                            const canConfirm = estado === 'PROGRAMADA';
+                            const canComplete = estado === 'PROGRAMADA' || estado === 'CONFIRMADA' || estado === 'EN_ATENCION';
+                            const canCancel = estado === 'PROGRAMADA' || estado === 'CONFIRMADA';
+                            const isInactive = estado === 'CANCELADA' || estado === 'COMPLETADA' || estado === 'NO_ASISTIO';
 
                             return (
                                 <div key={cita.cita_id} className="flex gap-4 md:gap-6 group">
@@ -227,11 +233,19 @@ const AgendaDoctor = () => {
                                                     <div className="flex items-center gap-2 flex-wrap mb-1">
                                                         <h4 className="font-bold text-slate-800 text-base leading-tight">{cita.paciente_nombre}</h4>
                                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${getStatusStyle(estado)}`}>
-                                                            {estado}
+                                                            {estado.replace('_', ' ')}
                                                         </span>
                                                     </div>
+                                                    {/* Doctor - visible cuando no hay filtro de doctor */}
+                                                    {cita.doctor_nombre && (
+                                                        <p className="text-[10px] text-slate-500 font-bold mb-1">
+                                                            Dr. {cita.doctor_nombre}
+                                                        </p>
+                                                    )}
                                                     {cita.tipo_cita && (
-                                                        <p className="text-[10px] text-primary font-bold tracking-widest uppercase mb-1">{cita.tipo_cita}</p>
+                                                        <p className="text-[10px] text-primary font-bold tracking-widest uppercase mb-1">
+                                                            {cita.tipo_cita.replace('_', ' ')}
+                                                        </p>
                                                     )}
                                                     <p className="text-slate-500 text-sm">
                                                         {cita.motivo_consulta || 'Sin motivo especificado'}
