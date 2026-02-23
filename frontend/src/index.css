@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 body {
-    background-color: #C2D6EA;
-    color: #0A1F35;
+    background-color: #EEF2F7;
+    color: #1E293B;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -14,71 +14,43 @@ body {
 
 /* ── Smooth scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #B0CAE0; }
-::-webkit-scrollbar-thumb { background-color: #7AAABF; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background-color: #5A90B0; }
+::-webkit-scrollbar-track { background: #EEF2F7; }
+::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background-color: #94A3B8; }
 
 /* ════════════════════════════════════════════════════════
-   OCEAN BLUE THEME — overrides para clases hardcodeadas
+   Pequeños ajustes al tema claro para la zona de contenido
+   (el sidebar usa gradiente directo en Layout.jsx)
    ════════════════════════════════════════════════════════ */
 
-/* Fondos blancos/grises → tonos azules claros */
-.bg-white   { background-color: #E8F2FA !important; }
-.bg-gray-50 { background-color: #D5E6F4 !important; }
-.bg-gray-100{ background-color: #C8DCF0 !important; }
-.bg-gray-200{ background-color: #B8CEDF !important; }
+/* bg-gray-50 → mismo tono que el fondo */
+.bg-gray-50 { background-color: #EEF2F7 !important; }
+.bg-gray-100{ background-color: #E2E8F0 !important; }
 
-/* Textos grises → oscuros sobre fondo claro (alto contraste) */
-.text-gray-900 { color: #0A1F35 !important; }
-.text-gray-800 { color: #1A3450 !important; }
-.text-gray-700 { color: #2C4E6C !important; }
-.text-gray-600 { color: #3A6280 !important; }
-.text-gray-500 { color: #4A7494 !important; }
-.text-gray-400 { color: #6A94B0 !important; }
+/* Hover filas/listas sobre fondo claro */
+.hover\:bg-gray-50:hover  { background-color: #EEF2F7 !important; }
+.hover\:bg-gray-100:hover { background-color: #E2E8F0 !important; }
 
-/* Bordes */
-.border-gray-100 { border-color: #C8DCF0 !important; }
-.border-gray-200 { border-color: #94BAD8 !important; }
-.border-gray-300 { border-color: #7AAAC8 !important; }
-
-/* Divisores */
-.divide-gray-100 > * + * { border-color: #C8DCF0 !important; }
-.divide-gray-200 > * + * { border-color: #94BAD8 !important; }
-
-/* Hover filas/listas */
-.hover\:bg-gray-50:hover  { background-color: #D5E6F4 !important; }
-.hover\:bg-gray-100:hover { background-color: #C8DCF0 !important; }
-
-/* Inputs, selects, textareas */
+/* Inputs */
 input:not([type="range"]),
 select,
 textarea {
-    background-color: #F0F7FD !important;
-    color: #0A1F35 !important;
-    border-color: #7AAAC8 !important;
+    background-color: #FFFFFF !important;
+    color: #1E293B !important;
+    border-color: #CBD5E1 !important;
 }
 input::placeholder,
-textarea::placeholder { color: #6A94B0 !important; }
+textarea::placeholder { color: #94A3B8 !important; }
 input:focus,
 select:focus,
 textarea:focus {
-    background-color: #FFFFFF !important;
-    border-color: #1565C0 !important;
-    outline-color: #1565C0 !important;
+    border-color: #6366F1 !important;
+    outline-color: #6366F1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
 }
 
-/* Modales / overlay backdrop */
-.bg-black\/50 { background-color: rgba(10, 31, 53, 0.6) !important; }
-.bg-black\/60 { background-color: rgba(10, 31, 53, 0.7) !important; }
-
-/* Sombras más pronunciadas para separar elementos en fondo claro */
-.shadow-sm  { box-shadow: 0 1px 4px  rgba(10,31,53,0.12) !important; }
-.shadow-md  { box-shadow: 0 4px 12px rgba(10,31,53,0.15) !important; }
-.shadow-lg  { box-shadow: 0 8px 24px rgba(10,31,53,0.18) !important; }
-.shadow-xl  { box-shadow: 0 12px 32px rgba(10,31,53,0.2) !important; }
-
 /* ════════════════════════════════════════════════════════
-   IMPRESIÓN — blanco/negro para facturas y recibos
+   IMPRESIÓN — restaurar blanco/negro para facturas
    ════════════════════════════════════════════════════════ */
 @media print {
     body * { visibility: hidden; }
@@ -94,11 +66,6 @@ textarea:focus {
         background: white !important;
         color: black !important;
     }
-
-    #print-area .bg-white        { background-color: white !important; }
-    #print-area .text-gray-900   { color: #111 !important; }
-    #print-area .text-gray-700   { color: #374151 !important; }
-    #print-area .border-gray-200 { border-color: #e5e7eb !important; }
 
     @page { margin: 1.5cm; size: A4; }
 }
