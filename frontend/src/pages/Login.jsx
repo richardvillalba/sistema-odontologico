@@ -54,23 +54,23 @@ const Login = () => {
     return (
         <div className="min-h-screen flex animate-in fade-in duration-700">
             {/* Panel Izquierdo - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex-col justify-between p-16 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-900 via-primary-dark to-primary-900 flex-col justify-between p-16 relative overflow-hidden">
                 {/* Efectos de fondo */}
                 <div className="absolute inset-0">
-                    <div className="absolute top-[10%] left-[15%] w-[50%] h-[50%] bg-blue-500/15 rounded-full blur-[100px]"></div>
-                    <div className="absolute bottom-[10%] right-[10%] w-[45%] h-[45%] bg-indigo-500/10 rounded-full blur-[100px]"></div>
+                    <div className="absolute top-[10%] left-[15%] w-[50%] h-[50%] bg-primary-400/15 rounded-full blur-[100px]"></div>
+                    <div className="absolute bottom-[10%] right-[10%] w-[45%] h-[45%] bg-accent/10 rounded-full blur-[100px]"></div>
                     <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
                 </div>
 
                 {/* Logo */}
                 <div className="relative z-10 animate-in slide-in-from-left-8 duration-700 delay-150 fill-mode-both">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 border border-blue-400/20">
+                        <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 backdrop-blur-md">
                             <ToothLogo className="w-8 h-8 text-white" />
                         </div>
                         <div>
                             <span className="text-white font-black text-3xl tracking-tight block leading-none">Denta</span>
-                            <span className="text-blue-400/60 text-xs font-bold tracking-[0.15em] uppercase">
+                            <span className="text-primary-100/60 text-xs font-bold tracking-[0.15em] uppercase">
                                 Gestión Odontológica
                             </span>
                         </div>
@@ -82,11 +82,11 @@ const Login = () => {
                     <div className="space-y-6">
                         <h2 className="text-5xl font-black text-white leading-[1.1] tracking-tight">
                             Tu clínica,
-                            <span className="block bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mt-1">
+                            <span className="block text-primary-200 mt-1">
                                 bajo control total.
                             </span>
                         </h2>
-                        <p className="text-slate-400 text-lg leading-relaxed font-medium">
+                        <p className="text-primary-100/70 text-lg leading-relaxed font-medium">
                             Pacientes, citas, facturación e inventario en una sola plataforma diseñada para profesionales de la odontología.
                         </p>
                     </div>
@@ -99,14 +99,14 @@ const Login = () => {
                             { icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', text: 'Agenda inteligente', desc: 'Citas, disponibilidad y recordatorios.' },
                         ].map((item, i) => (
                             <div key={i} className="flex gap-4 group">
-                                <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-blue-500/10 group-hover:border-blue-500/30 duration-300">
-                                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-primary/10 group-hover:border-primary/30 duration-300">
+                                    <svg className="w-5 h-5 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 className="text-slate-200 font-bold text-sm">{item.text}</h4>
-                                    <p className="text-slate-500 text-sm font-medium">{item.desc}</p>
+                                    <h4 className="text-primary-100 font-bold text-sm">{item.text}</h4>
+                                    <p className="text-primary-200/50 text-sm font-medium">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -115,61 +115,61 @@ const Login = () => {
 
                 {/* Footer */}
                 <div className="relative z-10 flex items-center justify-between border-t border-white/5 pt-8 animate-in fade-in duration-1000 delay-500 fill-mode-both">
-                    <p className="text-slate-600 text-xs font-bold tracking-widest uppercase">© 2026 Denta</p>
+                    <p className="text-primary-200/40 text-xs font-bold tracking-widest uppercase">© 2026 Denta</p>
                     <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider">Online</span>
+                        <span className="text-[10px] font-black text-primary-200/40 uppercase tracking-wider">Online</span>
                     </div>
                 </div>
             </div>
 
             {/* Panel Derecho - Formulario */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center bg-slate-50 px-6 lg:px-24 py-12 relative overflow-hidden">
-                <div className="lg:hidden absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-200/30 rounded-full blur-3xl"></div>
+            <div className="w-full lg:w-1/2 flex items-center justify-center bg-surface px-6 lg:px-24 py-12 relative overflow-hidden">
+                <div className="lg:hidden absolute top-[-10%] right-[-10%] w-64 h-64 bg-primary-200/30 rounded-full blur-3xl"></div>
 
                 <div className="w-full max-w-md relative z-10">
-                    <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-100 p-8 lg:p-12 animate-in zoom-in-95 duration-700">
+                    <div className="bg-surface-card rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-border p-8 lg:p-12 animate-in zoom-in-95 duration-700">
 
                         {/* Logo mobile */}
                         <div className="lg:hidden mb-10 flex flex-col items-center">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-blue-600/20 mb-4">
+                            <div className="w-16 h-16 bg-primary rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-primary/20 mb-4">
                                 <ToothLogo className="w-9 h-9 text-white" />
                             </div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Denta</h1>
-                            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.15em] mt-1">Gestión Odontológica</p>
+                            <h1 className="text-3xl font-black text-text-primary tracking-tight">Denta</h1>
+                            <p className="text-text-secondary opacity-60 text-xs font-bold uppercase tracking-[0.15em] mt-1">Gestión Odontológica</p>
                         </div>
 
                         {/* Encabezado */}
                         <div className="mb-10 text-center lg:text-left">
-                            <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-3">
+                            <h2 className="text-4xl font-black text-text-primary tracking-tight leading-none mb-3">
                                 Bienvenido
                             </h2>
-                            <p className="text-slate-400 font-semibold">
+                            <p className="text-text-secondary font-semibold">
                                 Ingresá tus credenciales para acceder al sistema.
                             </p>
                         </div>
 
                         {/* Error */}
                         {error && (
-                            <div className="mb-8 flex items-center gap-4 bg-red-50/80 border border-red-100 p-4 rounded-2xl animate-in slide-in-from-top-4 duration-300">
-                                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-                                    <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="mb-8 flex items-center gap-4 bg-danger-light/50 border border-danger-light p-4 rounded-2xl animate-in slide-in-from-top-4 duration-300">
+                                <div className="w-10 h-10 rounded-xl bg-danger-light flex items-center justify-center shrink-0">
+                                    <svg className="w-5 h-5 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                 </div>
-                                <p className="text-sm font-bold text-red-800">{error}</p>
+                                <p className="text-sm font-bold text-danger-dark">{error}</p>
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Usuario */}
                             <div className="space-y-2 group">
-                                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-blue-600">
+                                <label className="block text-[11px] font-black text-text-secondary opacity-60 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">
                                     Usuario
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                        <svg className="w-5 h-5 text-slate-300 transition-colors group-focus-within:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-text-secondary opacity-30 transition-colors group-focus-within:text-primary group-focus-within:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                     </div>
@@ -179,7 +179,7 @@ const Login = () => {
                                         value={formData.username}
                                         onChange={handleChange}
                                         disabled={loading}
-                                        className="w-full pl-14 pr-5 py-4 bg-slate-50/50 border-2 border-slate-100 rounded-2xl text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-0 focus:border-blue-500/50 focus:bg-white transition-all disabled:opacity-50 font-bold"
+                                        className="w-full pl-14 pr-5 py-4 bg-surface-raised border-2 border-border rounded-2xl text-text-primary placeholder-text-secondary/30 focus:outline-none focus:ring-0 focus:border-primary/50 focus:bg-surface-card transition-all disabled:opacity-50 font-bold"
                                         placeholder="Tu nombre de usuario"
                                         autoFocus
                                         autoComplete="username"
@@ -189,12 +189,12 @@ const Login = () => {
 
                             {/* Contraseña */}
                             <div className="space-y-2 group">
-                                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-blue-600">
+                                <label className="block text-[11px] font-black text-text-secondary opacity-60 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">
                                     Contraseña
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                        <svg className="w-5 h-5 text-slate-300 transition-colors group-focus-within:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-text-secondary opacity-30 transition-colors group-focus-within:text-primary group-focus-within:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                         </svg>
                                     </div>
@@ -204,14 +204,14 @@ const Login = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         disabled={loading}
-                                        className="w-full pl-14 pr-14 py-4 bg-slate-50/50 border-2 border-slate-100 rounded-2xl text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-0 focus:border-blue-500/50 focus:bg-white transition-all disabled:opacity-50 font-bold"
+                                        className="w-full pl-14 pr-14 py-4 bg-surface-raised border-2 border-border rounded-2xl text-text-primary placeholder-text-secondary/30 focus:outline-none focus:ring-0 focus:border-primary/50 focus:bg-surface-card transition-all disabled:opacity-50 font-bold"
                                         placeholder="••••••••••••"
                                         autoComplete="current-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-300 hover:text-blue-600 transition-colors"
+                                        className="absolute inset-y-0 right-0 pr-5 flex items-center text-text-secondary opacity-40 hover:text-primary hover:opacity-100 transition-colors"
                                     >
                                         {showPassword ? (
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +231,7 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black py-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3 shadow-xl shadow-blue-600/20 mt-2 group"
+                                className="w-full bg-primary hover:bg-primary-dark text-white font-black py-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3 shadow-xl shadow-primary/20 mt-2 group"
                             >
                                 {loading ? (
                                     <>
@@ -251,7 +251,7 @@ const Login = () => {
 
                         {/* Footer */}
                         <div className="mt-10 text-center">
-                            <p className="text-sm text-slate-400 font-medium">
+                            <p className="text-sm text-text-secondary font-medium">
                                 ¿Problemas para acceder? Contactá al administrador.
                             </p>
                         </div>
