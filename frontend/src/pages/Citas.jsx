@@ -64,13 +64,22 @@ const Citas = () => {
         enabled: searchPaciente.length >= 2
     });
 
+    const [errorModal, setErrorModal] = useState('');
+
     // Mutations
     const crearCitaMutation = useMutation({
         mutationFn: (data) => citasService.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['citas']);
-            setShowModal(false);
-            resetForm();
+        onSuccess: (res) => {
+            if (res.data?.resultado === 1 || res.data?.resultado === '1') {
+                queryClient.invalidateQueries(['citas']);
+                setShowModal(false);
+                resetForm();
+            } else {
+                setErrorModal(res.data?.mensaje || 'Error al guardar la cita');
+            }
+        },
+        onError: (err) => {
+            setErrorModal(err.response?.data?.mensaje || 'Error al conectar con el servidor');
         }
     });
 
@@ -111,14 +120,18 @@ const Citas = () => {
 
     const handleSubmitCita = (e) => {
         e.preventDefault();
-        if (!selectedPaciente) {
-            alert('Debe seleccionar un paciente');
-            return;
-        }
+        if (!selectedPaciente) return;
+        setErrorModal('');
         crearCitaMutation.mutate({
-            paciente_id: selectedPaciente.paciente_id,
-            ...formCita,
-            empresa_id: empresaId
+            paciente_id: String(selectedPaciente.paciente_id || selectedPaciente.PACIENTE_ID),
+            doctor_id: formCita.doctor_id ? String(formCita.doctor_id) : null,
+            fecha: formCita.fecha,
+            hora_inicio: formCita.hora_inicio,
+            duracion_minutos: String(formCita.duracion_minutos),
+            motivo_consulta: formCita.motivo_consulta || null,
+            notas: formCita.notas || null,
+            empresa_id: String(empresaId),
+            creado_por: String(usuario?.usuario_id),
         });
     };
 
@@ -422,6 +435,11 @@ const Citas = () => {
                         </div>
 
                         <form onSubmit={handleSubmitCita} className="p-6 space-y-4">
+                            {errorModal && (
+                                <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl">
+                                    {errorModal}
+                                </div>
+                            )}
                             {/* LOV de Paciente Mejorado */}
                             <div>
                                 <label className="text-xs font-bold text-slate-500 mb-1 block">Paciente *</label>
