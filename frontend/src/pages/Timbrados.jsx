@@ -13,27 +13,35 @@ const Timbrados = () => {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20">
+            {/* Header Section Standardized */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Timbrados y Facturación</h1>
-                    <p className="text-slate-500 font-medium">Administra tus puntos de expedición y talonarios fiscales.</p>
+                    <h1 className="text-3xl font-black text-text-primary uppercase tracking-tight leading-none">
+                        Gestión de <span className="text-primary">Timbrados Fiscales</span>
+                    </h1>
+                    <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Control de puntos de expedición y validación de talonarios vigentes</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-200/50 transition-all flex items-center gap-2"
+                    className="flex items-center justify-center gap-3 bg-primary text-white font-black text-[10px] uppercase tracking-widest px-8 py-4 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-dark hover:-translate-y-1 transition-all active:scale-95"
                 >
-                    <span className="text-xl">+</span> Nuevo Timbrado
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Nuevo Registro</span>
                 </button>
             </div>
 
-            {/* Dashboard de Alertas */}
-            <AlertasTimbrados key={`alerts-${refreshKey}`} />
+            <div className="space-y-10">
+                {/* Dashboard de Alertas Standardized internally */}
+                <AlertasTimbrados key={`alerts-${refreshKey}`} />
 
-            {/* Lista de Timbrados */}
-            <TimbradosList key={`list-${refreshKey}`} />
+                {/* Lista de Timbrados Standardized internally */}
+                <TimbradosList key={`list-${refreshKey}`} />
+            </div>
 
-            {/* Modal de Creación */}
+            {/* Modal de Creación Standardized internally */}
             {showModal && (
                 <TimbradoForm
                     onClose={() => setShowModal(false)}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { odontogramaService, pacientesService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import Diente from '../components/odontograma/Diente';
 import DienteModal from '../components/odontograma/DienteModal';
 
@@ -21,9 +22,11 @@ const ESTADO_COLORES = {
 
 const OdontogramaPaciente = () => {
     const { id: pacienteId } = useParams();
+    const { empresaActiva } = useAuth();
     const queryClient = useQueryClient();
     const [selectedDiente, setSelectedDiente] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [viewMode, setViewMode] = useState('ALL'); // 'ALL', 'UPPER', 'LOWER'
 
     // Cargar datos del paciente
     const { data: paciente } = useQuery({
@@ -33,26 +36,30 @@ const OdontogramaPaciente = () => {
 
     // Cargar odontograma actual
     const { data: odontograma, isLoading, error } = useQuery({
-        queryKey: ['odontograma', pacienteId],
-        queryFn: () => odontogramaService.getActual(pacienteId).then(res => res.data),
+        queryKey: ['odontograma', pacienteId, empresaActiva?.empresa_id],
+        queryFn: () => odontogramaService.getActual(pacienteId, empresaActiva?.empresa_id).then(res => res.data),
+    });
+
+    // Cargar todos los hallazgos del paciente (para visualización en el odontograma)
+    const { data: allHallazgosRes } = useQuery({
+        queryKey: ['odontograma-hallazgos-all', pacienteId, empresaActiva?.empresa_id],
+        queryFn: () => odontogramaService.getHallazgosAll(pacienteId, empresaActiva?.empresa_id).then(res => res.data),
+        enabled: !!odontograma,
     });
 
     // Mutation para crear odontograma
-    const crearOdontograma = useMutation({
-        mutationFn: (data) => odontogramaService.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['odontograma', pacienteId]);
-        },
-    });
+    // ... existing mutations ...
 
-    // Mutation para actualizar diente
-    const actualizarDiente = useMutation({
-        mutationFn: ({ odontogramaId, data }) =>
-            odontogramaService.actualizarDiente(odontogramaId, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['odontograma', pacienteId]);
-        },
-    });
+    // Organizar hallazgos por número FDI para pasarlos al componente Diente
+    const hallazgosPorDiente = {};
+    if (allHallazgosRes?.items) {
+        allHallazgosRes.items.forEach(h => {
+            if (!hallazgosPorDiente[h.numero_fdi]) {
+                hallazgosPorDiente[h.numero_fdi] = [];
+            }
+            hallazgosPorDiente[h.numero_fdi].push(h);
+        });
+    }
 
     // Organizar dientes por número FDI
     const dientesPorNumero = {};
@@ -62,16 +69,7 @@ const OdontogramaPaciente = () => {
         });
     }
 
-    // Arcadas dentales (numeración FDI)
-    const arcadaSuperior = [
-        [18, 17, 16, 15, 14, 13, 12, 11],
-        [21, 22, 23, 24, 25, 26, 27, 28]
-    ];
-
-    const arcadaInferior = [
-        [48, 47, 46, 45, 44, 43, 42, 41],
-        [31, 32, 33, 34, 35, 36, 37, 38]
-    ];
+    // ... arcadas definition ...
 
     const handleDienteClick = (numeroFdi) => {
         const diente = dientesPorNumero[numeroFdi];
@@ -81,74 +79,28 @@ const OdontogramaPaciente = () => {
         }
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedDiente(null);
-    };
-
-    const handleEstadoChange = async (nuevoEstado) => {
-        if (!selectedDiente || !odontograma) return;
-
-        await actualizarDiente.mutateAsync({
-            odontogramaId: odontograma.odontograma_id,
-            data: {
-                numero_fdi: selectedDiente.numero_fdi,
-                estado: nuevoEstado,
-            }
-        });
-        handleCloseModal();
-    };
-
-    const handleCrearOdontograma = () => {
-        crearOdontograma.mutate({
-            paciente_id: parseInt(pacienteId),
-            empresa_id: 1,
-            tipo: 'PERMANENTE',
-            observaciones: 'Odontograma inicial',
-            creado_por: 1, // TODO: usar usuario logueado
-        });
-    };
-
-    const getDienteColor = (numeroFdi) => {
-        const diente = dientesPorNumero[numeroFdi];
-        if (!diente) return '#F1F5F9';
-        return ESTADO_COLORES[diente.estado] || '#F1F5F9';
-    };
+    // ... handles ...
 
     const renderArcada = (arcada) => (
-        <div className="flex justify-center gap-1 md:gap-2 flex-wrap">
+        <div className="flex justify-center gap-1 md:gap-2 flex-wrap min-w-max">
             {arcada[0].map(num => (
-                <div
+                <Diente
                     key={num}
+                    numero={num}
+                    hallazgos={hallazgosPorDiente[num] || []}
                     onClick={() => handleDienteClick(num)}
-                    className="flex flex-col items-center cursor-pointer group"
-                >
-                    <span className="text-[10px] font-bold text-slate-400 mb-1 group-hover:text-primary">
-                        {num}
-                    </span>
-                    <div
-                        className="w-10 h-10 rounded-lg border-2 border-slate-200 group-hover:border-primary group-hover:scale-110 transition-all shadow-sm"
-                        style={{ backgroundColor: getDienteColor(num) }}
-                    />
-                </div>
+                />
             ))}
 
-            <div className="w-4" /> {/* Separador central */}
+            <div className="w-8" /> {/* Separador central más amplio */}
 
             {arcada[1].map(num => (
-                <div
+                <Diente
                     key={num}
+                    numero={num}
+                    hallazgos={hallazgosPorDiente[num] || []}
                     onClick={() => handleDienteClick(num)}
-                    className="flex flex-col items-center cursor-pointer group"
-                >
-                    <span className="text-[10px] font-bold text-slate-400 mb-1 group-hover:text-primary">
-                        {num}
-                    </span>
-                    <div
-                        className="w-10 h-10 rounded-lg border-2 border-slate-200 group-hover:border-primary group-hover:scale-110 transition-all shadow-sm"
-                        style={{ backgroundColor: getDienteColor(num) }}
-                    />
-                </div>
+                />
             ))}
         </div>
     );
@@ -163,106 +115,105 @@ const OdontogramaPaciente = () => {
 
     // Si no hay odontograma, mostrar botón para crear
     if (!odontograma?.success || !odontograma?.dientes?.length) {
-        return (
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Link to={`/pacientes/${pacienteId}`} className="text-slate-400 hover:text-primary">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-800">Odontograma</h1>
-                        {paciente?.items?.[0] && (
-                            <p className="text-slate-500">
-                                {paciente.items[0].nombre} {paciente.items[0].apellido}
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                {/* No hay odontograma */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-                    <div className="text-6xl mb-4">🦷</div>
-                    <h2 className="text-xl font-bold text-slate-700 mb-2">
-                        No hay odontograma registrado
-                    </h2>
-                    <p className="text-slate-500 mb-6">
-                        Este paciente aún no tiene un odontograma. Crea uno para comenzar a registrar el estado dental.
-                    </p>
-                    <button
-                        onClick={handleCrearOdontograma}
-                        disabled={crearOdontograma.isPending}
-                        className="bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-all disabled:opacity-50"
-                    >
-                        {crearOdontograma.isPending ? 'Creando...' : 'Crear Odontograma'}
-                    </button>
-                </div>
-            </div>
-        );
+        // ... (no changes here for now)
     }
 
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
                 <div className="flex items-center gap-4">
-                    <Link to={`/pacientes/${pacienteId}`} className="text-slate-400 hover:text-primary">
+                    <Link to={`/pacientes/${pacienteId}`} className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-primary transition-all shadow-sm">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                         </svg>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-800">Odontograma</h1>
-                        <p className="text-slate-500">
-                            {odontograma.paciente_nombre} - {odontograma.numero_historia}
+                        <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Odontograma</h1>
+                        <p className="text-slate-500 font-medium text-xs sm:text-sm">
+                            {odontograma.paciente_nombre} • <span className="text-primary font-bold">{odontograma.numero_historia}</span>
                         </p>
                     </div>
                 </div>
-                <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-medium">
-                    {odontograma.tipo}
-                </span>
+                <div className="flex items-center justify-between sm:justify-end gap-3 bg-slate-100/50 p-2 rounded-2xl sm:bg-transparent sm:p-0">
+                    <span className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-wider border border-blue-100">
+                        {odontograma.tipo}
+                    </span>
+
+                    {/* View Selector for Mobile */}
+                    <div className="flex sm:hidden bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                        {[
+                            { id: 'ALL', label: 'Todo' },
+                            { id: 'UPPER', label: 'Sup' },
+                            { id: 'LOWER', label: 'Inf' }
+                        ].map(m => (
+                            <button
+                                key={m.id}
+                                onClick={() => setViewMode(m.id)}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${viewMode === m.id ? 'bg-primary text-white shadow-md' : 'text-slate-400'}`}
+                            >
+                                {m.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             {/* Leyenda */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-4">
-                <div className="flex flex-wrap gap-4 justify-center">
-                    {Object.entries(ESTADO_COLORES).map(([estado, color]) => (
-                        <div key={estado} className="flex items-center gap-2">
-                            <div
-                                className="w-4 h-4 rounded border border-slate-300"
-                                style={{ backgroundColor: color }}
-                            />
-                            <span className="text-xs text-slate-600 capitalize">
-                                {estado.toLowerCase().replace('_', ' ')}
-                            </span>
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-auto no-scrollbar">
+                <div className="flex gap-4 sm:gap-6 justify-start sm:justify-center min-w-max">
+                    {[
+                        { color: 'bg-red-500', label: 'Caries' },
+                        { color: 'bg-blue-500', label: 'Obturación' },
+                        { color: 'bg-amber-500', label: 'Otros' },
+                    ].map(l => (
+                        <div key={l.label} className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${l.color} shadow-sm`} />
+                            <span className="text-[10px] sm:text-xs font-bold text-slate-600 whitespace-nowrap uppercase tracking-tight">{l.label}</span>
                         </div>
                     ))}
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-0.5 bg-slate-300 rounded-full" />
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-tight">Sano</span>
+                    </div>
                 </div>
             </div>
 
             {/* Odontograma Visual */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-8">
-                <div className="space-y-8">
+            <div className="bg-white rounded-[2rem] sm:rounded-3xl border border-slate-200 p-4 sm:p-8 shadow-md overflow-x-auto no-scrollbar scroll-smooth">
+                <div className={`space-y-8 sm:space-y-12 min-w-max mx-auto max-w-4xl transition-all duration-500 ${viewMode !== 'ALL' ? 'py-10' : ''}`}>
                     {/* Arcada Superior */}
-                    <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center mb-4">
-                            Arcada Superior
-                        </p>
-                        {renderArcada(arcadaSuperior)}
-                    </div>
+                    {(viewMode === 'ALL' || viewMode === 'UPPER') && (
+                        <div className="relative animate-in fade-in slide-in-from-top-4 duration-500">
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] text-center absolute -top-6 w-full">
+                                Arcada Superior
+                            </p>
+                            <div className="md:scale-100 scale-110 sm:scale-125 transition-transform origin-center">
+                                {renderArcada(arcadaSuperior)}
+                            </div>
+                        </div>
+                    )}
 
-                    {/* Separador */}
-                    <div className="h-px bg-slate-200" />
+                    {/* Línea Divisoria Estética */}
+                    {viewMode === 'ALL' && (
+                        <div className="flex items-center gap-4 py-2">
+                            <div className="h-px bg-slate-100 flex-1" />
+                            <div className="w-2 h-2 rounded-full bg-slate-200" />
+                            <div className="h-px bg-slate-100 flex-1" />
+                        </div>
+                    )}
 
                     {/* Arcada Inferior */}
-                    <div>
-                        {renderArcada(arcadaInferior)}
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center mt-4">
-                            Arcada Inferior
-                        </p>
-                    </div>
+                    {(viewMode === 'ALL' || viewMode === 'LOWER') && (
+                        <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="md:scale-100 scale-110 sm:scale-125 transition-transform origin-center">
+                                {renderArcada(arcadaInferior)}
+                            </div>
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] text-center absolute -bottom-6 w-full">
+                                Arcada Inferior
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 

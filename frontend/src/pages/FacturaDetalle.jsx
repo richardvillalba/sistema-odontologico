@@ -269,58 +269,68 @@ const FacturaDetalle = () => {
     };
 
     if (loadingFactura || loadingDetalles) return (
-        <div className="p-20 text-center animate-pulse font-black text-slate-400 uppercase tracking-widest">
-            Consultando Comprobante...
+        <div className="p-20 text-center animate-pulse flex flex-col items-center gap-6">
+            <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p className="font-black text-text-secondary uppercase tracking-[0.2em] text-[10px] opacity-60">
+                Consultando Comprobante...
+            </p>
         </div>
     );
 
     if (isErrorFactura || !factura) return (
-        <div className="p-20 text-center space-y-4">
-            <div className="text-6xl">🔍</div>
-            <h2 className="text-2xl font-black text-slate-900">Factura no encontrada</h2>
-            <p className="text-slate-500">El comprobante solicitado no existe o no tiene permisos para verlo.</p>
-            <button onClick={() => navigate('/facturas')} className="text-indigo-600 font-bold uppercase text-xs">Volver al listado</button>
+        <div className="p-20 text-center space-y-6 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-[2rem] bg-surface-raised flex items-center justify-center text-3xl border border-border shadow-inner">🔍</div>
+            <div className="space-y-2">
+                <h2 className="text-2xl font-black text-text-primary uppercase tracking-tight">Factura no encontrada</h2>
+                <p className="text-text-secondary font-medium max-w-sm mx-auto">El comprobante solicitado no existe, fue eliminado o no tienes los permisos necesarios para visualizarlo.</p>
+            </div>
+            <button onClick={() => navigate('/facturas')} className="bg-primary text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all">Volver al listado</button>
         </div>
     );
 
     const getStatusStyle = (estado) => {
         switch (estado) {
-            case 'BORRADOR': return 'bg-slate-100 text-slate-700 border-slate-200';
-            case 'PENDIENTE': return 'bg-amber-100 text-amber-700 border-amber-200';
-            case 'PAGADA': return 'bg-green-100 text-green-700 border-green-200';
-            case 'PARCIAL': return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'ANULADA': return 'bg-red-100 text-red-700 border-red-200';
-            default: return 'bg-slate-100 text-slate-700 border-slate-200';
+            case 'BORRADOR': return 'bg-surface-raised text-text-secondary border-border';
+            case 'PENDIENTE': return 'bg-warning-light/20 text-warning-dark border-warning/20';
+            case 'PAGADA': return 'bg-secondary-light/20 text-secondary border-secondary/20';
+            case 'PARCIAL': return 'bg-primary-light/20 text-primary border-primary/20';
+            case 'ANULADA': return 'bg-danger-light/20 text-danger border-danger/20';
+            default: return 'bg-surface-raised text-text-secondary border-border';
         }
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20 px-1 sm:px-0">
+        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20 px-4 sm:px-0">
             {/* Header / Actions Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4 sm:px-0">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div className="flex items-center gap-6">
                     <button
                         onClick={() => navigate('/facturas')}
-                        className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+                        className="p-4 bg-surface-card border border-border rounded-2xl text-text-secondary hover:text-primary shadow-sm group transition-all"
                     >
-                        ⬅️
+                        <svg className="w-6 h-6 transition-transform group-hover:-translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
+                        </svg>
                     </button>
                     <div className="min-w-0">
-                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">
-                            Factura {factura.numero_factura_completo}
+                        <h1 className="text-2xl sm:text-3xl font-black text-text-primary uppercase tracking-tight leading-none">
+                            Factura <span className="text-primary">{factura.numero_factura_completo}</span>
                         </h1>
-                        <p className="text-slate-500 font-medium text-sm">Emitida el {new Date(factura.fecha_emision).toLocaleDateString()}</p>
+                        <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Emitida el <span className="text-text-primary opacity-100">{new Date(factura.fecha_emision).toLocaleDateString()}</span></p>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 sm:gap-3">
+                <div className="flex flex-wrap gap-3">
                     {factura.estado === 'BORRADOR' && (
                         <button
                             onClick={() => confirmarMutation.mutate()}
                             disabled={confirmarMutation.isPending}
-                            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-indigo-200 transition-all text-sm"
+                            className="flex-1 sm:flex-none bg-primary hover:bg-primary-dark text-white px-6 py-4 rounded-2xl font-black shadow-xl shadow-primary/20 transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"
                         >
-                            {confirmarMutation.isPending ? 'Confirmando...' : 'Confirmar Factura'}
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {confirmarMutation.isPending ? 'Procesando...' : 'Confirmar Factura'}
                         </button>
                     )}
 
@@ -329,8 +339,11 @@ const FacturaDetalle = () => {
                             onClick={() => cajaAbierta ? navigate(`/facturas/${id}/registrar-pago`) : null}
                             disabled={!cajaAbierta}
                             title={!cajaAbierta ? 'Debes abrir tu caja para registrar pagos' : ''}
-                            className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black shadow-lg transition-all text-sm ${cajaAbierta ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
+                            className={`flex-1 sm:flex-none px-6 py-4 rounded-2xl font-black shadow-xl transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${cajaAbierta ? 'bg-secondary hover:bg-secondary-dark text-white shadow-secondary/20' : 'bg-surface-raised text-text-secondary opacity-50 cursor-not-allowed border border-border shadow-none'}`}
                         >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.407 2.67 1M12 17c-1.12 0-2.09-.411-2.67-1M12 8V7m0 11v-1m0-11a5 5 0 015 5v3m-5-8a5 5 0 00-5 5v3m5-8V7m0 11v-1" />
+                            </svg>
                             Registrar Pago
                         </button>
                     )}
@@ -340,81 +353,99 @@ const FacturaDetalle = () => {
                             onClick={() => cajaAbierta ? setAnularModal(true) : null}
                             disabled={!cajaAbierta}
                             title={!cajaAbierta ? 'Debes abrir tu caja para anular esta factura' : ''}
-                            className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black transition-all text-sm ${cajaAbierta ? 'bg-white border-2 border-slate-100 text-rose-600 hover:bg-rose-50' : 'bg-slate-100 text-slate-400 cursor-not-allowed border-2 border-slate-100'}`}
+                            className={`flex-1 sm:flex-none px-6 py-4 rounded-2xl font-black transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border-2 ${cajaAbierta ? 'bg-white border-danger/10 text-danger hover:bg-danger/5 shadow-xl shadow-danger/5' : 'bg-surface-raised border-border text-text-secondary opacity-50 cursor-not-allowed'}`}
                         >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
                             Anular
                         </button>
                     )}
 
                     <button
                         onClick={() => window.print()}
-                        className="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 transition-all flex items-center justify-center gap-2 text-sm"
+                        className="flex-1 sm:flex-none bg-primary-dark hover:bg-black text-white px-6 py-4 rounded-2xl font-black shadow-xl shadow-primary-dark/20 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest border border-white/10"
                     >
-                        <span>🖨️</span> <span className="hidden xs:inline">Imprimir</span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Imprimir
                     </button>
                 </div>
             </div>
 
             {actionError && (
-                <div className="bg-rose-50 border-2 border-rose-100 p-4 rounded-2xl flex items-center gap-4 animate-shake mx-4 sm:mx-0">
-                    <span className="text-2xl">⚠️</span>
-                    <p className="text-rose-700 font-bold">{actionError}</p>
+                <div className="bg-danger-light/20 border-2 border-danger/20 p-5 rounded-3xl flex items-center gap-5 animate-shake mx-2 sm:mx-0">
+                    <div className="w-12 h-12 rounded-2xl bg-danger text-white flex items-center justify-center shadow-lg shadow-danger/20 shrink-0">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <p className="text-danger font-black text-sm uppercase tracking-tight">{actionError}</p>
                 </div>
             )}
 
             {/* Banner: caja cerrada */}
             {!loadingCajas && !cajaAbierta && factura.estado !== 'ANULADA' && factura.estado !== 'PAGADA' && (
-                <div className="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex items-center justify-between gap-4 mx-4 sm:mx-0">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl shrink-0">🔐</span>
-                        <p className="text-amber-800 font-bold text-sm">
-                            Caja cerrada — Abre tu caja para poder registrar pagos o anular esta factura.
-                        </p>
+                <div className="bg-warning-light/10 border-2 border-warning/20 p-6 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-6 mx-2 sm:mx-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-warning-light/20 to-transparent">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-warning text-white flex items-center justify-center shadow-xl shadow-warning/20 shrink-0">
+                            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-warning-dark font-black text-sm uppercase tracking-tight">Caja Restringida</p>
+                            <p className="text-text-secondary font-medium text-xs">Debes aperturar tu caja para habilitar pagos o anular este comprobante.</p>
+                        </div>
                     </div>
                     <button
                         onClick={() => navigate('/caja')}
-                        className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all"
+                        className="w-full sm:w-auto bg-warning-dark hover:bg-black text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-warning-dark/20"
                     >
-                        Ir a Caja
+                        Gestionar Caja
                     </button>
                 </div>
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* Info Principal */}
-                <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+                <div className="lg:col-span-2 space-y-8">
                     {/* Items Table / Cards */}
-                    <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-2 sm:mx-0">
-                        <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <h2 className="font-black text-slate-800 uppercase tracking-widest text-xs sm:text-sm">Detalle de Conceptos</h2>
-                            <span className="text-[10px] sm:text-xs font-bold text-slate-400">{detalles.length} ítems</span>
+                    <div className="bg-surface-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden mx-2 sm:mx-0">
+                        <div className="px-8 py-6 border-b border-border flex justify-between items-center bg-surface-raised/50">
+                            <h2 className="font-black text-text-primary uppercase tracking-tight text-sm">Detalle de Conceptos</h2>
+                            <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">{detalles.length} ítems</span>
                         </div>
 
                         {/* Desktop Table */}
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-sm text-left">
-                                <thead className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                                <thead className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-40 border-b border-border">
                                     <tr>
-                                        <th className="px-8 py-4">Descripción</th>
-                                        <th className="px-8 py-4 text-center">Cant.</th>
-                                        <th className="px-8 py-4 text-right">Precio Unit.</th>
-                                        <th className="px-8 py-4 text-right">Subtotal</th>
+                                        <th className="px-8 py-5">Descripción del Concepto</th>
+                                        <th className="px-8 py-5 text-center">Cantidad</th>
+                                        <th className="px-8 py-5 text-right">Precio Unit. (Gs)</th>
+                                        <th className="px-8 py-5 text-right">Monto Línea (Gs)</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-border">
                                     {detalles.map((det, idx) => (
-                                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-8 py-5">
-                                                <p className="font-bold text-slate-800">{det.descripcion}</p>
+                                        <tr key={idx} className="hover:bg-primary-light/5 transition-all">
+                                            <td className="px-8 py-6">
+                                                <p className="font-black text-text-primary uppercase tracking-tight leading-tight">{det.descripcion}</p>
                                                 {det.tratamiento_paciente_id && (
-                                                    <span className="text-[9px] font-black text-indigo-400 uppercase">Tratamiento #{det.tratamiento_paciente_id}</span>
+                                                    <div className="flex items-center gap-1.5 mt-1.5">
+                                                        <span className="w-1 h-1 rounded-full bg-primary/40"></span>
+                                                        <span className="text-[9px] font-black text-primary uppercase tracking-widest opacity-60">Tratamiento #{det.tratamiento_paciente_id}</span>
+                                                    </div>
                                                 )}
                                             </td>
-                                            <td className="px-8 py-5 text-center font-bold text-slate-600">{det.cantidad}</td>
-                                            <td className="px-8 py-5 text-right font-bold text-slate-600">
+                                            <td className="px-8 py-6 text-center font-black text-text-secondary opacity-80">{det.cantidad}</td>
+                                            <td className="px-8 py-6 text-right font-black text-text-secondary opacity-80">
                                                 {new Intl.NumberFormat('es-PY').format(det.precio_unitario)}
                                             </td>
-                                            <td className="px-8 py-5 text-right font-black text-slate-900">
+                                            <td className="px-8 py-6 text-right font-black text-text-primary text-base tracking-tighter">
                                                 {new Intl.NumberFormat('es-PY').format(det.subtotal)}
                                             </td>
                                         </tr>
@@ -424,23 +455,23 @@ const FacturaDetalle = () => {
                         </div>
 
                         {/* Mobile Cards View */}
-                        <div className="md:hidden divide-y divide-slate-50">
+                        <div className="md:hidden divide-y divide-border">
                             {detalles.map((det, idx) => (
-                                <div key={idx} className="px-6 py-5 space-y-3">
+                                <div key={idx} className="px-6 py-6 space-y-4">
                                     <div>
-                                        <p className="font-bold text-slate-800 leading-tight">{det.descripcion}</p>
+                                        <p className="font-black text-text-primary uppercase tracking-tight leading-tight">{det.descripcion}</p>
                                         {det.tratamiento_paciente_id && (
-                                            <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mt-1 block">Tratamiento #{det.tratamiento_paciente_id}</span>
+                                            <span className="text-[9px] font-black text-primary uppercase tracking-widest mt-1.5 block opacity-60">Tratamiento #{det.tratamiento_paciente_id}</span>
                                         )}
                                     </div>
-                                    <div className="flex justify-between items-center text-xs">
-                                        <div className="flex flex-col">
-                                            <span className="text-slate-400 font-black uppercase text-[8px] tracking-widest">Cant x Precio</span>
-                                            <span className="font-bold text-slate-600">{det.cantidad} x {new Intl.NumberFormat('es-PY').format(det.precio_unitario)}</span>
+                                    <div className="flex justify-between items-end">
+                                        <div className="space-y-1">
+                                            <span className="text-text-secondary font-black uppercase text-[8px] tracking-[0.2em] opacity-40">Métricas</span>
+                                            <p className="font-black text-text-secondary text-xs opacity-80">{det.cantidad} x {new Intl.NumberFormat('es-PY').format(det.precio_unitario)} <span className="text-[9px]">Gs</span></p>
                                         </div>
-                                        <div className="text-right flex flex-col">
-                                            <span className="text-slate-400 font-black uppercase text-[8px] tracking-widest">Subtotal</span>
-                                            <span className="font-black text-slate-900">{new Intl.NumberFormat('es-PY').format(det.subtotal)} <span className="text-[10px] text-slate-400">Gs</span></span>
+                                        <div className="text-right space-y-1">
+                                            <span className="text-text-secondary font-black uppercase text-[8px] tracking-[0.2em] opacity-40">Subtotal</span>
+                                            <p className="font-black text-text-primary text-lg tracking-tighter">{new Intl.NumberFormat('es-PY').format(det.subtotal)} <span className="text-[10px] text-text-secondary opacity-40">Gs</span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -448,40 +479,48 @@ const FacturaDetalle = () => {
                         </div>
 
                         {/* Totals Section */}
-                        <div className="bg-slate-50 p-6 sm:p-8 flex flex-col items-end space-y-3">
-                            <div className="flex justify-between w-full max-w-[280px] sm:max-w-xs text-xs sm:text-sm text-slate-500 font-bold">
-                                <span>Subtotal:</span>
-                                <span>{new Intl.NumberFormat('es-PY').format(factura.subtotal)} Gs</span>
+                        <div className="bg-surface-raised/50 p-8 flex flex-col items-end space-y-4 border-t border-border">
+                            <div className="flex justify-between w-full max-w-[280px] sm:max-w-xs text-xs font-bold uppercase tracking-widest">
+                                <span className="text-text-secondary opacity-40">Subtotal Operación</span>
+                                <span className="text-text-primary">{new Intl.NumberFormat('es-PY').format(factura.subtotal)} Gs</span>
                             </div>
-                            <div className="flex justify-between w-full max-w-[280px] sm:max-w-xs text-xs sm:text-sm text-rose-500 font-bold border-b border-slate-200 pb-3">
-                                <span>Descuento:</span>
+                            <div className="flex justify-between w-full max-w-[280px] sm:max-w-xs text-xs font-black uppercase tracking-widest text-danger border-b border-border pb-4">
+                                <span className="opacity-60">Bonificación Aplicada</span>
                                 <span>- {new Intl.NumberFormat('es-PY').format(factura.descuento)} Gs</span>
                             </div>
                             <div className="flex justify-between items-center w-full max-w-[280px] sm:max-w-xs pt-2">
-                                <span className="text-xs sm:text-base font-black text-slate-900 uppercase tracking-widest mr-2">Total</span>
-                                <span className="text-2xl sm:text-3xl font-black text-indigo-600 flex items-baseline gap-1">
-                                    {new Intl.NumberFormat('es-PY').format(factura.total)} <span className="text-[10px] sm:text-sm uppercase tracking-tight">Gs</span>
-                                </span>
+                                <span className="text-xs font-black text-text-primary uppercase tracking-[0.2em] mr-4 opacity-40">Total Final</span>
+                                <div className="text-right">
+                                    <span className="text-3xl font-black text-primary tracking-tighter">
+                                        {new Intl.NumberFormat('es-PY').format(factura.total)}
+                                    </span>
+                                    <span className="text-[10px] font-black text-primary uppercase ml-1 opacity-60">Gs</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Observaciones */}
                     {factura.observaciones && (
-                        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm mx-2 sm:mx-0">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Observaciones / Notas</h3>
-                            <p className="text-slate-600 font-medium leading-relaxed italic text-sm sm:text-base">"{factura.observaciones}"</p>
+                        <div className="bg-surface-card p-8 rounded-[2rem] border border-border shadow-sm mx-2 sm:mx-0 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <svg className="w-12 h-12 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C14.9124 8 14.017 7.10457 14.017 6V3L14.017 3H21.017V21H14.017ZM3.017 21V18C3.017 16.8954 3.91238 16 5.017 16H8.017C8.56928 16 9.017 15.5523 9.017 15V9C9.017 8.44772 8.56928 8 8.017 8H5.017C3.91238 8 3.017 7.10457 3.017 6V3L3.017 3H10.017V21H3.017Z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4 opacity-40">Anotaciones del Comprobante</h3>
+                            <p className="text-text-primary font-bold leading-relaxed italic text-sm sm:text-base pr-8">"{factura.observaciones}"</p>
                         </div>
                     )}
 
                     {/* Cuotas - Solo si es CREDITO y tiene cuotas */}
                     {cuotas.length > 0 && (
-                        <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-2 sm:mx-0">
-                            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
-                                <h2 className="font-black text-amber-800 uppercase tracking-widest text-xs sm:text-sm">Plan de Cuotas</h2>
-                                <span className="text-[10px] sm:text-xs font-bold text-amber-600">{cuotas.length} cuotas</span>
+                        <div className="bg-surface-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden mx-2 sm:mx-0">
+                            <div className="px-8 py-6 border-b border-border flex justify-between items-center bg-warning-light/5">
+                                <h2 className="font-black text-warning-dark uppercase tracking-tight text-sm">Calendario de Vencimientos</h2>
+                                <span className="text-[10px] font-black text-warning-dark uppercase tracking-widest opacity-60">{cuotas.length} cuotas programadas</span>
                             </div>
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y divide-border">
                                 {cuotas.map((cuota) => {
                                     const isVencida = cuota.vencida === 'S' || cuota.estado === 'VENCIDA';
                                     const isPagada = cuota.estado === 'PAGADA';
@@ -490,30 +529,39 @@ const FacturaDetalle = () => {
                                     return (
                                         <div
                                             key={cuota.cuota_id}
-                                            className={`px-6 sm:px-8 py-5 flex items-center justify-between gap-3 sm:gap-4 ${isPagada ? 'bg-green-50/25' : isVencida ? 'bg-rose-50/25' : ''}`}
+                                            className={`px-8 py-6 flex items-center justify-between gap-6 transition-all ${isPagada ? 'bg-secondary-light/5 opacity-60' : isVencida ? 'bg-danger-light/5' : 'hover:bg-primary-light/5'}`}
                                         >
-                                            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-xs sm:text-sm font-black shrink-0 ${isPagada ? 'bg-green-100 text-green-600' : isVencida ? 'bg-rose-100 text-rose-600' : isParcial ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
-                                                    {isPagada ? '✓' : cuota.numero_cuota}
+                                            <div className="flex items-center gap-5 min-w-0">
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 border shadow-sm ${isPagada ? 'bg-secondary text-white border-secondary/20 shadow-secondary/10' : isVencida ? 'bg-danger text-white border-danger/20 shadow-danger/10 animate-pulse' : isParcial ? 'bg-primary text-white border-primary/20 shadow-primary/10' : 'bg-surface-raised text-text-secondary border-border'}`}>
+                                                    {isPagada ? (
+                                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    ) : cuota.numero_cuota}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="font-bold text-slate-800 text-sm sm:text-base truncate">
-                                                        Cuota {cuota.numero_cuota}
-                                                        {isParcial && <span className="ml-2 text-[10px] text-blue-600">(Parcial)</span>}
+                                                    <p className={`font-black uppercase tracking-tight text-sm sm:text-base truncate ${isPagada ? 'text-text-secondary' : 'text-text-primary'}`}>
+                                                        Cuota <span className="text-primary">#{cuota.numero_cuota}</span>
+                                                        {isParcial && <span className="ml-2 text-[10px] font-black text-primary px-2 py-0.5 bg-primary/10 rounded-full tracking-widest uppercase">Parcial</span>}
                                                     </p>
-                                                    <p className={`text-[10px] sm:text-xs font-bold ${isVencida ? 'text-rose-500' : 'text-slate-400'}`}>
-                                                        Vence: {new Date(cuota.fecha_vencimiento).toLocaleDateString()}
-                                                        {isVencida && !isPagada && ' - VENCIDA'}
-                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <svg className={`w-3.5 h-3.5 ${isVencida ? 'text-danger' : 'text-text-secondary opacity-40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <p className={`text-[10px] font-black uppercase tracking-widest ${isVencida ? 'text-danger' : 'text-text-secondary opacity-40'}`}>
+                                                            {new Date(cuota.fecha_vencimiento).toLocaleDateString()}
+                                                            {isVencida && !isPagada && ' • VENCIDA'}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="text-right flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 shrink-0">
+                                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 shrink-0">
                                                 <div className="text-right">
-                                                    <p className={`font-black text-sm sm:text-base ${isPagada ? 'text-green-600/50 line-through' : 'text-slate-900'}`}>
+                                                    <p className={`font-black text-base sm:text-lg tracking-tighter ${isPagada ? 'text-text-secondary opacity-40 line-through' : isVencida ? 'text-danger' : 'text-text-primary'}`}>
                                                         {new Intl.NumberFormat('es-PY').format(cuota.monto_cuota)} <span className="text-[10px]">Gs</span>
                                                     </p>
                                                     {cuota.saldo_cuota > 0 && cuota.saldo_cuota < cuota.monto_cuota && (
-                                                        <p className="text-[10px] text-amber-600 font-bold">
+                                                        <p className="text-[10px] text-primary font-black uppercase tracking-widest mt-1">
                                                             Saldo: {new Intl.NumberFormat('es-PY').format(cuota.saldo_cuota)} Gs
                                                         </p>
                                                     )}
@@ -523,8 +571,11 @@ const FacturaDetalle = () => {
                                                         onClick={() => cajaAbierta ? openPagoModal(cuota) : null}
                                                         disabled={!cajaAbierta}
                                                         title={!cajaAbierta ? 'Debes abrir tu caja para pagar cuotas' : ''}
-                                                        className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] font-black rounded-lg sm:rounded-xl transition-all uppercase tracking-widest ${cajaAbierta ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                                                        className={`px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl flex items-center gap-2 ${cajaAbierta ? 'bg-secondary hover:bg-secondary-dark text-white shadow-secondary/20' : 'bg-surface-raised text-text-secondary opacity-50 cursor-not-allowed border border-border shadow-none'}`}
                                                     >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
                                                         Pagar
                                                     </button>
                                                 )}
@@ -538,52 +589,58 @@ const FacturaDetalle = () => {
 
                     {/* Pagos Registrados */}
                     {pagos.length > 0 && (
-                        <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mx-2 sm:mx-0">
-                            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50">
-                                <h2 className="font-black text-emerald-800 uppercase tracking-widest text-xs sm:text-sm">Pagos Registrados</h2>
-                                <span className="text-[10px] sm:text-xs font-bold text-emerald-600">{pagos.length} pago{pagos.length > 1 ? 's' : ''}</span>
+                        <div className="bg-surface-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden mx-2 sm:mx-0">
+                            <div className="px-8 py-6 border-b border-border flex justify-between items-center bg-secondary-light/5">
+                                <h2 className="font-black text-secondary uppercase tracking-tight text-sm">Registro de Cobros</h2>
+                                <span className="text-[10px] font-black text-secondary uppercase tracking-widest opacity-60">{pagos.length} cobro{pagos.length > 1 ? 's' : ''} efectuado{pagos.length > 1 ? 's' : ''}</span>
                             </div>
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y divide-border">
                                 {pagos.map((pago) => (
                                     <div
                                         key={pago.pago_id}
-                                        className="px-6 sm:px-8 py-5 flex items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors"
+                                        className="px-8 py-6 flex items-center justify-between gap-6 hover:bg-primary-light/5 transition-all"
                                     >
-                                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-black shrink-0">
-                                                💰
+                                        <div className="flex items-center gap-5 min-w-0">
+                                            <div className="w-12 h-12 rounded-2xl bg-secondary text-white flex items-center justify-center text-sm font-black shrink-0 border border-secondary/20 shadow-lg shadow-secondary/10">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-bold text-slate-800 text-sm sm:text-base truncate">
+                                                <p className="font-black text-text-primary text-sm sm:text-base uppercase tracking-tight truncate">
                                                     {pago.metodo_pago}
-                                                    {pago.referencia && <span className="ml-2 text-[10px] text-slate-400 font-medium">#{pago.referencia}</span>}
+                                                    {pago.referencia && <span className="ml-2 text-[10px] text-text-secondary font-black opacity-40">REF: #{pago.referencia}</span>}
                                                 </p>
-                                                <p className="text-[10px] sm:text-xs font-bold text-slate-400">
-                                                    {new Date(pago.fecha_pago).toLocaleDateString()}
+                                                <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 mt-1">
+                                                    Operación: <span className="text-text-primary opacity-100">{new Date(pago.fecha_pago).toLocaleDateString()}</span>
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 shrink-0">
-                                            <p className="font-black text-emerald-600 text-base sm:text-lg">
-                                                {new Intl.NumberFormat('es-PY').format(pago.monto)} <span className="text-[10px]">Gs</span>
+                                        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 shrink-0">
+                                            <p className="font-black text-secondary text-lg sm:text-xl tracking-tighter">
+                                                {new Intl.NumberFormat('es-PY').format(pago.monto)} <span className="text-[10px] opacity-60">Gs</span>
                                             </p>
-                                            <button
-                                                onClick={() => imprimirRecibo(pago)}
-                                                title="Imprimir recibo de este pago"
-                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black rounded-lg transition-all flex items-center gap-1"
-                                            >
-                                                🖨️ <span className="hidden sm:inline">Recibo</span>
-                                            </button>
-                                            {factura.estado !== 'ANULADA' && (
+                                            <div className="flex gap-2">
                                                 <button
-                                                    onClick={() => cajaAbierta ? setAnularPagoModal({ open: true, pago }) : null}
-                                                    disabled={!cajaAbierta}
-                                                    title={!cajaAbierta ? 'Debes abrir tu caja para anular pagos' : ''}
-                                                    className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${cajaAbierta ? 'bg-rose-50 hover:bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                                                    onClick={() => imprimirRecibo(pago)}
+                                                    title="Imprimir recibo de este pago"
+                                                    className="p-3 bg-surface-raised border border-border text-text-secondary hover:text-primary rounded-xl transition-all shadow-sm group"
                                                 >
-                                                    Anular
+                                                    <svg className="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                    </svg>
                                                 </button>
-                                            )}
+                                                {factura.estado !== 'ANULADA' && (
+                                                    <button
+                                                        onClick={() => cajaAbierta ? setAnularPagoModal({ open: true, pago }) : null}
+                                                        disabled={!cajaAbierta}
+                                                        title={!cajaAbierta ? 'Debes abrir tu caja para anular pagos' : ''}
+                                                        className={`px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${cajaAbierta ? 'bg-danger text-white hover:bg-danger-dark shadow-xl shadow-danger/20' : 'bg-surface-raised text-text-secondary opacity-50 cursor-not-allowed border border-border shadow-none'}`}
+                                                    >
+                                                        Anular
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -593,67 +650,70 @@ const FacturaDetalle = () => {
                 </div>
 
                 {/* Sidebar Info */}
-                <div className="space-y-6 sm:space-y-8 px-2 sm:px-0">
+                <div className="space-y-8">
                     {/* Status Card */}
-                    <div className={`p-6 sm:p-8 rounded-[2rem] border-2 shadow-sm flex items-center lg:flex-col text-left lg:text-center gap-4 ${getStatusStyle(factura.estado)}`}>
-                        <div className="text-4xl sm:text-5xl shrink-0">
+                    <div className={`p-8 rounded-[2.5rem] border-2 shadow-sm flex items-center lg:flex-col text-left lg:text-center gap-6 relative overflow-hidden group ${getStatusStyle(factura.estado)}`}>
+                        <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-current opacity-5 blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-white/40 backdrop-blur-md flex items-center justify-center text-3xl sm:text-4xl shadow-xl shadow-current/5 shrink-0 border border-white/40">
                             {factura.estado === 'PAGADA' ? '✅' : factura.estado === 'ANULADA' ? '🚫' : '⏳'}
                         </div>
                         <div className="flex-1 lg:w-full">
-                            <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 mb-1 lg:mb-2">Estado</p>
-                            <p className="text-xl sm:text-2xl font-black tracking-tighter leading-none">{factura.estado}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2">Dictamen de Cobro</p>
+                            <p className="text-2xl sm:text-3xl font-black tracking-tighter leading-none">{factura.estado}</p>
                             {factura.saldo_pendiente > 0 && (
-                                <div className="mt-3 pt-3 border-t border-current/10 w-full text-rose-700">
-                                    <p className="text-[9px] font-black uppercase tracking-widest mb-1">Saldo Pendiente</p>
-                                    <p className="text-lg font-black">{new Intl.NumberFormat('es-PY').format(factura.saldo_pendiente)} Gs</p>
+                                <div className="mt-5 pt-5 border-t border-current/10 w-full">
+                                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-60">Saldo Pendiente</p>
+                                    <p className="text-xl font-black tracking-tighter">{new Intl.NumberFormat('es-PY').format(factura.saldo_pendiente)} <span className="text-xs">Gs</span></p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Patient Card */}
-                    <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm space-y-6">
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Información del Cliente</h3>
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-xl sm:text-2xl font-black text-slate-400 shrink-0">
+                    <div className="bg-surface-card p-8 rounded-[2.5rem] border border-border shadow-sm space-y-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-20"></div>
+                        <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40">Identidad del Beneficiario</h3>
+                        <div className="flex items-center gap-5">
+                            <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center text-2xl font-black shadow-xl shadow-primary/20 shrink-0 border-4 border-white">
                                 {factura.nombre_cliente?.charAt(0)}
                             </div>
                             <div className="min-w-0">
-                                <p className="font-black text-slate-900 leading-tight truncate">{factura.nombre_cliente}</p>
-                                <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-tighter">
-                                    {factura.tipo_documento_cliente}: {factura.numero_documento_cliente}
-                                </p>
+                                <p className="font-black text-text-primary uppercase tracking-tight leading-none truncate">{factura.nombre_cliente}</p>
+                                <div className="flex items-center gap-1.5 mt-2 bg-surface-raised px-2.5 py-1 rounded-lg w-fit border border-border">
+                                    <span className="text-[9px] font-black text-text-secondary opacity-40 uppercase">{factura.tipo_documento_cliente}:</span>
+                                    <span className="text-[10px] font-black text-text-primary">{factura.numero_documento_cliente}</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="pt-4 border-t border-slate-100 flex justify-between items-center gap-2">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0">Condición</span>
-                            <span className="bg-slate-100 px-3 py-1 rounded-lg text-[9px] font-black text-slate-700 uppercase truncate">
-                                {factura.condicion_operacion} {factura.condicion_operacion === 'CREDITO' ? `(${factura.plazo_credito_dias} días)` : ''}
+                        <div className="pt-6 border-t border-border flex justify-between items-center gap-4">
+                            <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 shrink-0">Condición Fiscal</span>
+                            <span className="bg-primary/5 border border-primary/20 px-4 py-1.5 rounded-xl text-[9px] font-black text-primary uppercase tracking-widest truncate">
+                                {factura.condicion_operacion} {factura.condicion_operacion === 'CREDITO' ? `(${factura.plazo_credito_dias}D)` : ''}
                             </span>
                         </div>
                         <button
                             onClick={() => navigate(`/pacientes/${factura.paciente_id}`)}
-                            className="w-full bg-indigo-50/50 hover:bg-indigo-50 text-indigo-600 py-3.5 rounded-2xl font-black text-[10px] transition-all uppercase tracking-widest"
+                            className="w-full bg-primary-dark hover:bg-black text-white py-4 rounded-2xl font-black text-[10px] transition-all uppercase tracking-widest shadow-xl shadow-primary-dark/20 border border-white/10"
                         >
-                            Ver Expediente
+                            Ver Legajo Clínico
                         </button>
                     </div>
 
                     {/* Fiscal Info */}
-                    <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-200/50 space-y-4">
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Datos Fiscales</h3>
-                        <div className="space-y-3">
+                    <div className="bg-surface-raised p-8 rounded-[2.5rem] border border-border space-y-6">
+                        <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40">Especificaciones SET</h3>
+                        <div className="space-y-4">
                             <div className="flex justify-between items-center gap-4">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timbrado</span>
-                                <span className="font-mono text-xs font-bold text-slate-700">{factura.numero_timbrado}</span>
+                                <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">Timbrado Nro</span>
+                                <span className="font-mono text-xs font-black text-text-primary bg-white px-3 py-1 rounded-lg border border-border">{factura.numero_timbrado}</span>
                             </div>
                             <div className="flex justify-between items-center gap-4">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Punto Exp.</span>
-                                <span className="font-mono text-xs font-bold text-slate-700">{factura.establecimiento}-{factura.punto_expedicion}</span>
+                                <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">PV-Boca-Nro</span>
+                                <span className="font-mono text-xs font-black text-text-primary bg-white px-3 py-1 rounded-lg border border-border">{factura.establecimiento}-{factura.punto_expedicion}</span>
                             </div>
                             <div className="flex justify-between items-center gap-4">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID Interno</span>
-                                <span className="font-mono text-xs font-bold text-slate-700">#{factura.factura_id}</span>
+                                <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">Folio Interno</span>
+                                <span className="font-mono text-xs font-black text-primary bg-primary/5 px-3 py-1 rounded-lg border border-primary/10">#{factura.factura_id}</span>
                             </div>
                         </div>
                     </div>
@@ -662,63 +722,80 @@ const FacturaDetalle = () => {
 
             {/* Modal de Pago de Cuota */}
             {pagoModal.open && pagoModal.cuota && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95">
-                        <h3 className="text-xl font-black text-slate-900 mb-6">
-                            Pagar Cuota {pagoModal.cuota.numero_cuota}
-                        </h3>
+                <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-surface-card rounded-[2.5rem] shadow-2xl max-w-md w-full p-10 animate-in zoom-in-95 border border-white/20">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-black text-text-primary uppercase tracking-tight leading-none">
+                                Liquidar Cuota <span className="text-primary">#{pagoModal.cuota.numero_cuota}</span>
+                            </h3>
+                        </div>
 
-                        <div className="space-y-4">
-                            <div className="bg-slate-50 p-4 rounded-2xl">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-slate-500">Monto cuota:</span>
-                                    <span className="font-bold">{new Intl.NumberFormat('es-PY').format(pagoModal.cuota.monto_cuota)} Gs</span>
+                        <div className="space-y-6">
+                            <div className="bg-surface-raised border border-border p-6 rounded-2xl space-y-3">
+                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                    <span className="text-text-secondary opacity-40">Monto Nominal:</span>
+                                    <span className="text-text-primary">{new Intl.NumberFormat('es-PY').format(pagoModal.cuota.monto_cuota)} Gs</span>
                                 </div>
-                                <div className="flex justify-between text-sm mt-1">
-                                    <span className="text-slate-500">Saldo pendiente:</span>
-                                    <span className="font-black text-amber-600">{new Intl.NumberFormat('es-PY').format(pagoModal.cuota.saldo_cuota)} Gs</span>
+                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest pt-3 border-t border-border/50">
+                                    <span className="text-text-secondary opacity-40">Saldo Exigible:</span>
+                                    <span className="text-primary text-sm">{new Intl.NumberFormat('es-PY').format(pagoModal.cuota.saldo_cuota)} Gs</span>
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Monto a Pagar</label>
-                                <input
-                                    type="number"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-lg font-bold p-3"
-                                    value={montoPago}
-                                    onChange={(e) => setMontoPago(parseFloat(e.target.value) || 0)}
-                                    max={pagoModal.cuota.saldo_cuota}
-                                />
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Monto a Percibir</label>
+                                <div className="relative group">
+                                    <input
+                                        type="number"
+                                        className="w-full bg-surface-raised border-2 border-border rounded-xl text-xl font-black p-4 focus:border-primary focus:outline-none transition-all pr-12"
+                                        value={montoPago}
+                                        onChange={(e) => setMontoPago(parseFloat(e.target.value) || 0)}
+                                        max={pagoModal.cuota.saldo_cuota}
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-text-secondary opacity-40 uppercase">Gs</span>
+                                </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Método de Pago</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Modalidad de Cobro</label>
                                 <select
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold p-3"
+                                    className="w-full bg-surface-raised border-2 border-border rounded-xl text-xs font-black uppercase tracking-widest p-4 focus:border-primary focus:outline-none transition-all appearance-none cursor-pointer"
                                     value={metodoPago}
                                     onChange={(e) => setMetodoPago(e.target.value)}
                                 >
-                                    <option value="EFECTIVO">Efectivo</option>
-                                    <option value="TRANSFERENCIA">Transferencia</option>
-                                    <option value="TARJETA">Tarjeta</option>
-                                    <option value="CHEQUE">Cheque</option>
+                                    <option value="EFECTIVO">💵 EFECTIVO</option>
+                                    <option value="TRANSFERENCIA">🏦 TRANSFERENCIA</option>
+                                    <option value="TARJETA">💳 TARJETA</option>
+                                    <option value="CHEQUE">📝 CHEQUE</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div className="flex gap-3 mt-8">
+                        <div className="grid grid-cols-2 gap-4 mt-10">
                             <button
                                 onClick={() => setPagoModal({ open: false, cuota: null })}
-                                className="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition-all"
+                                className="px-6 py-4 bg-surface-raised hover:bg-border text-text-secondary rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border border-border"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handlePagarCuota}
                                 disabled={pagarCuotaMutation.isPending || montoPago <= 0 || montoPago > pagoModal.cuota.saldo_cuota}
-                                className="flex-1 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-xl font-black transition-all"
+                                className="px-6 py-4 bg-secondary hover:bg-secondary-dark disabled:bg-surface-raised disabled:text-text-secondary/40 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-secondary/20 flex items-center justify-center gap-2"
                             >
-                                {pagarCuotaMutation.isPending ? 'Procesando...' : 'Confirmar Pago'}
+                                {pagarCuotaMutation.isPending ? (
+                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                                Confirmar
                             </button>
                         </div>
                     </div>
@@ -727,60 +804,71 @@ const FacturaDetalle = () => {
 
             {/* Modal de Anulación */}
             {anularModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95">
-                        <div className="text-center mb-6">
-                            <div className="text-6xl mb-4">⚠️</div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-2">
-                                Anular Factura
+                <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-surface-card rounded-[2.5rem] shadow-2xl max-w-md w-full p-10 animate-in zoom-in-95 border border-white/20">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 rounded-[2rem] bg-danger/10 text-danger flex items-center justify-center mx-auto mb-6 shadow-inner border border-danger/10">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight mb-2">
+                                Anular Comprobante
                             </h3>
-                            <p className="text-slate-500 font-medium">
-                                Factura {factura.numero_factura_completo}
+                            <p className="text-text-secondary font-black text-[10px] uppercase tracking-widest opacity-40">
+                                {factura.numero_factura_completo}
                             </p>
                         </div>
 
-                        <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 mb-6">
-                            <p className="text-sm text-rose-700 font-bold text-center">
-                                Esta acción es irreversible. La factura quedará anulada permanentemente.
+                        <div className="bg-danger/5 border border-danger/20 rounded-2xl p-6 mb-8">
+                            <p className="text-xs text-danger font-black uppercase tracking-tight text-center leading-relaxed">
+                                Esta operación es irreversible. El comprobante pasará a estado ANULADO permanentemente.
                             </p>
                         </div>
 
-                        <div className="space-y-2 mb-6">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                Motivo de Anulación
+                        <div className="space-y-2 mb-8 text-left">
+                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">
+                                Justificación de la Anulación
                             </label>
                             <textarea
-                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium p-4 focus:border-rose-400 focus:outline-none transition-colors resize-none"
-                                rows="3"
-                                placeholder="Ingrese el motivo de la anulación..."
+                                className="w-full bg-surface-raised border-2 border-border rounded-2xl text-sm font-bold p-5 focus:border-danger/30 focus:outline-none transition-all resize-none shadow-inner"
+                                rows="4"
+                                placeholder="Describa el motivo detallado..."
                                 value={motivoAnulacion}
                                 onChange={(e) => setMotivoAnulacion(e.target.value)}
                             />
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="grid grid-cols-2 gap-4">
                             <button
                                 onClick={() => {
                                     setAnularModal(false);
                                     setMotivoAnulacion('');
                                 }}
-                                className="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all"
+                                className="px-6 py-4 bg-surface-raised hover:bg-border text-text-secondary rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border border-border"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={() => anularMutation.mutate(motivoAnulacion)}
                                 disabled={anularMutation.isPending || !motivoAnulacion.trim()}
-                                className="flex-1 px-6 py-3 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 disabled:text-slate-500 text-white rounded-xl font-black transition-all"
+                                className="px-6 py-4 bg-danger hover:bg-danger-dark disabled:bg-surface-raised disabled:text-text-secondary/40 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-danger/20 flex items-center justify-center gap-2"
                             >
-                                {anularMutation.isPending ? 'Anulando...' : 'Confirmar Anulación'}
+                                {anularMutation.isPending ? (
+                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                    </svg>
+                                )}
+                                Confirmar
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Área de impresión - fuera de pantalla en modo normal, visible al imprimir */}
+            {/* ÁREA DE IMPRESIÓN (OCULTA) */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
                 {factura && (
                     <FacturaPrint factura={factura} detalles={detalles} empresa={empresa} />
@@ -789,46 +877,50 @@ const FacturaDetalle = () => {
 
             {/* Modal de Anulación de Pago */}
             {anularPagoModal.open && anularPagoModal.pago && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95">
-                        <div className="text-center mb-6">
-                            <div className="text-6xl mb-4">⚠️</div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-2">
-                                Anular Pago
+                <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-surface-card rounded-[2.5rem] shadow-2xl max-w-md w-full p-10 animate-in zoom-in-95 border border-white/20">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 rounded-[2rem] bg-danger/10 text-danger flex items-center justify-center mx-auto mb-6 shadow-inner border border-danger/10">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight mb-2">
+                                Anular Transacción
                             </h3>
-                            <p className="text-slate-500 font-medium">
-                                {anularPagoModal.pago.metodo_pago} - {new Intl.NumberFormat('es-PY').format(anularPagoModal.pago.monto)} Gs
+                            <p className="text-text-secondary font-black text-[10px] uppercase tracking-widest opacity-40">
+                                {anularPagoModal.pago.metodo_pago} • {new Intl.NumberFormat('es-PY').format(anularPagoModal.pago.monto)} Gs
                             </p>
                         </div>
 
-                        <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 mb-6">
-                            <p className="text-sm text-rose-700 font-bold text-center">
-                                Al anular este pago, se actualizará el saldo de la factura y cuotas asociadas.
+                        <div className="bg-danger/5 border border-danger/20 rounded-2xl p-6 mb-8 text-center">
+                            <p className="text-xs text-danger font-black uppercase tracking-tight">
+                                Al anular el ingreso, se revertirá el saldo de la factura y cuotas asociadas.
                             </p>
                         </div>
 
-                        <div className="space-y-2 mb-6">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                Motivo de Anulación *
+                        <div className="space-y-2 mb-8 text-left">
+                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">
+                                Motivo de Reversión *
                             </label>
                             <textarea
-                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium p-4 focus:border-rose-400 focus:outline-none transition-colors resize-none"
-                                rows="3"
-                                placeholder="Ingrese el motivo de la anulación del pago..."
+                                className="w-full bg-surface-raised border-2 border-border rounded-2xl text-sm font-bold p-5 focus:border-danger/30 focus:outline-none transition-all resize-none shadow-inner"
+                                rows="4"
+                                placeholder="Especifique el motivo de anulación del cobro..."
                                 value={motivoAnulacionPago}
                                 onChange={(e) => setMotivoAnulacionPago(e.target.value)}
                             />
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="grid grid-cols-2 gap-4">
                             <button
                                 onClick={() => {
                                     setAnularPagoModal({ open: false, pago: null });
                                     setMotivoAnulacionPago('');
                                 }}
-                                className="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all"
+                                className="px-6 py-4 bg-surface-raised hover:bg-border text-text-secondary rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border border-border"
                             >
-                                Cancelar
+                                Volver
                             </button>
                             <button
                                 onClick={() => anularPagoMutation.mutate({
@@ -836,9 +928,16 @@ const FacturaDetalle = () => {
                                     motivo: motivoAnulacionPago
                                 })}
                                 disabled={anularPagoMutation.isPending || !motivoAnulacionPago.trim()}
-                                className="flex-1 px-6 py-3 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 disabled:text-slate-500 text-white rounded-xl font-black transition-all"
+                                className="px-6 py-4 bg-danger hover:bg-danger-dark disabled:bg-surface-raised disabled:text-text-secondary/40 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-danger/20 flex items-center justify-center gap-2"
                             >
-                                {anularPagoMutation.isPending ? 'Anulando...' : 'Confirmar Anulación'}
+                                {anularPagoMutation.isPending ? (
+                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                )}
+                                Anular Pago
                             </button>
                         </div>
                     </div>

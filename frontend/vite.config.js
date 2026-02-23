@@ -7,10 +7,15 @@ export default defineConfig({
     server: {
         port: 3000,
         proxy: {
-            '/api': {
-                target: 'https://g04d6b70b49b5da-escanor.adb.sa-vinhedo-1.oraclecloudapps.com/ords/admin/api/v1',
+            '/api/facturas': {
+                target: 'https://g04d6b70b49b5da-escanor.adb.sa-vinhedo-1.oraclecloudapps.com/ords/admin',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, ''),
+            },
+            '/api': {
+                target: 'https://g04d6b70b49b5da-escanor.adb.sa-vinhedo-1.oraclecloudapps.com/ords/admin',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, '/api/v1'),
             },
         },
     },

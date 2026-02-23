@@ -19,6 +19,11 @@ const RUTA_PROGRAMA = [
     { path: '/configuraciones/cajas', codigo: 'CONFIG_CAJAS' },
     { path: '/configuraciones/empresas', codigo: 'CONFIG_EMPRESAS' },
     { path: '/configuraciones/sucursales', codigo: 'CONFIG_SUCURSALES' },
+    // Sub-rutas de reportes
+    { path: '/reportes/financiero', codigo: 'REP_FINANCIERO' },
+    { path: '/reportes/citas', codigo: 'REP_CITAS' },
+    { path: '/reportes/pacientes', codigo: 'REP_PACIENTES' },
+    { path: '/reportes/inventario', codigo: 'REP_INVENTARIO' },
     // Rutas principales
     { path: '/pacientes', codigo: 'PACIENTES' },
     { path: '/citas', codigo: 'CITAS' },
@@ -26,6 +31,7 @@ const RUTA_PROGRAMA = [
     { path: '/caja', codigo: 'CAJA' },
     { path: '/compras', codigo: 'COMPRAS' },
     { path: '/facturas', codigo: 'FACTURACION' },
+    { path: '/reportes', codigo: 'REPORTES' },
     { path: '/configuraciones', codigo: 'CONFIGURACIONES' },
 ];
 

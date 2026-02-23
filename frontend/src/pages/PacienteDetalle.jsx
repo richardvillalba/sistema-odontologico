@@ -9,8 +9,8 @@ import PlanTratamiento from '../components/tratamientos/PlanTratamiento';
 import HistoriaClinica from '../components/historia/HistoriaClinica';
 import CuentaCorriente from '../components/facturacion/CuentaCorriente';
 
-const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-slate-800 font-medium";
-const labelClass = "block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1";
+const inputClass = "w-full border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-surface-raised text-text-primary font-medium";
+const labelClass = "block text-[10px] font-black text-text-secondary opacity-60 uppercase tracking-widest mb-1";
 
 const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
     const { empresaActiva } = useAuth();
@@ -95,12 +95,12 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 sm:px-8 py-4 sm:py-6 text-white shrink-0">
+            <div className="bg-surface-card rounded-3xl shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="bg-primary px-6 sm:px-8 py-4 sm:py-6 text-white shrink-0">
                     <div className="flex justify-between items-center">
                         <div>
                             <h2 className="text-xl font-black tracking-tight">Editar Paciente</h2>
-                            <p className="text-indigo-200 text-sm font-medium mt-0.5 truncate max-w-[200px] sm:max-w-none">{paciente.nombre_completo}</p>
+                            <p className="text-primary-100 text-sm font-medium mt-0.5 truncate max-w-[200px] sm:max-w-none">{paciente.nombre_completo}</p>
                         </div>
                         <button type="button" onClick={onClose} className="p-2 rounded-xl hover:bg-white/20 transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -109,7 +109,7 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
                     <div className="flex gap-1 mt-4 sm:mt-5 bg-white/10 p-1 rounded-xl overflow-x-auto no-scrollbar">
                         {tabs.map(t => (
                             <button key={t.id} type="button" onClick={() => setTab(t.id)}
-                                className={`flex-1 min-w-[100px] py-1.5 rounded-lg text-[10px] sm:text-xs font-black transition-all whitespace-nowrap ${tab === t.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-indigo-100 hover:text-white'}`}>
+                                className={`flex-1 min-w-[100px] py-1.5 rounded-lg text-[10px] sm:text-xs font-black transition-all whitespace-nowrap ${tab === t.id ? 'bg-white text-primary shadow-sm' : 'text-primary-100 hover:text-white'}`}>
                                 {t.label}
                             </button>
                         ))}
@@ -201,15 +201,15 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
                             </div>
                         )}
                     </div>
-                    <div className="px-6 sm:px-8 py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+                    <div className="px-6 sm:px-8 py-5 border-t border-border bg-surface-raised flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
                         <div className="flex gap-1.5 order-last sm:order-first">
                             {tabs.map(t => (
-                                <div key={t.id} onClick={() => setTab(t.id)} className={`h-1.5 rounded-full cursor-pointer transition-all ${tab === t.id ? 'bg-indigo-600 w-5' : 'bg-slate-300 w-1.5'}`} />
+                                <div key={t.id} onClick={() => setTab(t.id)} className={`h-1.5 rounded-full cursor-pointer transition-all ${tab === t.id ? 'bg-primary w-5' : 'bg-border w-1.5'}`} />
                             ))}
                         </div>
                         <div className="flex gap-3 w-full sm:w-auto">
-                            <button type="button" onClick={onClose} className="flex-1 sm:flex-none px-6 py-2.5 text-slate-500 font-bold hover:text-slate-700 transition-colors text-sm">Cancelar</button>
-                            <button type="submit" disabled={mutation.isPending} className="flex-1 sm:flex-none px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white rounded-xl font-black transition-all flex items-center justify-center gap-2 text-sm">
+                            <button type="button" onClick={onClose} className="flex-1 sm:flex-none px-6 py-2.5 text-text-secondary font-bold hover:text-text-primary transition-colors text-sm">Cancelar</button>
+                            <button type="submit" disabled={mutation.isPending} className="flex-1 sm:flex-none px-8 py-2.5 bg-primary hover:bg-primary-dark disabled:bg-border text-white rounded-xl font-black transition-all flex items-center justify-center gap-2 text-sm">
                                 {mutation.isPending ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Guardando...</> : 'Guardar Cambios'}
                             </button>
                         </div>
@@ -226,6 +226,18 @@ const PacienteDetalle = () => {
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'info');
     const [showEditModal, setShowEditModal] = useState(false);
+    const { tieneAccesoPrograma } = useAuth();
+
+    const allTabs = [
+        { id: 'info', label: 'Información Personal', icon: '👤', codigo: 'PAC_INFO' },
+        { id: 'odontograma', label: 'Odontograma', icon: '🦷', codigo: 'PAC_ODONTOGRAMA' },
+        { id: 'historia', label: 'Historia Clínica', icon: '📋', codigo: 'PAC_HISTORIA' },
+        { id: 'tratamientos', label: 'Tratamientos', icon: '💊', codigo: 'PAC_TRATAMIENTOS' },
+        { id: 'facturacion', label: 'Facturación / Pagos', icon: '💰', codigo: 'PAC_FACTURACION' },
+        { id: 'archivos', label: 'Archivos / Rayos X', icon: '📁', codigo: 'PAC_ARCHIVOS' },
+    ];
+
+    const tabs = allTabs.filter(t => tieneAccesoPrograma(t.codigo));
 
     // Sincronizar pestaña si cambian los parámetros de búsqueda (ej: al navegar desde Historias)
     useEffect(() => {
@@ -264,27 +276,15 @@ const PacienteDetalle = () => {
     const facturasPendientes = cuentaRes?.data?.items || [];
     const totalPendiente = facturasPendientes.reduce((acc, f) => acc + (f.saldo_pendiente || 0), 0);
 
-    if (loadingPatient) return <div className="p-20 text-center animate-pulse font-bold text-slate-400">Cargando expediente...</div>;
-    if (!paciente) return <div className="p-20 text-center text-rose-500 font-bold text-xl">Paciente no encontrado.</div>;
-
-    const { tieneAccesoPrograma } = useAuth();
-
-    const allTabs = [
-        { id: 'info', label: 'Información Personal', icon: '👤', codigo: 'PAC_INFO' },
-        { id: 'odontograma', label: 'Odontograma', icon: '🦷', codigo: 'PAC_ODONTOGRAMA' },
-        { id: 'historia', label: 'Historia Clínica', icon: '📋', codigo: 'PAC_HISTORIA' },
-        { id: 'tratamientos', label: 'Tratamientos', icon: '💊', codigo: 'PAC_TRATAMIENTOS' },
-        { id: 'facturacion', label: 'Facturación / Pagos', icon: '💰', codigo: 'PAC_FACTURACION' },
-        { id: 'archivos', label: 'Archivos / Rayos X', icon: '📁', codigo: 'PAC_ARCHIVOS' },
-    ];
-
-    const tabs = allTabs.filter(t => tieneAccesoPrograma(t.codigo));
+    if (loadingPatient) return <div className="p-20 text-center animate-pulse font-bold text-text-secondary opacity-60">Cargando expediente...</div>;
+    if (!paciente) return <div className="p-20 text-center text-danger font-bold text-xl">Paciente no encontrado.</div>;
 
     return (
         <div className="space-y-6 animate-in fade-in duration-700">
             {/* Cabecera del Expediente */}
-            <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
-                <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+            <div className="bg-primary-dark rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 sm:gap-8">
                     <div className="w-20 h-20 sm:w-24 h-24 rounded-2xl bg-primary/20 flex items-center justify-center text-3xl sm:text-4xl font-black text-primary border border-white/10 shrink-0">
                         {paciente.nombre?.charAt(0)}{paciente.apellido?.charAt(0)}
                     </div>
@@ -293,28 +293,28 @@ const PacienteDetalle = () => {
                             <h1 className="text-2xl sm:text-4xl font-black tracking-tight truncate w-full sm:w-auto text-center sm:text-left">{paciente.nombre_completo}</h1>
                             <span className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-emerald-500/30">ACTIVO</span>
                         </div>
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 mt-3 text-slate-400 font-medium text-xs sm:text-sm">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 mt-3 text-primary-100/60 font-medium text-xs sm:text-sm">
                             <span className="flex items-center gap-2">🆔 {paciente.documento_numero}</span>
                             <span className="flex items-center gap-2">📂 HC: {paciente.numero_historia}</span>
                             <span className="flex items-center gap-2">🎂 {calculateAge(paciente.fecha_nacimiento)} años</span>
                         </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <button onClick={() => setShowEditModal(true)} className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl font-bold transition-all text-sm">Editar Perfil</button>
-                        <button className="flex-1 sm:flex-none bg-primary hover:bg-blue-600 px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all text-sm">Nueva Cita</button>
+                        <button onClick={() => setShowEditModal(true)} className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl font-bold transition-all text-sm border border-white/10">Editar Perfil</button>
+                        <button className="flex-1 sm:flex-none bg-primary hover:bg-primary-dark px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/30 transition-all text-sm">Nueva Cita</button>
                     </div>
                 </div>
             </div>
 
             {/* Navegación por Pestañas */}
-            <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 rounded-2xl w-full">
+            <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-surface-raised rounded-2xl w-full border border-border">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
                         className={`px-4 sm:px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap text-sm ${activeTab === tab.id
-                            ? 'bg-white text-slate-900 shadow-sm'
-                            : 'text-slate-500 hover:text-slate-800'
+                            ? 'bg-surface-card text-text-primary shadow-sm border border-border'
+                            : 'text-text-secondary opacity-60 hover:text-text-primary hover:opacity-100'
                             }`}
                     >
                         <span>{tab.icon}</span>
@@ -327,46 +327,46 @@ const PacienteDetalle = () => {
             {/* Contenido Dinámico */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 <div className="lg:col-span-2">
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm min-h-[400px]">
+                    <div className="bg-surface-card rounded-3xl p-6 sm:p-8 border border-border shadow-sm min-h-[400px]">
                         {activeTab === 'info' && (
                             <div className="space-y-8 animate-in slide-in-from-left-2 duration-300">
-                                <h3 className="text-xl font-black text-slate-800">Detalles de Contacto</h3>
+                                <h3 className="text-xl font-black text-text-primary">Detalles de Contacto</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Fecha de Nacimiento</p>
-                                        <p className="font-bold text-slate-700">{formatDate(paciente.fecha_nacimiento)}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Fecha de Nacimiento</p>
+                                        <p className="font-bold text-text-primary">{formatDate(paciente.fecha_nacimiento)}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Género</p>
-                                        <p className="font-bold text-slate-700">{paciente.genero === 'M' ? 'Masculino' : paciente.genero === 'F' ? 'Femenino' : '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Género</p>
+                                        <p className="font-bold text-text-primary">{paciente.genero === 'M' ? 'Masculino' : paciente.genero === 'F' ? 'Femenino' : '—'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Teléfono Principal</p>
-                                        <p className="font-bold text-slate-700">{paciente.telefono_principal || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Teléfono Principal</p>
+                                        <p className="font-bold text-text-primary">{paciente.telefono_principal || '—'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Teléfono Secundario</p>
-                                        <p className="font-bold text-slate-700">{paciente.telefono_secundario || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Teléfono Secundario</p>
+                                        <p className="font-bold text-text-primary">{paciente.telefono_secundario || '—'}</p>
                                     </div>
                                     <div className="space-y-1 md:col-span-2">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Correo Electrónico</p>
-                                        <p className="font-bold text-slate-700">{paciente.email || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Correo Electrónico</p>
+                                        <p className="font-bold text-text-primary">{paciente.email || '—'}</p>
                                     </div>
                                     <div className="space-y-1 md:col-span-2">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Dirección</p>
-                                        <p className="font-bold text-slate-700">{paciente.direccion || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Dirección</p>
+                                        <p className="font-bold text-text-primary">{paciente.direccion || '—'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Departamento</p>
-                                        <p className="font-bold text-slate-700">{paciente.departamento_nombre || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Departamento</p>
+                                        <p className="font-bold text-text-primary">{paciente.departamento_nombre || '—'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Ciudad</p>
-                                        <p className="font-bold text-slate-700">{paciente.ciudad_nombre || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Ciudad</p>
+                                        <p className="font-bold text-text-primary">{paciente.ciudad_nombre || '—'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Barrio</p>
-                                        <p className="font-bold text-slate-700">{paciente.barrio_nombre || '—'}</p>
+                                        <p className="text-[10px] font-black uppercase text-text-secondary opacity-60 tracking-widest">Barrio</p>
+                                        <p className="font-bold text-text-primary">{paciente.barrio_nombre || '—'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -382,8 +382,8 @@ const PacienteDetalle = () => {
 
                         {activeTab === 'archivos' && (
                             <div className="text-center py-40">
-                                <div className="text-4xl mb-4">🏗️</div>
-                                <p className="text-slate-400 font-bold uppercase tracking-widest">Módulo en Desarrollo</p>
+                                <div className="text-4xl mb-4 opacity-20 filter grayscale">📁</div>
+                                <p className="text-text-secondary opacity-40 font-black uppercase tracking-[0.2em] text-xs">Módulo en Desarrollo</p>
                             </div>
                         )}
                     </div>
@@ -392,29 +392,32 @@ const PacienteDetalle = () => {
                 {/* Sidebar del Expediente */}
                 <div className="space-y-8">
                     {/* Alertas Críticas */}
-                    <div className="bg-rose-600 rounded-3xl p-6 text-white shadow-xl">
-                        <h4 className="font-black text-sm uppercase tracking-widest mb-4 opacity-80">Importante</h4>
-                        <div className="flex items-start gap-3">
-                            <span className="text-2xl">⚡</span>
+                    <div className="bg-danger rounded-3xl p-6 text-white shadow-xl shadow-danger/20 relative overflow-hidden group">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                        <h4 className="font-black text-[10px] uppercase tracking-[0.2em] mb-4 opacity-70">Atención Médica</h4>
+                        <div className="flex items-start gap-4 relative z-10">
+                            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                <svg className="w-6 h-6 border-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            </div>
                             <p className="text-sm font-bold leading-relaxed">
-                                {paciente.alergias || 'No se han reportado alergias críticas para este paciente.'}
+                                {paciente.alergias || 'No se han reportado alergias o alertas críticas.'}
                             </p>
                         </div>
                     </div>
 
                     {/* Resumen de Cuenta */}
-                    <div className={`rounded-3xl p-6 border shadow-sm transition-all duration-500 ${totalPendiente > 0 ? 'bg-rose-50 border-rose-100' : 'bg-white border-slate-200'}`}>
-                        <h4 className="font-black text-sm uppercase text-slate-400 tracking-widest mb-6">Estado de Cuenta</h4>
+                    <div className={`rounded-3xl p-6 border shadow-sm transition-all duration-500 ${totalPendiente > 0 ? 'bg-danger-light/30 border-danger-light' : 'bg-surface-card border-border'}`}>
+                        <h4 className="font-black text-[10px] uppercase text-text-secondary opacity-60 tracking-[0.2em] mb-6">Estado de Cuenta</h4>
                         <div className="space-y-4">
-                            <div className={`flex justify-between items-center p-4 rounded-2xl transition-colors ${totalPendiente > 0 ? 'bg-white border border-rose-100 shadow-sm' : 'bg-slate-50'}`}>
-                                <span className="text-xs font-bold text-slate-500">Saldo Pendiente</span>
-                                <span className={`text-xl font-black ${totalPendiente > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                            <div className={`flex justify-between items-center p-4 rounded-2xl transition-colors ${totalPendiente > 0 ? 'bg-surface-card border border-danger-light shadow-sm' : 'bg-surface-raised'}`}>
+                                <span className="text-xs font-bold text-text-secondary opacity-60">Saldo Pendiente</span>
+                                <span className={`text-xl font-black ${totalPendiente > 0 ? 'text-danger-dark' : 'text-emerald-600'}`}>
                                     {new Intl.NumberFormat('es-PY').format(totalPendiente)} Gs
                                 </span>
                             </div>
                             <button
                                 onClick={() => setActiveTab('facturacion')}
-                                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-slate-900/10"
+                                className="w-full bg-primary hover:bg-primary-dark text-white py-4 rounded-2xl font-black transition-all shadow-lg shadow-primary/20 text-sm uppercase tracking-widest"
                             >
                                 Gestionar Pagos
                             </button>

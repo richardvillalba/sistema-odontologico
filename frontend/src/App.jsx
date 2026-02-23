@@ -35,6 +35,11 @@ import RegistrarPago from './pages/RegistrarPago';
 import Caja from './pages/Caja';
 import CajaDetalle from './pages/CajaDetalle';
 import Tratamientos from './pages/Tratamientos';
+import Reportes from './pages/Reportes';
+import ReporteFinanciero from './pages/reportes/ReporteFinanciero';
+import ReporteCitas from './pages/reportes/ReporteCitas';
+import ReportePacientes from './pages/reportes/ReportePacientes';
+import ReporteInventario from './pages/reportes/ReporteInventario';
 
 import { PointOfSaleProvider } from './context/PointOfSaleContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -119,6 +124,13 @@ function App() {
                                             {/* Caja */}
                                             <Route path="/caja" element={<Caja />} />
                                             <Route path="/caja/:id" element={<CajaDetalle />} />
+
+                                            {/* Reportes */}
+                                            <Route path="/reportes" element={<Reportes />} />
+                                            <Route path="/reportes/financiero" element={<ReporteFinanciero />} />
+                                            <Route path="/reportes/citas" element={<ReporteCitas />} />
+                                            <Route path="/reportes/pacientes" element={<ReportePacientes />} />
+                                            <Route path="/reportes/inventario" element={<ReporteInventario />} />
 
                                             {/* Tratamientos (dentro de Configuraciones) */}
                                             <Route path="/configuraciones/tratamientos" element={<Tratamientos />} />

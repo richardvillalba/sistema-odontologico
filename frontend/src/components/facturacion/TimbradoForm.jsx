@@ -43,16 +43,16 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
         setLoading(true);
         try {
             const dataToSave = {
-                empresa_id: empresaActiva?.empresa_id,
+                empresa_id: String(empresaActiva?.empresa_id),
                 numero_timbrado: formData.numero_timbrado,
                 establecimiento: formData.establecimiento,
                 punto_expedicion: formData.punto_expedicion,
                 tipo_documento: formData.tipo_documento,
-                numero_inicio: parseInt(formData.numero_inicio),
-                numero_fin: parseInt(formData.numero_fin),
+                numero_inicio: String(formData.numero_inicio),
+                numero_fin: String(formData.numero_fin),
                 fecha_inicio: formData.fecha_inicio,
                 fecha_vencimiento: formData.fecha_vencimiento,
-                creado_por: usuario?.usuario_id
+                creado_por: String(usuario?.usuario_id)
             };
 
             let response;
@@ -80,120 +80,151 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-300 border border-slate-200">
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h3 className="font-bold text-lg text-slate-800">
-                        {initialData ? 'Editar Timbrado' : 'Nuevo Timbrado'}
-                    </h3>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+        <div className="fixed inset-0 bg-primary-dark/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 transition-all duration-500">
+            <div className="bg-surface-card rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-300 border border-white/20">
+                <div className="px-10 py-8 border-b border-border flex justify-between items-center bg-surface-raised/50">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                            <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-text-primary uppercase tracking-tight">
+                                {initialData ? 'Parametrización de Timbrado' : 'Nuevo Registro Fiscal'}
+                            </h3>
+                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 mt-1">Configuración de validez y rangos técnicos</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl text-text-secondary hover:text-danger hover:bg-danger/10 transition-all active:scale-95"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    <div className="grid grid-cols-2 gap-5">
-                        <div className="col-span-1">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nro. Timbrado</label>
+                <form onSubmit={handleSubmit} className="p-10 space-y-8">
+                    <div className="grid grid-cols-2 gap-8">
+                        <div>
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-3 ml-1">Número de Timbrado</label>
                             <input
                                 type="text" name="numero_timbrado" required
-                                placeholder="Ej: 12345678"
+                                placeholder="8 DÍGITOS TÉCNICOS"
                                 value={formData.numero_timbrado} onChange={handleChange}
                                 maxLength="8" pattern="\d{8}" title="Debe tener exactamente 8 dígitos"
-                                className="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all font-mono text-sm"
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:bg-white transition-all font-mono text-sm font-black text-text-primary placeholder:opacity-20 shadow-sm"
                             />
                         </div>
-                        <div className="col-span-1">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tipo Documento</label>
+                        <div>
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-3 ml-1">Tipo de Documento</label>
                             <select
                                 name="tipo_documento"
                                 value={formData.tipo_documento} onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm font-medium"
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:bg-white transition-all text-[10px] font-black uppercase tracking-widest text-text-primary shadow-sm appearance-none"
                             >
-                                <option value="FACTURA">FACTURA</option>
-                                <option value="NOTA_CREDITO">NOTA CRÉDITO</option>
+                                <option value="FACTURA">FACTURA CLÍNICA</option>
+                                <option value="NOTA_CREDITO">NOTA DE CRÉDITO</option>
                             </select>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-2 gap-8">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Establecimiento</label>
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-3 ml-1">Establecimiento</label>
                             <input
                                 type="text" name="establecimiento" required maxLength="3"
-                                placeholder="001"
+                                placeholder="000"
                                 value={formData.establecimiento} onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all font-mono text-center text-sm"
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:bg-white transition-all font-mono text-center text-sm font-black text-text-primary placeholder:opacity-20 shadow-sm"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Punto Exp.</label>
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-3 ml-1">Punto de Expedición</label>
                             <input
                                 type="text" name="punto_expedicion" required maxLength="3"
-                                placeholder="001"
+                                placeholder="000"
                                 value={formData.punto_expedicion} onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all font-mono text-center text-sm"
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:bg-white transition-all font-mono text-center text-sm font-black text-text-primary placeholder:opacity-20 shadow-sm"
                             />
                         </div>
                     </div>
 
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Rango de Numeración</label>
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="number" name="numero_inicio" required
-                                placeholder="Inicio"
-                                value={formData.numero_inicio} onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                            />
-                            <span className="text-slate-400">→</span>
-                            <input
-                                type="number" name="numero_fin" required
-                                placeholder="Fin"
-                                value={formData.numero_fin} onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                            />
+                    <div className="p-8 bg-surface-raised rounded-3xl border-2 border-border group transition-all hover:border-primary/20">
+                        <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-6 ml-1 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                            Rango de Numeración Autorizada
+                        </label>
+                        <div className="flex items-center gap-6">
+                            <div className="flex-1">
+                                <input
+                                    type="number" name="numero_inicio" required
+                                    placeholder="INICIO"
+                                    value={formData.numero_inicio} onChange={handleChange}
+                                    className="w-full px-6 py-3.5 rounded-xl border-2 border-border bg-white focus:border-primary transition-all text-sm font-black font-mono text-text-primary text-center shadow-inner"
+                                />
+                            </div>
+                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-border/40 text-text-secondary">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <input
+                                    type="number" name="numero_fin" required
+                                    placeholder="FIN"
+                                    value={formData.numero_fin} onChange={handleChange}
+                                    className="w-full px-6 py-3.5 rounded-xl border-2 border-border bg-white focus:border-primary transition-all text-sm font-black font-mono text-text-primary text-center shadow-inner"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-2 gap-8">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Fecha Inicio</label>
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-3 ml-1">Fecha de Emisión</label>
                             <input
                                 type="date" name="fecha_inicio" required
                                 value={formData.fecha_inicio} onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm"
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:bg-white transition-all text-[11px] font-black uppercase tracking-widest text-text-primary shadow-sm"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Vencimiento</label>
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest mb-3 ml-1">Fecha de Vencimiento</label>
                             <input
                                 type="date" name="fecha_vencimiento" required
                                 value={formData.fecha_vencimiento} onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm"
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:bg-white transition-all text-[11px] font-black uppercase tracking-widest text-text-primary shadow-sm"
                             />
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
+                    <div className="flex justify-end gap-4 pt-8 border-t-2 border-border/50">
                         <button
                             type="button" onClick={onClose}
-                            className="px-5 py-2.5 text-slate-600 font-bold hover:bg-slate-50 rounded-xl transition-colors text-sm"
+                            className="px-8 py-4 text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] hover:bg-surface-raised rounded-2xl transition-all active:scale-95"
                         >
-                            Cancelar
+                            Abortar
                         </button>
                         <button
                             type="submit" disabled={loading}
-                            className="px-6 py-2.5 bg-indigo-600 text-white font-bold hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-200/50 transition-all disabled:opacity-50 disabled:shadow-none text-sm flex items-center gap-2"
+                            className="px-10 py-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-dark hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50 disabled:shadow-none flex items-center gap-3"
                         >
                             {loading ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Guardando...
+                                    <span>Sincronizando...</span>
                                 </>
-                            ) : 'Guardar Timbrado'}
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Confirmar Registro</span>
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

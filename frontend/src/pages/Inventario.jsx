@@ -52,70 +52,76 @@ export default function Inventario() {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {/* Header Section Standardized */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Inventario de Stock</h1>
-                    <p className="text-slate-500 font-medium text-sm md:text-base">Monitoreo de existencias y movimientos de almacén.</p>
+                    <h1 className="text-3xl font-black text-text-primary uppercase tracking-tight leading-none">
+                        Control de <span className="text-primary">Inventario</span>
+                    </h1>
+                    <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Monitoreo de existencias y trazabilidad de movimientos técnicos</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                     {/* Filtros rápidos o acciones */}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="Buscar en stock..."
-                            className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 text-slate-600 font-medium placeholder:text-slate-400"
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+            {/* Filters and Stats Standardized */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="lg:col-span-3 bg-surface-card rounded-[2rem] border border-border flex items-center px-6 shadow-sm">
+                    <svg className="w-5 h-5 text-text-secondary opacity-30 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                        type="text"
+                        placeholder="Filtrar por nombre de insumo o código maestro..."
+                        className="w-full bg-transparent border-none focus:ring-0 text-sm font-bold text-text-primary placeholder:text-text-secondary/30 py-4"
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
                 </div>
-                <div className="bg-slate-900 rounded-2xl p-4 flex items-center justify-between text-white shadow-lg overflow-hidden relative">
+                <div className="bg-primary-dark rounded-[2.5rem] p-8 flex items-center justify-between text-white shadow-2xl relative overflow-hidden group">
                     <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Items en Stock</p>
-                        <p className="text-2xl font-black">{stockItems.length}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[.2em] text-white/40 mb-1">SKUs en Almacén</p>
+                        <p className="text-4xl font-black">{stockItems.length}</p>
                     </div>
-                    <div className="text-3xl relative z-10 opacity-30">📊</div>
-                    <div className="absolute -right-4 -bottom-4 bg-white/5 w-24 h-24 rounded-full"></div>
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center relative z-10">
+                        <svg className="w-8 h-8 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m4 4h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div className="absolute -right-4 -bottom-4 bg-white/5 w-32 h-32 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* List and Tables Standardized */}
+            <div className="bg-surface-card rounded-[3rem] border border-border shadow-sm overflow-hidden">
                 {isLoading ? (
-                    <div className="p-24 text-center">
-                        <div className="w-12 h-12 border-4 border-slate-100 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-slate-400 font-bold animate-pulse">Consultando almacenes...</p>
+                    <div className="p-32 text-center animate-pulse flex flex-col items-center gap-6">
+                        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                        <p className="font-black text-text-secondary uppercase tracking-[0.2em] text-[10px] opacity-40">Consultando Base de Datos de Almacén...</p>
                     </div>
                 ) : (
                     <>
-                        {/* Desktop table */}
+                        {/* Desktop Table Standardized */}
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50 border-b border-slate-100">
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">Artículo</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">Sucursal</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider text-center">Cantidad Actual</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider text-center">Estado Stock</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">Último Movimiento</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider text-center">Acciones</th>
+                                    <tr className="bg-surface-raised/50 border-b border-border">
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40">Especificación del Artículo</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40">Ubicación</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 text-center">Existencia</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 text-center">Estado Crítico</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40">Última Trazabilidad</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 text-center">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-border/50">
                                     {stockItems.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="p-20 text-center">
-                                                <p className="text-slate-400 font-medium">No hay registros de inventario.</p>
+                                            <td colSpan="6" className="p-32 text-center">
+                                                <div className="w-20 h-20 bg-surface-raised rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner border border-border">📊</div>
+                                                <p className="text-text-secondary font-black uppercase text-[10px] tracking-widest opacity-40">Sin registros de stock en este centro</p>
                                             </td>
                                         </tr>
                                     ) : (
@@ -124,43 +130,56 @@ export default function Inventario() {
                                                 item.cantidad_actual >= (item.cantidad_maxima || 999999) ? 'Exceso' : 'Normal';
 
                                             return (
-                                                <tr key={item.inventario_id} className="hover:bg-slate-50/50 transition-colors group">
-                                                    <td className="px-6 py-4">
+                                                <tr key={item.inventario_id} className="hover:bg-surface-raised/30 transition-all group">
+                                                    <td className="px-8 py-6">
                                                         <div className="flex flex-col">
-                                                            <span className="font-bold text-slate-900 leading-tight">{item.articulo_nombre}</span>
-                                                            <span className="text-[10px] text-slate-400 font-black tracking-widest uppercase">{item.articulo_codigo}</span>
+                                                            <span className="font-black text-text-primary text-sm tracking-tight leading-tight mb-1">{item.articulo_nombre}</span>
+                                                            <span className="text-[10px] text-primary font-black tracking-widest uppercase opacity-60">#{item.articulo_codigo}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm font-bold text-slate-500 uppercase tracking-tighter">SUC {item.sucursal_id}</span>
+                                                    <td className="px-8 py-6">
+                                                        <span className="bg-surface-raised px-4 py-1.5 rounded-xl text-[10px] font-black text-text-secondary uppercase tracking-widest border border-border shadow-inner">
+                                                            Sucursal {item.sucursal_id}
+                                                        </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
+                                                    <td className="px-8 py-6 text-center">
                                                         <div className="flex flex-col items-center">
-                                                            <span className={`text-xl font-black ${status === 'Bajo' ? 'text-rose-600' : 'text-slate-900'}`}>{item.cantidad_actual}</span>
-                                                            <span className="text-[10px] text-slate-400 font-bold uppercase">{item.unidad_medida}</span>
+                                                            <span className={`text-2xl font-black ${status === 'Bajo' ? 'text-danger' : 'text-text-primary'}`}>
+                                                                {item.cantidad_actual}
+                                                            </span>
+                                                            <span className="text-[10px] text-text-secondary font-black uppercase tracking-widest opacity-40">
+                                                                {item.unidad_medida}
+                                                            </span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${status === 'Bajo' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                                            status === 'Exceso' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                                'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                                                    <td className="px-8 py-6 text-center">
+                                                        <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-colors ${status === 'Bajo'
+                                                            ? 'bg-danger/10 text-danger border-danger/20'
+                                                            : status === 'Exceso'
+                                                                ? 'bg-warning/10 text-warning border-warning/20'
+                                                                : 'bg-secondary/10 text-secondary border-secondary/20'
+                                                            }`}>
                                                             {status}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-col text-xs">
-                                                            <span className="font-bold text-slate-600">{new Date(item.fecha_ultimo_ingreso || item.fecha_creacion).toLocaleDateString()}</span>
-                                                            <span className="text-slate-400">{item.observaciones || 'Sin observaciones'}</span>
+                                                    <td className="px-8 py-6">
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className="text-[10px] font-black text-text-primary uppercase tracking-tight">
+                                                                {new Date(item.fecha_ultimo_ingreso || item.fecha_creacion).toLocaleDateString()}
+                                                            </span>
+                                                            <span className="text-[11px] text-text-secondary font-medium opacity-60 italic leading-tight">
+                                                                {item.observaciones || 'Sin anotaciones técnicas'}
+                                                            </span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
+                                                    <td className="px-8 py-6 text-center">
                                                         <button
                                                             onClick={() => handleAjuste(item)}
-                                                            className="p-2 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-all shadow-sm group-hover:scale-110"
-                                                            title="Ajuste de Stock"
+                                                            className="p-3.5 rounded-2xl bg-surface-card text-text-primary border border-border hover:bg-primary-dark hover:text-white hover:border-primary-dark transition-all shadow-sm group-hover:scale-105"
+                                                            title="Ajuste Propedéutico"
                                                         >
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                                             </svg>
                                                         </button>
                                                     </td>
@@ -172,12 +191,12 @@ export default function Inventario() {
                             </table>
                         </div>
 
-                        {/* Mobile card layout */}
-                        <div className="md:hidden divide-y divide-slate-100">
+                        {/* Mobile Cards Standardized */}
+                        <div className="md:hidden divide-y divide-border/50">
                             {stockItems.length === 0 ? (
-                                <div className="p-12 text-center">
-                                    <div className="text-4xl mb-3">📋</div>
-                                    <p className="text-slate-400 font-medium">No hay registros de inventario.</p>
+                                <div className="p-20 text-center">
+                                    <div className="text-4xl mb-4 opacity-20">📋</div>
+                                    <p className="text-text-secondary font-black text-[10px] uppercase tracking-widest opacity-40">No hay registros de inventario</p>
                                 </div>
                             ) : (
                                 stockItems.map((item) => {
@@ -185,35 +204,50 @@ export default function Inventario() {
                                         item.cantidad_actual >= (item.cantidad_maxima || 999999) ? 'Exceso' : 'Normal';
 
                                     return (
-                                        <div key={item.inventario_id} className="p-4">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <div>
-                                                    <span className="font-bold text-slate-900 text-sm">{item.articulo_nombre}</span>
-                                                    <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase">{item.articulo_codigo}</p>
+                                        <div key={item.inventario_id} className="p-8 space-y-6 hover:bg-surface-raised/30 transition-all">
+                                            <div className="flex items-start justify-between">
+                                                <div className="space-y-1">
+                                                    <h4 className="font-black text-text-primary text-sm tracking-tight leading-tight">{item.articulo_nombre}</h4>
+                                                    <p className="text-[10px] text-primary font-black tracking-widest uppercase opacity-60">#{item.articulo_codigo}</p>
                                                 </div>
-                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${status === 'Bajo' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                                    status === 'Exceso' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                        'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${status === 'Bajo'
+                                                    ? 'bg-danger/10 text-danger border-danger/20'
+                                                    : status === 'Exceso'
+                                                        ? 'bg-warning/10 text-warning border-warning/20'
+                                                        : 'bg-secondary/10 text-secondary border-secondary/20'
+                                                    }`}>
                                                     {status}
                                                 </span>
                                             </div>
-                                            <div className="flex items-end justify-between">
+                                            <div className="bg-surface-card border border-border rounded-2xl p-6 flex justify-between items-center shadow-inner">
                                                 <div className="space-y-1">
-                                                    <p className="text-xs text-slate-500 font-medium">Sucursal: <span className="font-bold">SUC {item.sucursal_id}</span></p>
-                                                    <p className="text-xs text-slate-400">Último: {new Date(item.fecha_ultimo_ingreso || item.fecha_creacion).toLocaleDateString()}</p>
-                                                </div>
-                                                <div className="text-right flex flex-col items-end">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className={`text-xl font-black ${status === 'Bajo' ? 'text-rose-600' : 'text-slate-900'}`}>{item.cantidad_actual}</span>
-                                                        <span className="text-[10px] text-slate-400 font-bold uppercase">{item.unidad_medida}</span>
+                                                    <p className="text-[8px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40">Existencia Física</p>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className={`text-2xl font-black ${status === 'Bajo' ? 'text-danger' : 'text-text-primary'}`}>
+                                                            {item.cantidad_actual}
+                                                        </span>
+                                                        <span className="text-[10px] text-text-secondary font-black uppercase tracking-widest opacity-40">
+                                                            {item.unidad_medida}
+                                                        </span>
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleAjuste(item)}
-                                                        className="mt-2 text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-xl flex items-center gap-1"
-                                                    >
-                                                        ⚙️ Ajustar
-                                                    </button>
                                                 </div>
+                                                <button
+                                                    onClick={() => handleAjuste(item)}
+                                                    className="bg-primary text-white p-4 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95"
+                                                >
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest opacity-40">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                SUCURSAL {item.sucursal_id}
+                                                <span className="mx-2">•</span>
+                                                {new Date(item.fecha_ultimo_ingreso || item.fecha_creacion).toLocaleDateString()}
                                             </div>
                                         </div>
                                     );
@@ -229,7 +263,7 @@ export default function Inventario() {
                     item={selectedArticulo}
                     onConfirm={onConfirmAjuste}
                     onCancel={() => setShowAjuste(false)}
-                    isSaving={ajusteMutation.isLoading}
+                    isSaving={ajusteMutation.isPending}
                 />
             )}
         </div>
@@ -240,7 +274,7 @@ function AjusteForm({ item, onConfirm, onCancel, isSaving }) {
     const [formData, setFormData] = useState({
         tipo_movimiento: 'AJUSTE',
         cantidad: item.cantidad_actual,
-        motivo: 'Ajuste manual de inventario'
+        motivo: 'Regularización técnica de existencias'
     });
 
     const handleSubmit = (e) => {
@@ -249,57 +283,61 @@ function AjusteForm({ item, onConfirm, onCancel, isSaving }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
+                className="bg-surface-card rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20"
             >
-                <div className="bg-slate-50 px-6 sm:px-8 py-4 sm:py-6 border-b border-slate-100">
-                    <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Ajuste de Stock</h2>
-                    <p className="text-slate-500 text-[10px] font-bold uppercase mt-1 tracking-widest truncate">{item.articulo_nombre}</p>
+                <div className="bg-surface-raised p-8 border-b border-border">
+                    <h2 className="text-xl font-black text-text-primary uppercase tracking-tight leading-none">Ajuste de <span className="text-primary">Stock</span></h2>
+                    <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40 truncate">{item.articulo_nombre}</p>
                 </div>
 
-                <div className="p-6 sm:p-8 space-y-6">
-                    <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Tipo de Movimiento</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {['INGRESO', 'EGRESO', 'AJUSTE'].map(tipo => (
+                <div className="p-10 space-y-8">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Modalidad de Intervención</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {[
+                                { id: 'INGRESO', color: 'secondary' },
+                                { id: 'EGRESO', color: 'danger' },
+                                { id: 'AJUSTE', color: 'primary' }
+                            ].map(tipo => (
                                 <button
-                                    key={tipo}
+                                    key={tipo.id}
                                     type="button"
-                                    onClick={() => setFormData(p => ({ ...p, tipo_movimiento: tipo }))}
-                                    className={`py-2 rounded-xl text-[9px] sm:text-[10px] font-black tracking-widest transition-all border ${formData.tipo_movimiento === tipo
-                                        ? 'bg-purple-600 text-white border-purple-600 shadow-md'
-                                        : 'bg-white text-slate-400 border-slate-200 hover:border-purple-200'
+                                    onClick={() => setFormData(p => ({ ...p, tipo_movimiento: tipo.id }))}
+                                    className={`py-3 rounded-2xl text-[10px] font-black tracking-widest transition-all border-2 ${formData.tipo_movimiento === tipo.id
+                                            ? `bg-${tipo.color} text-white border-${tipo.color} shadow-lg shadow-${tipo.color}/20`
+                                            : 'bg-surface-raised text-text-secondary border-border hover:border-border-dark'
                                         }`}
-                                >{tipo}</button>
+                                >{tipo.id}</button>
                             ))}
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">
-                            {formData.tipo_movimiento === 'AJUSTE' ? 'Cantidad Final' : 'Cantidad a Mover'}
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">
+                            {formData.tipo_movimiento === 'AJUSTE' ? 'Existencia Certificada' : 'Magnitud del Movimiento'}
                         </label>
-                        <div className="relative">
+                        <div className="relative group">
                             <input
                                 type="number"
-                                className="w-full px-4 py-3 sm:py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-purple-500/5 focus:border-purple-500 transition-all font-black text-xl sm:text-2xl text-center text-slate-700"
+                                className="w-full px-6 py-5 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-black text-3xl text-center text-text-primary shadow-inner"
                                 value={formData.cantidad}
-                                onChange={e => setFormData(prev => ({ ...prev, cantidad: parseFloat(e.target.value) }))}
+                                onChange={e => setFormData(prev => ({ ...prev, cantidad: parseFloat(e.target.value) || 0 }))}
                                 required
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-300 uppercase text-[9px] sm:text-[10px]">
+                            <span className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-text-secondary uppercase text-[10px] opacity-40">
                                 {item.unidad_medida}
                             </span>
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Motivo / Observación</label>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Justificación Técnica</label>
                         <textarea
-                            className="w-full px-4 py-2 sm:py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-purple-500/5 focus:border-purple-500 transition-all text-sm"
-                            placeholder="Ej: Rotura, Vencimiento, Regularización..."
+                            className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all text-xs font-medium text-text-primary shadow-inner resize-none"
+                            placeholder="Describa el motivo del ajuste funcional..."
                             rows="2"
                             value={formData.motivo}
                             onChange={e => setFormData(prev => ({ ...prev, motivo: e.target.value }))}
@@ -308,21 +346,21 @@ function AjusteForm({ item, onConfirm, onCancel, isSaving }) {
                     </div>
                 </div>
 
-                <div className="bg-slate-50 px-6 sm:px-8 py-4 sm:py-6 border-t border-slate-100 flex gap-3 sm:gap-4">
-                    <button
-                        type="submit"
-                        className="flex-1 bg-purple-600 text-white px-6 py-2.5 sm:py-4 rounded-2xl font-black shadow-lg shadow-purple-200 hover:bg-purple-700 hover:-translate-y-1 transition-all"
-                        disabled={isSaving}
-                    >
-                        Confirmar
-                    </button>
+                <div className="bg-surface-raised p-8 border-t border-border flex flex-col sm:flex-row gap-4">
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-6 py-2.5 sm:py-4 rounded-2xl font-black text-slate-500 hover:bg-slate-100 transition-all"
+                        className="flex-1 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-text-secondary border border-border hover:bg-white transition-all order-last sm:order-none"
                         disabled={isSaving}
                     >
-                        Cancelar
+                        Abortar
+                    </button>
+                    <button
+                        type="submit"
+                        className="flex-[2] bg-primary text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:bg-primary-dark hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
+                        disabled={isSaving}
+                    >
+                        {isSaving ? 'Sincronizando...' : 'Confirmar Ajuste'}
                     </button>
                 </div>
             </form>

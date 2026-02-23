@@ -67,146 +67,172 @@ export default function Articulos() {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {/* Header Section Standardized */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Catálogo de Artículos</h1>
-                    <p className="text-slate-500 font-medium text-sm md:text-base">Gestión de insumos, materiales y suministros clínicos.</p>
+                    <h1 className="text-3xl font-black text-text-primary uppercase tracking-tight leading-none">
+                        Catálogo de <span className="text-primary">Artículos</span>
+                    </h1>
+                    <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Gestión centralizada de insumos, materiales y suministros clínicos</p>
                 </div>
-                <div className="flex gap-2 sm:gap-4">
+                <div className="flex gap-4">
                     <button
                         onClick={() => setShowCategorias(true)}
-                        className="bg-white text-indigo-600 px-3 sm:px-6 py-3 rounded-2xl font-bold shadow-sm border border-indigo-100 hover:bg-indigo-50 hover:-translate-y-1 transition-all flex items-center gap-2 text-sm sm:text-base"
+                        className="bg-surface-card text-text-primary px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-border hover:bg-surface-raised hover:-translate-y-1 transition-all flex items-center gap-3 shadow-sm shadow-primary/5"
                     >
-                        <span>📂</span> <span className="hidden sm:inline">Gestionar</span> Categorías
+                        <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        Categorías
                     </button>
                     <button
                         onClick={handleAdd}
-                        className="bg-indigo-600 text-white px-3 sm:px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 transition-all flex items-center gap-2 text-sm sm:text-base"
+                        className="bg-primary text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary-dark hover:-translate-y-1 transition-all flex items-center gap-3 shadow-xl shadow-primary/20"
                     >
-                        <span className="text-xl">+</span> <span className="hidden sm:inline">Nuevo</span> Artículo
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nuevo Artículo
                     </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Filters and Stats Standardized */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div className="lg:col-span-3 flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-3">
-                        <div className="flex-1 relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="Buscar por nombre o código..."
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 text-slate-600 font-medium placeholder:text-slate-400"
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                            />
-                        </div>
+                    <div className="flex-1 bg-surface-card rounded-[2rem] border border-border flex items-center px-6 focus-within:border-primary/30 transition-all shadow-sm">
+                        <svg className="w-5 h-5 text-text-secondary opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Buscar por nombre o código de barras..."
+                            className="w-full bg-transparent border-none focus:ring-0 text-sm font-bold text-text-primary placeholder:text-text-secondary/30 py-4"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
                     </div>
                     <select
-                        className="bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-200 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20"
+                        className="bg-surface-card px-6 py-4 rounded-[2rem] border border-border font-black text-[10px] uppercase tracking-widest text-text-primary outline-none focus:border-primary/30 transition-all cursor-pointer shadow-sm appearance-none min-w-[200px]"
                         value={selectedCategoria}
                         onChange={e => setSelectedCategoria(e.target.value)}
                     >
-                        <option value="ALL">Todas las Categorías</option>
+                        <option value="ALL">📦 TODAS LAS CATEGORÍAS</option>
                         {categoriasRes?.data?.items?.map(cat => (
-                            <option key={cat.categoria_id} value={cat.categoria_id}>{cat.nombre}</option>
+                            <option key={cat.categoria_id} value={cat.categoria_id}>{cat.nombre.toUpperCase()}</option>
                         ))}
                     </select>
                 </div>
-                <div className="bg-indigo-900 rounded-2xl p-4 flex items-center justify-between text-white shadow-lg overflow-hidden relative">
+                <div className="bg-primary-dark rounded-[2.5rem] p-8 flex items-center justify-between text-white shadow-2xl relative overflow-hidden group">
                     <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Total Artículos</p>
-                        <p className="text-2xl font-black">{articulos.length}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[.2em] text-white/40 mb-1">Items en Catálogo</p>
+                        <p className="text-4xl font-black">{articulos.length}</p>
                     </div>
-                    <div className="text-3xl relative z-10 opacity-50">📦</div>
-                    <div className="absolute -right-4 -bottom-4 bg-white/5 w-24 h-24 rounded-full"></div>
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center relative z-10">
+                        <svg className="w-8 h-8 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <div className="absolute -right-4 -bottom-4 bg-white/5 w-32 h-32 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* List and Tables Standardized */}
+            <div className="bg-surface-card rounded-[3rem] border border-border shadow-sm overflow-hidden">
                 {loadingArticulos ? (
-                    <div className="p-24 text-center">
-                        <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-slate-400 font-bold animate-pulse">Cargando catálogo...</p>
+                    <div className="p-32 text-center animate-pulse flex flex-col items-center gap-6">
+                        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                        <p className="font-black text-text-secondary uppercase tracking-[0.2em] text-[10px] opacity-40">Accediendo al Catálogo Maestro...</p>
                     </div>
                 ) : (
                     <>
-                        {/* Desktop table */}
+                        {/* Desktop Table Standardized */}
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50 border-b border-slate-100">
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">Código / Nombre</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">Categoría</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">U. Medida</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider">Costo / Venta</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider text-center">Stock Mín/Máx</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase text-slate-400 tracking-wider text-center">Acciones</th>
+                                    <tr className="bg-surface-raised/50 border-b border-border">
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40">Identificación / Nombre</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40">Clasificación</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 text-center">Formato</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40">Valoración Gs</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 text-center">Nivel Stock</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 text-center">Gestión</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-border/50">
                                     {articulos.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="p-20 text-center">
-                                                <p className="text-slate-400 font-medium">No se encontraron artículos.</p>
+                                            <td colSpan="6" className="p-32 text-center">
+                                                <div className="w-20 h-20 bg-surface-raised rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner border border-border">📦</div>
+                                                <p className="text-text-secondary font-black uppercase text-[10px] tracking-widest opacity-40">Sin registros en esta categoría</p>
                                             </td>
                                         </tr>
                                     ) : (
                                         articulos.map((art) => (
-                                            <tr key={art.articulo_id} className="hover:bg-slate-50/50 transition-colors group">
-                                                <td className="px-6 py-4">
+                                            <tr key={art.articulo_id} className="hover:bg-surface-raised/30 transition-all group">
+                                                <td className="px-8 py-6">
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-slate-900 leading-tight">{art.nombre}</span>
-                                                        <span className="text-xs text-slate-400 font-black tracking-wider uppercase">{art.codigo}</span>
+                                                        <span className="font-black text-text-primary text-sm tracking-tight leading-tight mb-1">{art.nombre}</span>
+                                                        <span className="text-[10px] text-primary font-black tracking-widest uppercase opacity-60">#{art.codigo}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold uppercase tracking-tight">
+                                                <td className="px-8 py-6">
+                                                    <span className="px-4 py-1.5 bg-secondary/10 text-secondary border border-secondary/20 rounded-xl text-[9px] font-black uppercase tracking-widest">
                                                         {art.categoria_nombre}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-medium text-slate-500">
-                                                    {art.unidad_medida}
+                                                <td className="px-8 py-6 text-center">
+                                                    <span className="text-xs font-black text-text-secondary opacity-60 uppercase tracking-widest">{art.unidad_medida}</span>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-col text-xs font-bold">
-                                                        <span className="text-slate-400 whitespace-nowrap">C: {new Intl.NumberFormat('es-PY').format(art.costo_unitario)} Gs</span>
-                                                        <span className="text-indigo-600 whitespace-nowrap">V: {new Intl.NumberFormat('es-PY').format(art.precio_venta)} Gs</span>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex justify-between items-center text-[10px] font-medium text-text-secondary">
+                                                            <span className="opacity-40 uppercase tracking-widest">Costo:</span>
+                                                            <span className="font-black text-text-primary">{new Intl.NumberFormat('es-PY').format(art.costo_unitario)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-[10px] font-black text-secondary">
+                                                            <span className="opacity-40 uppercase tracking-widest">Venta:</span>
+                                                            <span className="">{new Intl.NumberFormat('es-PY').format(art.precio_venta)}</span>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <span className="text-xs font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">{art.cantidad_minima}</span>
-                                                        <span className="text-slate-300">/</span>
-                                                        <span className="text-xs font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{art.cantidad_maxima}</span>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center justify-center gap-3">
+                                                        <div className="flex flex-col items-center">
+                                                            <span className="text-[8px] font-black text-danger uppercase mb-1 opacity-40">Mín</span>
+                                                            <span className="text-[11px] font-black text-danger bg-danger/10 px-3 py-1 rounded-lg border border-danger/10 min-w-[32px] text-center">{art.cantidad_minima}</span>
+                                                        </div>
+                                                        <div className="w-4 h-[1px] bg-border mt-3"></div>
+                                                        <div className="flex flex-col items-center">
+                                                            <span className="text-[8px] font-black text-primary uppercase mb-1 opacity-40">Máx</span>
+                                                            <span className="text-[11px] font-black text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/10 min-w-[32px] text-center">{art.cantidad_maxima}</span>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
                                                         <button
                                                             onClick={() => handleEdit(art)}
-                                                            className="p-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                                                            title="Editar"
+                                                            className="p-3 rounded-2xl bg-surface-raised text-text-secondary border border-border hover:bg-primary-dark hover:text-white hover:border-primary-dark transition-all shadow-sm"
+                                                            title="Expediente Técnico"
                                                         >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                             </svg>
                                                         </button>
                                                         <button
                                                             onClick={() => handleToggleActivo(art)}
-                                                            className={`p-2 rounded-xl transition-all shadow-sm ${art.activo === 'S' ? 'bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'}`}
-                                                            title={art.activo === 'S' ? 'Desactivar' : 'Activar'}
+                                                            className={`p-3 rounded-2xl transition-all border shadow-sm ${art.activo === 'S'
+                                                                ? 'bg-danger/5 text-danger border-danger/20 hover:bg-danger hover:text-white'
+                                                                : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary hover:text-white'}`}
+                                                            title={art.activo === 'S' ? 'Baja de Catálogo' : 'Activar Item'}
                                                         >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 {art.activo === 'S' ? (
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                                                 ) : (
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                                                                 )}
                                                             </svg>
                                                         </button>
@@ -219,45 +245,55 @@ export default function Articulos() {
                             </table>
                         </div>
 
-                        {/* Mobile card layout */}
-                        <div className="md:hidden divide-y divide-slate-100">
+                        {/* Mobile Cards Standardized */}
+                        <div className="md:hidden divide-y divide-border/50">
                             {articulos.length === 0 ? (
-                                <div className="p-12 text-center">
-                                    <div className="text-4xl mb-3">📦</div>
-                                    <p className="text-slate-400 font-medium">No se encontraron artículos.</p>
+                                <div className="p-20 text-center">
+                                    <div className="text-4xl mb-4 opacity-20">📦</div>
+                                    <p className="text-text-secondary font-black text-[10px] uppercase tracking-widest opacity-40">No se encontraron artículos</p>
                                 </div>
                             ) : (
                                 articulos.map((art) => (
-                                    <div key={art.articulo_id} className="p-4">
-                                        <div className="flex items-start justify-between mb-1">
-                                            <div>
-                                                <span className="font-bold text-slate-900 text-sm">{art.nombre}</span>
-                                                <p className="text-[10px] text-slate-400 font-black tracking-wider uppercase">{art.codigo}</p>
+                                    <div key={art.articulo_id} className="p-8 space-y-4 hover:bg-surface-raised/30 transition-all">
+                                        <div className="flex items-start justify-between">
+                                            <div className="space-y-1">
+                                                <h4 className="font-black text-text-primary text-sm tracking-tight">{art.nombre}</h4>
+                                                <p className="text-[10px] text-primary font-black tracking-widest uppercase opacity-60">#{art.codigo}</p>
                                             </div>
-                                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase shrink-0 ml-2">
+                                            <span className="px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-lg text-[8px] font-black uppercase tracking-widest whitespace-nowrap">
                                                 {art.categoria_nombre}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-3 mt-2 text-xs">
-                                            <span className="text-slate-400">C: {new Intl.NumberFormat('es-PY').format(art.costo_unitario)} Gs</span>
-                                            <span className="text-indigo-600 font-bold">V: {new Intl.NumberFormat('es-PY').format(art.precio_venta)} Gs</span>
+                                        <div className="bg-surface-raised rounded-2xl p-4 grid grid-cols-2 gap-4">
+                                            <div className="space-y-1 border-r border-border pr-4">
+                                                <p className="text-[8px] font-black text-text-secondary uppercase opacity-40">Valoración Venta</p>
+                                                <p className="text-sm font-black text-secondary">{new Intl.NumberFormat('es-PY').format(art.precio_venta)} Gs</p>
+                                            </div>
+                                            <div className="space-y-1 pl-4">
+                                                <p className="text-[8px] font-black text-text-secondary uppercase opacity-40">Stock Mín/Máx</p>
+                                                <p className="text-sm font-black text-text-primary">{art.cantidad_minima} / {art.cantidad_maxima}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
-                                            <span>📏 {art.unidad_medida}</span>
-                                            <span>Stock: <span className="text-rose-500 font-bold">{art.cantidad_minima}</span> / <span className="text-blue-500 font-bold">{art.cantidad_maxima}</span></span>
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-3">
+                                        <div className="flex items-center gap-3">
                                             <button
                                                 onClick={() => handleEdit(art)}
-                                                className="flex-1 text-center text-xs font-bold text-indigo-600 bg-indigo-50 py-2 rounded-xl"
+                                                className="flex-1 bg-surface-card border border-border text-text-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-surface-raised transition-all"
                                             >
-                                                ✏️ Editar
+                                                Ver Detalles
                                             </button>
                                             <button
                                                 onClick={() => handleToggleActivo(art)}
-                                                className={`flex-1 text-center text-xs font-bold py-2 rounded-xl ${art.activo === 'S' ? 'text-rose-600 bg-rose-50' : 'text-emerald-600 bg-emerald-50'}`}
+                                                className={`px-6 py-4 rounded-2xl border transition-all ${art.activo === 'S'
+                                                    ? 'bg-danger/5 text-danger border-danger/20'
+                                                    : 'bg-secondary/5 text-secondary border-secondary/20'}`}
                                             >
-                                                {art.activo === 'S' ? '⛔ Desactivar' : '✅ Activar'}
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    {art.activo === 'S' ? (
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                    ) : (
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                                    )}
+                                                </svg>
                                             </button>
                                         </div>
                                     </div>
@@ -275,7 +311,7 @@ export default function Articulos() {
                     unidades={unidadesRes?.data?.items || []}
                     onSave={handleSave}
                     onCancel={() => setShowForm(false)}
-                    isSaving={upsertMutation.isLoading}
+                    isSaving={upsertMutation.isPending}
                 />
             )}
 
@@ -304,7 +340,6 @@ function ArticuloForm({ articulo, categorias, unidades, onSave, onCancel, isSavi
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Send null for codigo if it's new/empty to trigger auto-generation
         const payload = { ...formData };
         if (!articulo?.articulo_id && !payload.codigo.trim()) {
             payload.codigo = null;
@@ -318,44 +353,50 @@ function ArticuloForm({ articulo, categorias, unidades, onSave, onCancel, isSavi
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+                className="bg-surface-card rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20"
             >
-                <div className="bg-slate-50 px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-100 flex justify-between items-center">
+                <div className="bg-surface-raised p-8 sm:p-10 border-b border-border flex justify-between items-center">
                     <div>
-                        <h2 className="text-xl sm:text-2xl font-black text-slate-900">{articulo ? 'Editar Artículo' : 'Nuevo Artículo'}</h2>
-                        <p className="text-slate-500 text-xs sm:text-sm font-medium">Defina los parámetros del catálogo.</p>
+                        <h2 className="text-2xl font-black text-text-primary uppercase tracking-tight leading-none">
+                            {articulo ? 'Editar' : 'Registrar'} <span className="text-primary">Artículo</span>
+                        </h2>
+                        <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Definición de parámetros técnicos y operativos</p>
                     </div>
-                    <button type="button" onClick={onCancel} className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <button type="button" onClick={onCancel} className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-text-secondary hover:bg-danger hover:text-white transition-all">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-indigo-600">Identificación</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="col-span-1">
-                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Código (Auto)</label>
+                <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-1.5 h-4 bg-primary rounded-full"></div>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-40">Identificación Propedéutica</h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Referencia Fiscal</label>
                                 <input
                                     name="codigo"
                                     type="text"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 font-black uppercase"
-                                    placeholder="Autogenerado"
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised text-[11px] font-black uppercase tracking-widest text-text-secondary/50"
+                                    placeholder="AUTOGENERADO"
                                     value={formData.codigo || ''}
                                     readOnly
                                     disabled
                                 />
                             </div>
-                            <div className="col-span-1">
-                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">U. Medida</label>
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Unidad Base</label>
                                 <select
                                     name="unidad_medida"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-black text-[11px] uppercase tracking-widest appearance-none cursor-pointer"
                                     value={formData.unidad_medida}
                                     onChange={handleChange}
                                     required
@@ -367,88 +408,92 @@ function ArticuloForm({ articulo, categorias, unidades, onSave, onCancel, isSavi
                                 </select>
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Nombre</label>
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Nombre Comercial / Genérico</label>
                             <input
                                 name="nombre"
                                 type="text"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-700"
-                                placeholder="Ej. Anestesia 2%"
+                                className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-bold text-sm text-text-primary"
+                                placeholder="Ej. Resina Compuesta A2..."
                                 value={formData.nombre}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Categoría</label>
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Clasificación Maestro</label>
                             <select
                                 name="categoria_id"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                                className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-black text-[11px] uppercase tracking-widest appearance-none cursor-pointer"
                                 value={formData.categoria_id}
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="">Seleccione Categoría</option>
+                                <option value="">SELECCIONAR CATEGORÍA</option>
                                 {categorias.map(cat => (
-                                    <option key={cat.categoria_id} value={cat.categoria_id}>{cat.nombre}</option>
+                                    <option key={cat.categoria_id} value={cat.categoria_id}>{cat.nombre.toUpperCase()}</option>
                                 ))}
                             </select>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-indigo-600">Precios y Stock</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Costo Estimado</label>
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-1.5 h-4 bg-secondary rounded-full"></div>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-40">Costos y Protocolos de Stock</h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Costo Promedio (Gs)</label>
                                 <input
                                     name="costo_unitario"
                                     type="number"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-indigo-600"
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-black text-sm text-text-primary"
                                     value={formData.costo_unitario}
                                     onChange={handleChange}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Precio Venta</label>
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Precio Sugerido (Gs)</label>
                                 <input
                                     name="precio_venta"
                                     type="number"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-emerald-600"
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-secondary focus:outline-none transition-all font-black text-sm text-secondary"
                                     value={formData.precio_venta}
                                     onChange={handleChange}
                                 />
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Stock Mínimo</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Límite Crítico (Min)</label>
                                 <input
                                     name="cantidad_minima"
                                     type="number"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-rose-500"
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-danger focus:outline-none transition-all font-black text-sm text-danger"
                                     value={formData.cantidad_minima}
                                     onChange={handleChange}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Stock Máximo</label>
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Capacidad Máxima</label>
                                 <input
                                     name="cantidad_maxima"
                                     type="number"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-blue-500"
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-black text-sm text-primary"
                                     value={formData.cantidad_maxima}
                                     onChange={handleChange}
                                 />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Descripción</label>
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Observaciones Analíticas</label>
                             <textarea
                                 name="descripcion"
                                 rows="3"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all text-sm"
-                                placeholder="Detalles adicionales..."
+                                className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all text-xs font-medium text-text-primary resize-none shadow-inner"
+                                placeholder="Notas internas sobre el insumo..."
                                 value={formData.descripcion}
                                 onChange={handleChange}
                             ></textarea>
@@ -456,26 +501,33 @@ function ArticuloForm({ articulo, categorias, unidades, onSave, onCancel, isSavi
                     </div>
                 </div>
 
-                <div className="bg-slate-50 px-4 sm:px-8 py-4 sm:py-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                    <button
-                        type="submit"
-                        className="w-full sm:flex-1 bg-indigo-600 text-white px-8 py-3 sm:py-4 rounded-2xl font-black shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0"
-                        disabled={isSaving}
-                    >
-                        {isSaving ? (
-                            <div className="flex items-center justify-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>Guardando...</span>
-                            </div>
-                        ) : 'Guardar Artículo'}
-                    </button>
+                <div className="bg-surface-raised p-8 sm:p-10 border-t border-border flex flex-col sm:flex-row gap-4">
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="w-full sm:px-8 py-3 sm:py-4 rounded-2xl font-black text-slate-500 hover:bg-slate-100 transition-all order-last sm:order-none"
+                        className="flex-1 px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-text-secondary border border-border hover:bg-white transition-all order-last sm:order-none"
                         disabled={isSaving}
                     >
-                        Cancelar
+                        Abortar
+                    </button>
+                    <button
+                        type="submit"
+                        className="flex-[2] bg-primary text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:bg-primary-dark hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none flex items-center justify-center gap-3"
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Sincronizando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Certificar Artículo</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </form>
@@ -498,14 +550,9 @@ function CategoriasModal({ onClose }) {
         mutationFn: (data) => comprasService.upsertCategoria(data),
         onSuccess: () => {
             queryClient.invalidateQueries(['categorias']);
-            if (editingId) {
-                setEditingId(null);
-                setNombre('');
-                setDescripcion('');
-            } else {
-                setNombre('');
-                setDescripcion('');
-            }
+            setEditingId(null);
+            setNombre('');
+            setDescripcion('');
         }
     });
 
@@ -531,53 +578,63 @@ function CategoriasModal({ onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-                <div className="bg-slate-50 px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-100 flex justify-between items-center">
+        <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <div className="bg-surface-card rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20 flex flex-col max-h-[90vh]">
+                <div className="bg-surface-raised p-8 border-b border-border flex justify-between items-center">
                     <div>
-                        <h2 className="text-xl sm:text-2xl font-black text-slate-900">Gestionar Categorías</h2>
-                        <p className="text-slate-500 text-xs sm:text-sm font-medium">Categorías de artículos.</p>
+                        <h2 className="text-xl font-black text-text-primary uppercase tracking-tight leading-none">
+                            Estructura de <span className="text-primary">Categorías</span>
+                        </h2>
+                        <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Taxonomía organizativa del inventario</p>
                     </div>
-                    <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <button type="button" onClick={onClose} className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-text-secondary hover:bg-danger hover:text-white transition-all">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <div className="p-4 sm:p-6 bg-slate-50 border-b border-slate-100">
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                        <input
-                            type="text"
-                            placeholder="Nombre de Categoría"
-                            className="w-full px-4 py-2 sm:py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
-                            value={nombre}
-                            onChange={e => setNombre(e.target.value)}
-                            required
-                        />
-                        <div className="flex flex-col sm:flex-row gap-2">
+                <div className="p-8 bg-surface-raised/50 border-b border-border">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Identificador Categoría</label>
                             <input
                                 type="text"
-                                placeholder="Descripción (opcional)"
-                                className="flex-1 px-4 py-2 sm:py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all text-sm"
-                                value={descripcion}
-                                onChange={e => setDescripcion(e.target.value)}
+                                placeholder="NOMBRE DE LA CATEGORÍA..."
+                                className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-card focus:border-primary focus:outline-none transition-all font-black text-[11px] uppercase tracking-widest"
+                                value={nombre}
+                                onChange={e => setNombre(e.target.value)}
+                                required
                             />
-                            <div className="flex gap-2">
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-1 space-y-2">
+                                <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1 opacity-40">Alcance Analítico (Opcional)</label>
+                                <input
+                                    type="text"
+                                    placeholder="DESCRIPCIÓN BREVE..."
+                                    className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-surface-card focus:border-primary focus:outline-none transition-all text-xs font-medium"
+                                    value={descripcion}
+                                    onChange={e => setDescripcion(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex gap-2 items-end">
                                 <button
                                     type="submit"
-                                    disabled={upsertMutation.isLoading}
-                                    className="flex-1 sm:flex-none bg-indigo-600 text-white px-6 py-2 sm:py-0 rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50"
+                                    disabled={upsertMutation.isPending}
+                                    className="flex-1 sm:flex-none bg-primary text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary-dark hover:-translate-y-1 transition-all disabled:opacity-50 h-[52px]"
                                 >
-                                    {editingId ? 'Actualizar' : 'Agregar'}
+                                    {editingId ? 'Actualizar' : 'Integrar'}
                                 </button>
                                 {editingId && (
                                     <button
                                         type="button"
                                         onClick={() => { setEditingId(null); setNombre(''); setDescripcion(''); }}
-                                        className="bg-slate-200 text-slate-600 px-4 rounded-xl font-bold hover:bg-slate-300 transition-all"
+                                        className="bg-surface-raised border border-border text-text-secondary w-[52px] h-[52px] rounded-2xl flex items-center justify-center hover:bg-white transition-all shadow-sm"
                                     >
-                                        X
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 )}
                             </div>
@@ -585,39 +642,49 @@ function CategoriasModal({ onClose }) {
                     </form>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-2">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     {isLoading ? (
-                        <p className="text-center p-4 text-slate-400">Cargando...</p>
+                        <div className="py-20 text-center animate-pulse flex flex-col items-center gap-4">
+                            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">Consultando Registros...</p>
+                        </div>
                     ) : (
-                        <div className="space-y-1">
+                        <div className="space-y-3">
                             {(categoriasRes?.data?.items || []).map(cat => (
-                                <div key={cat.categoria_id} className="group flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-100">
-                                    <div>
-                                        <p className="font-bold text-slate-800">{cat.nombre}</p>
-                                        {cat.descripcion && <p className="text-xs text-slate-400">{cat.descripcion}</p>}
+                                <div key={cat.categoria_id} className="group flex items-center justify-between p-5 bg-surface-raised rounded-[1.5rem] border border-transparent hover:border-primary/20 hover:bg-white transition-all shadow-sm hover:shadow-md">
+                                    <div className="space-y-1">
+                                        <p className="font-black text-text-primary text-sm tracking-tight">{cat.nombre.toUpperCase()}</p>
+                                        {cat.descripcion && <p className="text-[10px] text-text-secondary font-medium opacity-60 leading-tight">{cat.descripcion}</p>}
                                     </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100 translate-x-2 group-hover:translate-x-0">
                                         <button
                                             onClick={() => handleEdit(cat)}
-                                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                                            className="p-2.5 bg-white text-primary border border-primary/20 rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm"
                                             title="Editar"
                                         >
-                                            ✏️
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
                                         </button>
                                         <button
                                             onClick={() => {
-                                                if (confirm('¿Eliminar esta categoría?')) deleteMutation.mutate(cat.categoria_id);
+                                                if (confirm('¿Eliminar esta categoría permanentemente?')) deleteMutation.mutate(cat.categoria_id);
                                             }}
-                                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
+                                            className="p-2.5 bg-white text-danger border border-danger/20 rounded-xl hover:bg-danger hover:text-white transition-all shadow-sm"
                                             title="Eliminar"
                                         >
-                                            🗑️
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
                                         </button>
                                     </div>
                                 </div>
                             ))}
                             {(categoriasRes?.data?.items || []).length === 0 && (
-                                <p className="text-center text-slate-400 py-8">No hay categorías registradas.</p>
+                                <div className="py-20 text-center space-y-4">
+                                    <div className="w-16 h-16 bg-surface-raised rounded-3xl flex items-center justify-center mx-auto text-2xl shadow-inner border border-border opacity-40">📂</div>
+                                    <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">Sin taxonomía registrada</p>
+                                </div>
                             )}
                         </div>
                     )}

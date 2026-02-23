@@ -47,64 +47,65 @@ function ModalAbrirCaja({ caja, onClose, onSuccess, usuarioId }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-                <div className="p-6 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                            <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-surface-card rounded-[2rem] shadow-2xl w-full max-w-md border border-white/20 animate-in zoom-in-95 duration-300 overflow-hidden">
+                <div className="p-8 border-b border-border bg-surface-raised/50">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-secondary-light/30 flex items-center justify-center border border-secondary/20">
+                            <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-slate-900">Abrir Caja</h2>
-                            <p className="text-sm text-slate-500 font-medium">{caja.nombre}</p>
+                            <h2 className="text-xl font-black text-text-primary uppercase tracking-tight">Abrir Caja</h2>
+                            <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest opacity-60 mt-0.5">{caja.nombre}</p>
                         </div>
                     </div>
                 </div>
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     {error && (
-                        <div className="bg-red-50 border border-red-100 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl">
+                        <div className="bg-danger-light/20 border border-danger/20 text-danger text-[10px] font-black uppercase tracking-widest px-4 py-3 rounded-xl flex items-center gap-3">
+                            <span className="w-1.5 h-1.5 bg-danger rounded-full animate-pulse"></span>
                             {error}
                         </div>
                     )}
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Saldo Inicial (Gs.)</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary opacity-60 uppercase tracking-widest px-1">Saldo Inicial (Gs.)</label>
                         <input
                             type="number"
                             min="0"
                             step="1000"
                             value={saldoInicial}
                             onChange={e => { setSaldoInicial(e.target.value); setError(''); }}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium text-lg"
+                            className="w-full px-5 py-4 bg-surface-raised border border-border rounded-2xl text-text-primary focus:bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all outline-none font-black text-2xl tracking-tight"
                             autoFocus
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Observaciones</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary opacity-60 uppercase tracking-widest px-1">Observaciones</label>
                         <textarea
                             value={observaciones}
                             onChange={e => setObservaciones(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium resize-none"
-                            placeholder="Opcional"
-                            rows={2}
+                            className="w-full px-5 py-4 bg-surface-raised border border-border rounded-2xl text-text-primary focus:bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all outline-none font-bold text-sm resize-none"
+                            placeholder="Notas opcionales..."
+                            rows={3}
                         />
                     </div>
-                    <div className="flex gap-3 pt-2">
+                    <div className="flex gap-4 pt-4">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={loading}
-                            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors"
+                            className="flex-1 px-4 py-4 border border-border text-text-secondary font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-surface-raised transition-all"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-60"
+                            className="flex-2 px-8 py-4 bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-50"
                         >
-                            {loading ? 'Abriendo...' : 'Abrir Caja'}
+                            {loading ? 'Procesando...' : 'Abrir Caja Ahora'}
                         </button>
                     </div>
                 </form>
@@ -121,77 +122,78 @@ function CajaCard({ caja, onAbrir, onClick }) {
     return (
         <div
             onClick={() => isAbierta && onClick(caja)}
-            className={`group bg-white rounded-3xl border-2 transition-all duration-300 shadow-sm hover:shadow-xl ${isAbierta
-                    ? 'border-emerald-100 hover:border-emerald-500 cursor-pointer translate-y-0 hover:-translate-y-2'
-                    : 'border-slate-100 opacity-90'
+            className={`group bg-surface-card rounded-[2.5rem] border border-border transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-primary/10 overflow-hidden ${isAbierta
+                ? 'hover:border-primary/30 cursor-pointer translate-y-0 hover:-translate-y-2'
+                : 'opacity-80'
                 }`}
         >
             <div className="p-8">
                 {/* Header */}
-                <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 ${isAbierta
-                                ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-200'
-                                : 'bg-gradient-to-br from-slate-300 to-slate-400'
+                <div className="flex items-start justify-between mb-8">
+                    <div className="flex items-center gap-5">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 border ${isAbierta
+                            ? 'bg-secondary text-white shadow-xl shadow-secondary/30 border-secondary/20'
+                            : 'bg-surface-raised text-text-secondary border-border'
                             }`}>
-                            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 className="font-black text-slate-900 text-xl leading-tight">{caja.nombre}</h3>
+                            <h3 className="font-black text-text-primary text-xl leading-tight uppercase tracking-tight">{caja.nombre}</h3>
                             {caja.descripcion && (
-                                <p className="text-sm text-slate-500 font-medium mt-1 truncate max-w-[200px]">{caja.descripcion}</p>
+                                <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest mt-1 opacity-60 truncate max-w-[180px]">{caja.descripcion}</p>
                             )}
                         </div>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black tracking-wider ${isAbierta ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest border ${isAbierta ? 'bg-secondary-light/20 text-secondary border-secondary/20' : 'bg-surface-raised text-text-secondary border-border'
                         }`}>
-                        <span className={`w-2 h-2 rounded-full ${isAbierta ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isAbierta ? 'bg-secondary animate-pulse' : 'bg-text-secondary opacity-40'}`}></span>
                         {isAbierta ? 'ABIERTA' : 'CERRADA'}
                     </span>
                 </div>
 
                 {/* Saldo */}
                 {isAbierta ? (
-                    <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-2xl p-5 mb-6 relative overflow-hidden group-hover:from-emerald-100 transition-colors duration-300">
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Saldo Disponible</p>
-                        <p className="text-3xl font-black text-emerald-900 tracking-tight">{formatCurrency(saldoActual)}</p>
+                    <div className="bg-surface-raised/50 border border-border rounded-3xl p-6 mb-8 relative overflow-hidden group-hover:bg-white transition-all duration-500">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/5 rounded-full -mr-8 -mt-8 blur-2xl"></div>
+                        <p className="text-[10px] font-black text-secondary uppercase tracking-[0.25em] mb-2 opacity-80">Saldo Disponible</p>
+                        <p className="text-3xl font-black text-text-primary tracking-tighter">{formatCurrency(saldoActual)}</p>
 
-                        <div className="flex gap-6 mt-4 pt-4 border-t border-emerald-200/50">
-                            <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Ingresos</p>
-                                <p className="text-sm font-black text-emerald-700">{formatCurrency(caja.total_ingresos)}</p>
+                        <div className="flex gap-8 mt-6 pt-6 border-t border-border">
+                            <div className="space-y-1">
+                                <p className="text-[9px] text-text-secondary font-black uppercase tracking-widest opacity-40">Ingresos</p>
+                                <p className="text-sm font-black text-secondary">{formatCurrency(caja.total_ingresos)}</p>
                             </div>
-                            <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Egresos</p>
-                                <p className="text-sm font-black text-red-600">{formatCurrency(caja.total_egresos)}</p>
+                            <div className="space-y-1">
+                                <p className="text-[9px] text-text-secondary font-black uppercase tracking-widest opacity-40">Egresos</p>
+                                <p className="text-sm font-black text-danger">{formatCurrency(caja.total_egresos)}</p>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-6 text-center">
-                        <p className="text-xs font-bold text-slate-400">Esta caja debe abrirse para registrar movimientos</p>
+                    <div className="bg-surface-raised border-dashed border-2 border-border rounded-3xl p-8 mb-8 text-center">
+                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 leading-relaxed">Esta caja debe abrirse para iniciar operaciones</p>
                     </div>
                 )}
 
                 {/* Info */}
-                <div className="text-xs text-slate-400 space-y-1.5 px-1">
+                <div className="text-[10px] text-text-secondary space-y-2.5 px-2">
                     {isAbierta && caja.fecha_apertura && (
                         <div className="flex justify-between items-center">
-                            <span className="font-bold uppercase tracking-tighter">Apertura</span>
-                            <span className="font-extrabold text-slate-600">{formatDateTime(caja.fecha_apertura)}</span>
+                            <span className="font-black uppercase tracking-widest opacity-40 text-[9px]">Apertura</span>
+                            <span className="font-bold text-text-primary uppercase">{formatDateTime(caja.fecha_apertura)}</span>
                         </div>
                     )}
                     {!isAbierta && caja.fecha_cierre ? (
                         <div className="flex justify-between items-center">
-                            <span className="font-bold uppercase tracking-tighter">Último Cierre</span>
-                            <span className="font-extrabold text-slate-600">{formatDateTime(caja.fecha_cierre)}</span>
+                            <span className="font-black uppercase tracking-widest opacity-40 text-[9px]">Último Cierre</span>
+                            <span className="font-bold text-text-primary uppercase">{formatDateTime(caja.fecha_cierre)}</span>
                         </div>
                     ) : !isAbierta && (
                         <div className="flex justify-between items-center">
-                            <span className="font-bold uppercase tracking-tighter">Creada</span>
-                            <span className="font-extrabold text-slate-600">{formatDateTime(caja.fecha_creacion)}</span>
+                            <span className="font-black uppercase tracking-widest opacity-40 text-[9px]">Creada</span>
+                            <span className="font-bold text-text-primary uppercase">{formatDateTime(caja.fecha_creacion)}</span>
                         </div>
                     )}
                 </div>
@@ -201,20 +203,20 @@ function CajaCard({ caja, onAbrir, onClick }) {
                     {isAbierta ? (
                         <button
                             onClick={(e) => { e.stopPropagation(); onClick(caja); }}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white font-black text-sm rounded-2xl hover:bg-black transition-all shadow-lg hover:grow"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-4.5 bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 group/btn"
                         >
                             Ver Detalles y Movimientos
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </button>
                     ) : (
                         <button
                             onClick={(e) => { e.stopPropagation(); onAbrir(caja); }}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 shadow-lg hover:scale-[1.02]"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-4.5 bg-secondary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-secondary-dark transition-all shadow-xl shadow-secondary/20 flex items-center justify-center gap-3"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                             </svg>
                             Abrir Caja de Hoy
                         </button>
@@ -275,53 +277,58 @@ export default function Caja() {
     const cajasCerradas = cajasUsuario.filter(c => c.estado === 'CERRADA');
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Toast */}
             {toast && (
-                <div className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-xl border text-sm font-bold flex items-center gap-3 ${toast.type === 'success'
-                        ? 'bg-white border-emerald-200 text-emerald-800'
-                        : 'bg-white border-red-200 text-red-800'
+                <div className={`fixed bottom-8 right-8 z-50 px-6 py-4 rounded-[1.5rem] shadow-2xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-4 animate-in slide-in-from-right-10 duration-500 ${toast.type === 'success'
+                    ? 'bg-surface-card border-secondary/20 text-secondary'
+                    : 'bg-surface-card border-danger/20 text-danger'
                     }`}>
-                    <span className={`w-2 h-2 rounded-full ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                    <span className={`w-2 h-2 rounded-full ${toast.type === 'success' ? 'bg-secondary animate-pulse' : 'bg-danger'}`}></span>
                     {toast.msg}
                 </div>
             )}
 
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Gestión de Caja</h1>
-                <p className="text-slate-500 font-medium mt-1">Abrí tu caja para comenzar a registrar movimientos</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-black text-text-primary tracking-tight uppercase">Gestión de Caja</h1>
+                    <p className="text-text-secondary font-medium text-sm md:text-base">Control centralizado de flujos de efectivo y cierres diarios.</p>
+                </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Total Cajas', value: cajas.length, color: 'bg-slate-100 text-slate-700' },
-                    { label: 'Abiertas', value: cajasAbiertas.length, color: 'bg-emerald-100 text-emerald-700' },
-                    { label: 'Cerradas', value: cajasCerradas.length, color: 'bg-slate-100 text-slate-500' },
+                    { label: 'Total Cajas', value: cajas.length, icon: '📦', color: 'bg-primary-light/30 text-primary border-primary/20' },
+                    { label: 'Cajas Abiertas', value: cajasAbiertas.length, icon: '🔓', color: 'bg-secondary-light/30 text-secondary border-secondary/20' },
+                    { label: 'Cajas Cerradas', value: cajasCerradas.length, icon: '🔒', color: 'bg-surface-raised text-text-secondary border-border' },
                 ].map((s) => (
-                    <div key={s.label} className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${s.color} font-black text-xl`}>
+                    <div key={s.label} className="bg-surface-card rounded-[2rem] border border-border p-6 flex items-center gap-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div className={`w-16 h-16 rounded-[1.25rem] flex items-center justify-center border ${s.color} font-black text-2xl`}>
                             {s.value}
                         </div>
-                        <p className="text-sm font-bold text-slate-600">{s.label}</p>
+                        <div>
+                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 mb-1">{s.label}</p>
+                            <p className="text-lg font-black text-text-primary uppercase tracking-tight">Consolidado</p>
+                        </div>
                     </div>
                 ))}
             </div>
 
             {/* Filtros */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
                 {[
-                    { label: 'Todas', value: '' },
-                    { label: 'Abiertas', value: 'ABIERTA' },
-                    { label: 'Cerradas', value: 'CERRADA' },
+                    { label: 'Todas las Cajas', value: '' },
+                    { label: 'Activas/Abiertas', value: 'ABIERTA' },
+                    { label: 'Finalizadas/Cerradas', value: 'CERRADA' },
                 ].map(f => (
                     <button
                         key={f.value}
                         onClick={() => setFiltroEstado(f.value)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${filtroEstado === f.value
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${filtroEstado === f.value
+                            ? 'bg-primary text-white shadow-lg shadow-primary/25 border-transparent'
+                            : 'bg-surface-card border border-border text-text-secondary hover:bg-surface-raised'
                             }`}
                     >
                         {f.label}
@@ -331,31 +338,30 @@ export default function Caja() {
 
             {/* Content */}
             {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <div className="flex flex-col items-center gap-3">
-                        <svg className="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        <p className="text-slate-500 font-bold text-sm">Cargando cajas...</p>
+                <div className="flex flex-col items-center justify-center py-32 bg-surface-card rounded-[3rem] border border-border shadow-sm">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+                        <div className="absolute inset-4 border-4 border-secondary/10 border-b-secondary rounded-full animate-reverse-spin"></div>
                     </div>
+                    <p className="text-[10px] text-text-secondary font-black uppercase tracking-[0.25em] mt-8 animate-pulse">Sincronizando Tesorería...</p>
                 </div>
             ) : error ? (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center font-bold">
-                    {error}
+                <div className="bg-danger-light/10 border-2 border-dashed border-danger/20 text-danger rounded-[2rem] p-12 text-center">
+                    <p className="text-xl font-black uppercase tracking-tight mb-2">Error de Sincronización</p>
+                    <p className="text-sm font-bold opacity-60">{error}</p>
                 </div>
             ) : cajasFiltradas.length === 0 ? (
-                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-16 text-center">
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                <div className="bg-surface-raised rounded-[3rem] border-2 border-dashed border-border p-24 text-center">
+                    <div className="w-20 h-20 bg-surface-card rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-sm border border-border">
+                        <svg className="w-10 h-10 text-text-secondary opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                     </div>
-                    <p className="text-slate-700 font-black text-lg">No hay cajas disponibles</p>
-                    <p className="text-slate-500 text-sm font-medium mt-1">Contactá a un administrador para configurar las cajas</p>
+                    <p className="text-text-primary font-black text-2xl uppercase tracking-tight mb-2">No se encontraron cajas</p>
+                    <p className="text-text-secondary text-sm font-medium max-w-sm mx-auto opacity-60">No tienes permisos asignados o no existen cajas configuradas para esta sucursal.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                     {cajasFiltradas.map(caja => (
                         <CajaCard
                             key={caja.caja_id}

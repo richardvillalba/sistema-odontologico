@@ -121,18 +121,18 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
         { id: 'emergencia', label: 'Emergencia' }
     ];
 
-    const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-slate-800 font-medium";
-    const labelClass = "block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1";
+    const inputClass = "w-full border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-surface-raised text-text-primary font-medium";
+    const labelClass = "block text-[10px] font-black text-text-secondary opacity-60 uppercase tracking-widest mb-1";
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
             <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl animate-in zoom-in-95 duration-300 overflow-hidden max-h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-8 py-4 sm:py-6 text-white">
+                <div className="bg-primary px-4 sm:px-8 py-4 sm:py-6 text-white">
                     <div className="flex justify-between items-center">
                         <div>
                             <h2 className="text-xl font-black tracking-tight">Registrar Nuevo Paciente</h2>
-                            <p className="text-blue-200 text-sm font-medium mt-0.5">Complete los datos del paciente</p>
+                            <p className="text-primary-100 text-sm font-medium mt-0.5">Complete los datos del paciente</p>
                         </div>
                         <button type="button" onClick={onClose} className="p-2 rounded-xl hover:bg-white/20 transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                                 key={t.id}
                                 type="button"
                                 onClick={() => setTab(t.id)}
-                                className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all ${tab === t.id ? 'bg-white text-blue-600 shadow-sm' : 'text-blue-100 hover:text-white'
+                                className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all ${tab === t.id ? 'bg-white text-primary shadow-sm' : 'text-primary-100 hover:text-white'
                                     }`}
                             >
                                 {t.label}
@@ -159,11 +159,11 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="px-4 sm:px-8 py-4 sm:py-6 max-h-[55vh] overflow-y-auto">
                         {error && (
-                            <div className="mb-4 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-center gap-3">
-                                <svg className="w-4 h-4 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="mb-4 bg-danger-light/50 border border-danger-light rounded-xl px-4 py-3 flex items-center gap-3">
+                                <svg className="w-4 h-4 text-danger flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                                 </svg>
-                                <p className="text-sm text-rose-700 font-semibold">{error}</p>
+                                <p className="text-sm text-danger-dark font-semibold">{error}</p>
                             </div>
                         )}
 
@@ -288,7 +288,7 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                         {/* TAB: Contacto de Emergencia */}
                         {tab === 'emergencia' && (
                             <div className="space-y-4">
-                                <p className="text-xs text-slate-400 font-medium bg-slate-50 rounded-xl p-3">
+                                <p className="text-xs text-text-secondary opacity-60 font-medium bg-surface-raised rounded-xl p-3 border border-border">
                                     Esta información es opcional pero recomendada para situaciones de emergencia durante el tratamiento.
                                 </p>
                                 <div>
@@ -318,13 +318,13 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                     </div>
 
                     {/* Footer */}
-                    <div className="px-4 sm:px-8 py-4 sm:py-5 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div className="px-4 sm:px-8 py-4 sm:py-5 border-t border-border bg-surface-raised flex justify-between items-center">
                         <div className="flex gap-1.5">
                             {tabs.map(t => (
                                 <div
                                     key={t.id}
                                     onClick={() => setTab(t.id)}
-                                    className={`h-1.5 rounded-full cursor-pointer transition-all ${tab === t.id ? 'bg-blue-600 w-5' : 'bg-slate-300 w-1.5'}`}
+                                    className={`h-1.5 rounded-full cursor-pointer transition-all ${tab === t.id ? 'bg-primary w-5' : 'bg-border w-1.5'}`}
                                 />
                             ))}
                         </div>
@@ -332,14 +332,14 @@ const ModalPaciente = ({ onClose, onSuccess, empresaId }) => {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-6 py-2.5 text-slate-500 font-bold hover:text-slate-700 transition-colors"
+                                className="px-6 py-2.5 text-text-secondary font-bold hover:text-text-primary transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
                                 disabled={mutation.isPending}
-                                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl font-black transition-all flex items-center gap-2"
+                                className="px-8 py-2.5 bg-primary hover:bg-primary-dark disabled:bg-border text-white rounded-xl font-black transition-all flex items-center gap-2"
                             >
                                 {mutation.isPending ? (
                                     <>
@@ -375,7 +375,7 @@ const Pacientes = () => {
     const pacientes = data?.data?.items || [];
 
     const getAvatarColor = (name) => {
-        const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500', 'bg-rose-500', 'bg-violet-500'];
+        const colors = ['bg-primary', 'bg-secondary', 'bg-indigo-500', 'bg-amber-500', 'bg-danger', 'bg-violet-500'];
         const index = name?.length % colors.length;
         return colors[index];
     };
@@ -400,16 +400,16 @@ const Pacientes = () => {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pacientes</h1>
-                    <p className="text-slate-500 font-medium text-sm md:text-base">Gestiona la base de datos de tu clínica.</p>
+                    <h1 className="text-2xl md:text-3xl font-black text-text-primary tracking-tight">Pacientes</h1>
+                    <p className="text-text-secondary font-medium text-sm md:text-base">Gestiona la base de datos de tu clínica.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="hidden sm:flex bg-white hover:bg-slate-50 text-slate-700 font-bold px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm transition-all items-center gap-2">
+                    <button className="hidden sm:flex bg-surface-card hover:bg-surface-raised text-text-secondary font-bold px-5 py-2.5 rounded-xl border border-border shadow-sm transition-all items-center gap-2">
                         📥 Exportar
                     </button>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                        className="bg-primary hover:bg-primary-dark text-white px-4 sm:px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
                         <span className="text-xl leading-none">+</span> <span className="hidden sm:inline">Registrar</span> Paciente
                     </button>
@@ -418,22 +418,22 @@ const Pacientes = () => {
 
             {/* Search & Stats Bar */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-3">
+                <div className="lg:col-span-3 bg-surface-card p-2 rounded-2xl shadow-sm border border-border flex items-center gap-3">
                     <div className="flex-1 relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">🔍</span>
                         <input
                             type="text"
                             placeholder="Buscar por nombre, documento o número de historia..."
-                            className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 text-slate-600 font-medium placeholder:text-slate-400"
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 text-text-primary font-medium placeholder:text-text-secondary/40"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </div>
-                <div className="bg-slate-900 rounded-2xl p-4 flex items-center justify-between text-white shadow-lg overflow-hidden relative">
+                <div className="bg-primary-dark rounded-2xl p-4 flex items-center justify-between text-white shadow-lg overflow-hidden relative">
                     <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Pacientes</p>
-                        <p className="text-2xl font-black">{pacientes.length}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary-100/60">Total Pacientes</p>
+                        <p className="text-2xl font-black text-white">{pacientes.length}</p>
                     </div>
                     <div className="text-3xl relative z-10">👥</div>
                     <div className="absolute -right-4 -bottom-4 bg-white/5 w-24 h-24 rounded-full"></div>
@@ -441,15 +441,15 @@ const Pacientes = () => {
             </div>
 
             {/* Table Content */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-surface-card rounded-3xl shadow-sm border border-border overflow-hidden">
                 {isLoading ? (
                     <div className="p-24 text-center">
-                        <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-slate-400 font-bold animate-pulse">Sincronizando pacientes...</p>
+                        <div className="w-12 h-12 border-4 border-surface-raised border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-text-secondary opacity-60 font-black animate-pulse uppercase tracking-widest text-xs">Sincronizando pacientes...</p>
                     </div>
                 ) : isError ? (
                     <div className="p-16 text-center">
-                        <div className="bg-rose-50 text-rose-600 p-6 rounded-2xl inline-block mb-4">
+                        <div className="bg-danger-light/30 text-danger-dark border border-danger-light p-6 rounded-2xl inline-block mb-4 font-bold">
                             ⚠️ Error de conexión: {error.message}
                         </div>
                     </div>
@@ -459,28 +459,28 @@ const Pacientes = () => {
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Paciente</th>
-                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Documento / HC</th>
-                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Edad</th>
-                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest">Contacto</th>
-                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Estado</th>
-                                        <th className="p-5 font-black text-[10px] text-slate-400 uppercase tracking-widest text-center">Acciones</th>
+                                    <tr className="bg-surface-raised border-b border-border">
+                                        <th className="p-5 font-black text-[10px] text-text-secondary opacity-60 uppercase tracking-widest">Paciente</th>
+                                        <th className="p-5 font-black text-[10px] text-text-secondary opacity-60 uppercase tracking-widest">Documento / HC</th>
+                                        <th className="p-5 font-black text-[10px] text-text-secondary opacity-60 uppercase tracking-widest text-center">Edad</th>
+                                        <th className="p-5 font-black text-[10px] text-text-secondary opacity-60 uppercase tracking-widest">Contacto</th>
+                                        <th className="p-5 font-black text-[10px] text-text-secondary opacity-60 uppercase tracking-widest text-center">Estado</th>
+                                        <th className="p-5 font-black text-[10px] text-text-secondary opacity-60 uppercase tracking-widest text-center">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-border">
                                     {pacientes.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="p-20 text-center">
                                                 <div className="flex flex-col items-center gap-3">
-                                                    <div className="text-5xl">👥</div>
-                                                    <p className="text-slate-400 font-bold">No se encontraron pacientes</p>
+                                                    <div className="text-5xl opacity-20 filter grayscale">👥</div>
+                                                    <p className="text-text-secondary opacity-40 font-black uppercase tracking-widest text-xs">No se encontraron pacientes</p>
                                                     {!searchTerm && (
                                                         <button
                                                             onClick={() => setShowModal(true)}
-                                                            className="mt-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all"
+                                                            className="mt-4 px-8 py-3 bg-primary text-white rounded-xl font-black text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
                                                         >
-                                                            + Registrar el primer paciente
+                                                            Registrar el primer paciente
                                                         </button>
                                                     )}
                                                 </div>
@@ -488,38 +488,38 @@ const Pacientes = () => {
                                         </tr>
                                     ) : (
                                         pacientes.map((p) => (
-                                            <tr key={p.paciente_id} className="hover:bg-slate-50/80 transition-all group">
+                                            <tr key={p.paciente_id} className="hover:bg-surface-raised transition-all group">
                                                 <td className="p-5">
                                                     <div className="flex items-center gap-4">
                                                         <div className={`${getAvatarColor(p.nombre)} w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-sm group-hover:scale-110 transition-transform`}>
                                                             {p.nombre?.charAt(0)}{p.apellido?.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                                                            <div className="font-bold text-text-primary group-hover:text-primary transition-colors">
                                                                 {p.nombre_completo || `${p.nombre} ${p.apellido}`}
                                                             </div>
-                                                            <div className="text-xs text-slate-400 font-medium">
+                                                            <div className="text-xs text-text-secondary opacity-60 font-medium">
                                                                 {p.fecha_registro ? `Registrado ${formatDate(p.fecha_registro)}` : 'En el sistema'}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="p-5">
-                                                    <div className="font-bold text-slate-700">{p.documento_numero || '-'}</div>
-                                                    <div className="text-[10px] font-black text-slate-400 uppercase">{p.numero_historia || '-'}</div>
+                                                    <div className="font-bold text-text-primary">{p.documento_numero || '-'}</div>
+                                                    <div className="text-[10px] font-black text-text-secondary opacity-60 uppercase">{p.numero_historia || '-'}</div>
                                                 </td>
                                                 <td className="p-5 text-center">
-                                                    <div className="font-bold text-slate-700">{calculateAge(p.fecha_nacimiento)} años</div>
-                                                    <div className="text-[10px] font-black text-slate-400">{formatDate(p.fecha_nacimiento)}</div>
+                                                    <div className="font-bold text-text-primary">{calculateAge(p.fecha_nacimiento)} años</div>
+                                                    <div className="text-[10px] font-black text-text-secondary opacity-60">{formatDate(p.fecha_nacimiento)}</div>
                                                 </td>
                                                 <td className="p-5">
-                                                    <div className="text-sm font-bold text-slate-700">{p.telefono_principal || 'Sin teléfono'}</div>
-                                                    <div className="text-xs text-slate-500 truncate max-w-[150px]">{p.email || 'Sin correo'}</div>
+                                                    <div className="text-sm font-bold text-text-primary">{p.telefono_principal || 'Sin teléfono'}</div>
+                                                    <div className="text-xs text-text-secondary opacity-60 truncate max-w-[150px]">{p.email || 'Sin correo'}</div>
                                                 </td>
                                                 <td className="p-5 text-center">
                                                     <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${p.activo === 'S'
-                                                        ? 'bg-emerald-100 text-emerald-700'
-                                                        : 'bg-slate-100 text-slate-500'
+                                                        ? 'bg-secondary-light text-secondary'
+                                                        : 'bg-surface-raised text-text-secondary opacity-60'
                                                         }`}>
                                                         {p.activo === 'S' ? 'Activo' : 'Inactivo'}
                                                     </span>
@@ -527,18 +527,18 @@ const Pacientes = () => {
                                                 <td className="p-5">
                                                     <div className="flex items-center justify-center gap-2">
                                                         <button
-                                                            className="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white hover:bg-blue-600 hover:border-blue-600 hover:shadow-md rounded-xl transition-all"
+                                                            className="p-2.5 bg-surface-card border border-border text-text-secondary opacity-60 hover:text-primary hover:bg-primary-light hover:border-primary/20 hover:shadow-md rounded-xl transition-all"
                                                             onClick={() => navigate(`/pacientes/${p.paciente_id}`)}
                                                             title="Ver Expediente"
                                                         >
-                                                            👁️
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                                         </button>
                                                         <button
-                                                            className="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white hover:bg-emerald-600 hover:border-emerald-600 hover:shadow-md rounded-xl transition-all"
+                                                            className="p-2.5 bg-surface-card border border-border text-text-secondary opacity-60 hover:text-secondary hover:bg-secondary-light hover:border-secondary/20 hover:shadow-md rounded-xl transition-all"
                                                             onClick={() => navigate(`/citas`)}
                                                             title="Nueva Cita"
                                                         >
-                                                            📅
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -550,17 +550,17 @@ const Pacientes = () => {
                         </div>
 
                         {/* Mobile card layout */}
-                        <div className="md:hidden divide-y divide-slate-100">
+                        <div className="md:hidden divide-y divide-border">
                             {pacientes.length === 0 ? (
                                 <div className="p-12 text-center">
-                                    <div className="text-5xl mb-3">👥</div>
-                                    <p className="text-slate-400 font-bold">No se encontraron pacientes</p>
+                                    <div className="text-5xl mb-3 opacity-20 filter grayscale">👥</div>
+                                    <p className="text-text-secondary opacity-40 font-black uppercase tracking-widest text-[10px]">No hay pacientes</p>
                                     {!searchTerm && (
                                         <button
                                             onClick={() => setShowModal(true)}
-                                            className="mt-3 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm"
+                                            className="mt-4 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-sm uppercase tracking-widest"
                                         >
-                                            + Registrar el primer paciente
+                                            Registrar paciente
                                         </button>
                                     )}
                                 </div>
@@ -568,7 +568,7 @@ const Pacientes = () => {
                                 pacientes.map((p) => (
                                     <div
                                         key={p.paciente_id}
-                                        className="p-4 hover:bg-slate-50 transition-all active:bg-slate-100 cursor-pointer"
+                                        className="p-4 hover:bg-surface-raised transition-all active:bg-surface-raised cursor-pointer"
                                         onClick={() => navigate(`/pacientes/${p.paciente_id}`)}
                                     >
                                         <div className="flex items-start gap-3">
@@ -577,18 +577,18 @@ const Pacientes = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between gap-2">
-                                                    <p className="font-bold text-slate-900 truncate">
+                                                    <p className="font-bold text-text-primary truncate">
                                                         {p.nombre_completo || `${p.nombre} ${p.apellido}`}
                                                     </p>
-                                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 ${p.activo === 'S' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 ${p.activo === 'S' ? 'bg-secondary-light text-secondary' : 'bg-surface-raised text-text-secondary opacity-60'}`}>
                                                         {p.activo === 'S' ? 'Activo' : 'Inactivo'}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                                                <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary opacity-60">
                                                     <span>📄 {p.documento_numero || '-'}</span>
                                                     <span>📱 {p.telefono_principal || '-'}</span>
                                                 </div>
-                                                <div className="flex items-center gap-3 mt-1 text-[10px] text-slate-400">
+                                                <div className="flex items-center gap-3 mt-1 text-[10px] text-text-secondary opacity-40">
                                                     <span>{calculateAge(p.fecha_nacimiento)} años</span>
                                                     <span>HC: {p.numero_historia || '-'}</span>
                                                 </div>

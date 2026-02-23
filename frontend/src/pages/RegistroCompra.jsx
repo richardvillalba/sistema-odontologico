@@ -90,165 +90,205 @@ export default function RegistroCompra() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20">
+            {/* Header Section Standardized */}
+            <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Registro de Compra</h1>
-                    <p className="text-slate-500 font-medium text-sm sm:text-base">Nueva entrada de facturas y stock.</p>
+                    <h1 className="text-3xl font-black text-text-primary uppercase tracking-tight leading-none">
+                        Registro Técnico de <span className="text-primary">Adquisiciones</span>
+                    </h1>
+                    <p className="text-text-secondary font-black mt-2 text-[10px] uppercase tracking-widest opacity-40">Procesamiento de facturas y actualización de activos clínicos</p>
                 </div>
                 <button
                     onClick={() => navigate('/compras')}
-                    className="text-slate-400 hover:text-slate-600 font-bold flex items-center gap-2 text-sm sm:text-base order-first sm:order-none"
+                    className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-primary transition-all group"
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Volver
+                    <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center border border-border group-hover:border-primary/20 shadow-sm transition-all">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </div>
+                    <span>Volver al Módulo</span>
                 </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Cabecera */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <div className="sm:col-span-2">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Proveedor</label>
-                        <select
-                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-green-500/5 focus:border-green-500 transition-all font-bold text-slate-700 text-sm sm:text-base"
-                            value={head.proveedor_id}
-                            onChange={(e) => setHead({ ...head, proveedor_id: e.target.value })}
-                            required
-                        >
-                            <option value="">Seleccione Proveedor</option>
-                            {proveedores.map(p => (
-                                <option key={p.proveedor_id} value={p.proveedor_id}>{p.nombre} ({p.ruc})</option>
-                            ))}
-                        </select>
+            <form onSubmit={handleSubmit} className="space-y-10">
+                {/* Cabecera Standardized */}
+                <div className="bg-surface-card rounded-[3rem] shadow-sm border border-border p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Proveedor Certificado</label>
+                        <div className="relative group">
+                            <select
+                                className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-bold text-sm text-text-primary appearance-none cursor-pointer"
+                                value={head.proveedor_id}
+                                onChange={(e) => setHead({ ...head, proveedor_id: e.target.value })}
+                                required
+                            >
+                                <option value="">Seleccione Proveedor...</option>
+                                {proveedores.map(p => (
+                                    <option key={p.proveedor_id} value={p.proveedor_id}>{p.nombre} [{p.ruc}]</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary opacity-30">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Nro. Factura</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Identificador Factura</label>
                         <input
                             type="text"
                             placeholder="000-000-000000"
-                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-green-500/5 focus:border-green-500 transition-all font-black text-slate-700 text-sm sm:text-base"
+                            className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-black text-sm text-text-primary"
                             value={head.nro_factura}
                             onChange={(e) => setHead({ ...head, nro_factura: e.target.value })}
                             required
                         />
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Fecha Emisión</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Fecha de Certificación</label>
                         <input
                             type="date"
-                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-green-500/5 focus:border-green-500 transition-all font-bold text-slate-700 text-sm sm:text-base"
+                            className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-bold text-sm text-text-primary cursor-pointer"
                             value={head.fecha_emision}
                             onChange={(e) => setHead({ ...head, fecha_emision: e.target.value })}
                             required
                         />
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Condición</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Modalidad de Pago</label>
                         <select
-                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-green-500/5 focus:border-green-500 transition-all font-bold text-slate-700 text-sm sm:text-base"
+                            className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-bold text-sm text-text-primary appearance-none cursor-pointer"
                             value={head.condicion_pago}
                             onChange={(e) => setHead({ ...head, condicion_pago: e.target.value })}
                         >
-                            <option value="CONTADO">Contado</option>
-                            <option value="CREDITO 15d">Crédito 15 días</option>
-                            <option value="CREDITO 30d">Crédito 30 días</option>
+                            <option value="CONTADO">CONTADO</option>
+                            <option value="CREDITO 15d">CRÉDITO 15 DÍAS</option>
+                            <option value="CREDITO 30d">CRÉDITO 30 DÍAS</option>
                         </select>
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Moneda</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 ml-1">Moneda Operativa</label>
                         <select
-                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-green-500/5 focus:border-green-500 transition-all font-bold text-slate-700 text-sm sm:text-base"
+                            className="w-full px-6 py-4 rounded-2xl border-2 border-border bg-surface-raised focus:border-primary focus:outline-none transition-all font-bold text-sm text-text-primary appearance-none cursor-pointer"
                             value={head.moneda}
                             onChange={(e) => setHead({ ...head, moneda: e.target.value })}
                         >
-                            <option value="PYG">PYG (Gs)</option>
-                            <option value="USD">USD ($)</option>
+                            <option value="PYG">PYG (GUARANÍES)</option>
+                            <option value="USD">USD (DÓLARES)</option>
                         </select>
                     </div>
                 </div>
 
-                {/* Detalles */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
-                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Ítems de la Factura</h3>
+                {/* Detalles Standardized */}
+                <div className="bg-surface-card rounded-[3.5rem] shadow-sm border border-border overflow-hidden">
+                    <div className="px-10 py-8 border-b border-border flex flex-col sm:flex-row justify-between items-center gap-6 bg-surface-raised/50">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shadow-inner">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40">Desglose de Ítems Adquiridos</h3>
+                        </div>
                         <button
                             type="button"
                             onClick={addLine}
-                            className="w-full sm:w-auto bg-green-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-sm"
+                            className="w-full sm:w-auto bg-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary-dark hover:-translate-y-1 transition-all flex items-center justify-center gap-3"
                         >
-                            <span>+</span> Agregar Artículo
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Incorporar Artículo
                         </button>
                     </div>
 
-                    {/* Desktop View Table */}
+                    {/* Desktop View Table Standardized */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="text-left text-[10px] font-black uppercase text-slate-400 border-b border-slate-100">
-                                    <th className="px-8 py-4">Artículo</th>
-                                    <th className="px-8 py-4 text-center">Cantidad</th>
-                                    <th className="px-8 py-4 text-right">Costo Unitario</th>
-                                    <th className="px-8 py-4 text-right">Subtotal</th>
-                                    <th className="px-8 py-4 text-center">Acción</th>
+                                <tr className="text-left text-[10px] font-black uppercase text-text-secondary tracking-[0.2em] opacity-40 border-b border-border">
+                                    <th className="px-10 py-6">Especificación del Artículo</th>
+                                    <th className="px-10 py-6 text-center">Magnitud</th>
+                                    <th className="px-10 py-6 text-right">Inversión Unit.</th>
+                                    <th className="px-10 py-6 text-right">Monto Línea</th>
+                                    <th className="px-10 py-6 text-center">Intervención</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border/50">
                                 {lines.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-8 py-10 text-center">
-                                            <p className="text-slate-300 font-medium italic">Cargue los productos comprados para continuar.</p>
+                                        <td colSpan="5" className="px-10 py-40 text-center">
+                                            <div className="w-24 h-24 bg-surface-raised rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner border border-border">
+                                                <svg className="w-10 h-10 text-text-secondary opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-text-secondary font-black uppercase text-[10px] tracking-[.2em] opacity-40 max-w-xs mx-auto">Pendiente de ingreso de activos para registro técnico</p>
                                         </td>
                                     </tr>
                                 ) : (
                                     lines.map((line) => (
-                                        <tr key={line.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-8 py-4">
-                                                <select
-                                                    className="w-full bg-transparent border-none focus:ring-0 font-bold text-slate-700 outline-none"
-                                                    value={line.articulo_id}
-                                                    onChange={(e) => updateLine(line.id, 'articulo_id', e.target.value)}
-                                                    required
-                                                >
-                                                    <option value="">Seleccione...</option>
-                                                    {articulos.map(a => (
-                                                        <option key={a.articulo_id} value={a.articulo_id}>{a.nombre} [{a.codigo}]</option>
-                                                    ))}
-                                                </select>
+                                        <tr key={line.id} className="hover:bg-surface-raised/30 transition-all group">
+                                            <td className="px-10 py-6">
+                                                <div className="relative group/select">
+                                                    <select
+                                                        className="w-full bg-transparent border-none focus:ring-0 font-black text-text-primary text-sm outline-none cursor-pointer pr-8 appearance-none"
+                                                        value={line.articulo_id}
+                                                        onChange={(e) => updateLine(line.id, 'articulo_id', e.target.value)}
+                                                        required
+                                                    >
+                                                        <option value="">Vincular Artículo...</option>
+                                                        {articulos.map(a => (
+                                                            <option key={a.articulo_id} value={a.articulo_id}>{a.nombre} [{a.codigo}]</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover/select:opacity-30 transition-opacity">
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td className="px-8 py-4 text-center">
+                                            <td className="px-10 py-6 text-center">
+                                                <div className="flex items-center justify-center gap-3">
+                                                    <input
+                                                        type="number"
+                                                        className="w-24 text-center bg-surface-raised border-2 border-border rounded-xl py-2 font-black text-sm text-text-primary focus:border-primary focus:outline-none transition-all shadow-inner"
+                                                        value={line.cantidad}
+                                                        onChange={(e) => updateLine(line.id, 'cantidad', parseFloat(e.target.value) || 0)}
+                                                        min="0.1"
+                                                        step="0.1"
+                                                        required
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-6">
                                                 <input
                                                     type="number"
-                                                    className="w-20 mx-auto text-center bg-slate-100 border-none rounded-lg py-1.5 font-bold text-slate-700 focus:ring-2 focus:ring-green-500/20"
-                                                    value={line.cantidad}
-                                                    onChange={(e) => updateLine(line.id, 'cantidad', parseFloat(e.target.value))}
-                                                    min="0.1"
-                                                    step="0.1"
-                                                    required
-                                                />
-                                            </td>
-                                            <td className="px-8 py-4">
-                                                <input
-                                                    type="number"
-                                                    className="w-32 ml-auto text-right bg-transparent border-none focus:ring-0 font-bold text-green-600 outline-none"
+                                                    className="w-36 ml-auto text-right bg-transparent border-none focus:ring-0 font-black text-sm text-primary outline-none"
                                                     value={line.costo_unitario}
-                                                    onChange={(e) => updateLine(line.id, 'costo_unitario', parseFloat(e.target.value))}
+                                                    onChange={(e) => updateLine(line.id, 'costo_unitario', parseFloat(e.target.value) || 0)}
                                                     required
                                                 />
                                             </td>
-                                            <td className="px-8 py-4 text-right font-black text-slate-900">
-                                                {new Intl.NumberFormat('es-PY').format(line.cantidad * line.costo_unitario)}
+                                            <td className="px-10 py-6 text-right">
+                                                <div className="flex flex-col items-end">
+                                                    <span className="font-black text-text-primary text-sm">{new Intl.NumberFormat('es-PY').format(line.cantidad * line.costo_unitario)}</span>
+                                                    <span className="text-[9px] font-black text-text-secondary uppercase opacity-30 italic">{head.moneda}</span>
+                                                </div>
                                             </td>
-                                            <td className="px-8 py-4 text-center">
+                                            <td className="px-10 py-6 text-center">
                                                 <button
                                                     type="button"
                                                     onClick={() => removeLine(line.id)}
-                                                    className="p-2 text-rose-300 hover:text-rose-600 transition-colors"
+                                                    className="p-3 rounded-2xl text-danger hover:bg-danger/10 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+                                                    title="Eliminar Línea"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                 </button>
                                             </td>
@@ -259,25 +299,25 @@ export default function RegistroCompra() {
                         </table>
                     </div>
 
-                    {/* Mobile View Cards */}
-                    <div className="md:hidden divide-y divide-slate-100">
+                    {/* Mobile View Cards Standardized */}
+                    <div className="md:hidden divide-y divide-border/50">
                         {lines.length === 0 ? (
-                            <div className="px-6 py-10 text-center">
-                                <p className="text-slate-300 font-medium italic text-sm">Cargue productos para continuar.</p>
+                            <div className="p-20 text-center">
+                                <p className="text-text-secondary font-black text-[10px] uppercase tracking-widest opacity-40">Cargue productos para continuar</p>
                             </div>
                         ) : (
                             lines.map((line) => (
-                                <div key={line.id} className="p-5 space-y-4">
+                                <div key={line.id} className="p-8 space-y-6 hover:bg-surface-raised/30 transition-all">
                                     <div className="flex justify-between items-start gap-4">
-                                        <div className="flex-1">
-                                            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Artículo</label>
+                                        <div className="flex-1 space-y-2">
+                                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 ml-1">Artículo Clínico</label>
                                             <select
-                                                className="w-full bg-slate-50 border-none rounded-xl px-0 py-2 font-bold text-slate-700 outline-none text-sm"
+                                                className="w-full bg-surface-raised border-2 border-border rounded-xl px-4 py-3 font-black text-text-primary outline-none text-xs focus:border-primary transition-all"
                                                 value={line.articulo_id}
                                                 onChange={(e) => updateLine(line.id, 'articulo_id', e.target.value)}
                                                 required
                                             >
-                                                <option value="">Seleccione artículo...</option>
+                                                <option value="">Seleccionar...</option>
                                                 {articulos.map(a => (
                                                     <option key={a.articulo_id} value={a.articulo_id}>{a.nombre}</option>
                                                 ))}
@@ -286,56 +326,62 @@ export default function RegistroCompra() {
                                         <button
                                             type="button"
                                             onClick={() => removeLine(line.id)}
-                                            className="p-2 text-rose-300 hover:text-rose-600 bg-rose-50 rounded-lg mt-4"
+                                            className="p-4 text-danger bg-danger/10 rounded-2xl"
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Cantidad</label>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 ml-1">Magnitud</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-slate-100 border-none rounded-xl py-2 px-3 font-bold text-slate-700 text-sm focus:ring-2 focus:ring-green-500/20"
+                                                className="w-full bg-surface-raised border-2 border-border rounded-xl py-3 px-4 font-black text-text-primary text-sm focus:border-primary transition-all"
                                                 value={line.cantidad}
-                                                onChange={(e) => updateLine(line.id, 'cantidad', parseFloat(e.target.value))}
+                                                onChange={(e) => updateLine(line.id, 'cantidad', parseFloat(e.target.value) || 0)}
                                                 min="0.1"
                                                 step="0.1"
                                                 required
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Costo Unit.</label>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 text-right mr-1">Costo Unitario</label>
                                             <input
                                                 type="number"
-                                                className="w-full text-right bg-slate-100 border-none rounded-xl py-2 px-3 font-bold text-green-600 text-sm focus:ring-2 focus:ring-green-500/20"
+                                                className="w-full text-right bg-surface-raised border-2 border-border rounded-xl py-3 px-4 font-black text-primary text-sm focus:border-primary transition-all"
                                                 value={line.costo_unitario}
-                                                onChange={(e) => updateLine(line.id, 'costo_unitario', parseFloat(e.target.value))}
+                                                onChange={(e) => updateLine(line.id, 'costo_unitario', parseFloat(e.target.value) || 0)}
                                                 required
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center pt-2 border-t border-slate-50">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase">Subtotal</span>
-                                        <span className="font-black text-slate-900">
-                                            {new Intl.NumberFormat('es-PY').format(line.cantidad * line.costo_unitario)} <span className="text-xs text-slate-400">Gs</span>
-                                        </span>
+                                    <div className="flex justify-between items-center pt-6 border-t border-border">
+                                        <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40">Subtotal de Línea</span>
+                                        <div className="text-right">
+                                            <span className="font-black text-text-primary text-lg">
+                                                {new Intl.NumberFormat('es-PY').format(line.cantidad * line.costo_unitario)}
+                                            </span>
+                                            <span className="text-[10px] font-black text-text-secondary uppercase ml-2 opacity-30 italic">{head.moneda}</span>
+                                        </div>
                                     </div>
                                 </div>
                             ))
                         )}
                     </div>
 
-                    {/* Footer / Totals */}
-                    <div className="bg-slate-50 px-6 sm:px-8 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div className="hidden sm:block text-slate-400 text-xs font-black uppercase tracking-widest">Resumen de Registro</div>
-                        <div className="flex items-center justify-between w-full sm:w-auto sm:gap-8">
-                            <span className="text-slate-500 font-black uppercase text-[10px] tracking-widest sm:hidden">Total General</span>
-                            <div className="text-right">
-                                <span className="text-xs text-slate-400 font-bold mr-2">{head.moneda}</span>
-                                <span className="text-2xl sm:text-3xl font-black text-slate-900">
+                    {/* Footer Standardized */}
+                    <div className="bg-surface-raised/80 px-10 py-10 flex flex-col sm:flex-row justify-between items-center gap-8 border-t border-border">
+                        <div className="hidden sm:flex items-center gap-4">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                            <span className="text-text-secondary text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Certificación de Importe Total</span>
+                        </div>
+                        <div className="flex items-center justify-between w-full sm:w-auto gap-12">
+                            <span className="text-text-secondary font-black uppercase text-[10px] tracking-widest sm:hidden opacity-40">Total Certificado</span>
+                            <div className="flex items-baseline gap-4">
+                                <span className="text-[10px] text-primary font-black uppercase tracking-widest italic">{head.moneda}</span>
+                                <span className="text-4xl sm:text-5xl font-black text-text-primary tracking-tighter">
                                     {new Intl.NumberFormat('es-PY').format(total)}
                                 </span>
                             </div>
@@ -343,13 +389,26 @@ export default function RegistroCompra() {
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-end gap-4 sm:pt-4">
+                {/* Submit Section Standardized */}
+                <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6">
                     <button
                         type="submit"
-                        disabled={registrarMutation.isLoading || lines.length === 0}
-                        className="w-full sm:w-auto bg-slate-900 text-white px-10 py-4 rounded-2xl font-black shadow-xl shadow-slate-200 hover:bg-black hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 disabled:shadow-none order-first sm:order-none"
+                        disabled={registrarMutation.isPending || lines.length === 0}
+                        className="w-full sm:w-auto bg-primary text-white px-12 py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:bg-primary-dark hover:-translate-y-2 active:translate-y-0 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none flex items-center justify-center gap-4"
                     >
-                        {registrarMutation.isLoading ? 'Procesando...' : 'Registrar Factura de Compra'}
+                        {registrarMutation.isPending ? (
+                            <>
+                                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Sincronizando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Certificar Registro de Compra</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </form>
