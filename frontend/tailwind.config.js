@@ -10,47 +10,47 @@ export default {
                 sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
             },
             colors: {
-                // ── Indigo/Violet Modern Palette ──
+                // ── Clinical Dental Palette ──
                 primary: {
-                    DEFAULT: '#6366F1',
-                    dark: '#0F0E1A',      // para referencia, el sidebar usará gradiente
-                    light: '#EEF2FF',
-                    50:  '#EEF2FF',
-                    100: '#E0E7FF',
-                    200: '#C7D2FE',
-                    300: '#A5B4FC',
-                    400: '#818CF8',
-                    500: '#6366F1',
-                    600: '#4F46E5',
-                    700: '#4338CA',
-                    800: '#3730A3',
-                    900: '#312E81',
+                    DEFAULT: '#0B6BCB',
+                    dark: '#0A4A8F',
+                    light: '#E3EFFB',
+                    50: '#E3EFFB',
+                    100: '#C7DFFA',
+                    200: '#97C3F5',
+                    300: '#5BA1E8',
+                    400: '#2B82D6',
+                    500: '#0B6BCB',
+                    600: '#0959A5',
+                    700: '#0A4A8F',
+                    800: '#073363',
+                    900: '#051E3B',
                 },
                 secondary: {
-                    DEFAULT: '#10B981',
-                    dark: '#059669',
-                    light: '#D1FAE5',
+                    DEFAULT: '#1AA37A',
+                    dark: '#15805F',
+                    light: '#E6F7F1',
                 },
                 accent: {
-                    DEFAULT: '#EC4899',
-                    light: '#FCE7F3',
+                    DEFAULT: '#6E56CF',
+                    light: '#F0EDFC',
                 },
                 surface: {
-                    DEFAULT: '#EEF2F7',   // gris-azulado suave — NO blanco
-                    card: '#FFFFFF',      // tarjetas blancas que resaltan sobre el fondo
-                    raised: '#F5F7FA',    // levemente elevado
+                    DEFAULT: '#F1F5F9',
+                    card: '#FFFFFF',
+                    raised: '#F8FAFC',
                 },
                 danger: {
-                    DEFAULT: '#EF4444',
+                    DEFAULT: '#DC3545',
                     light: '#FEF2F2',
                 },
                 warning: {
-                    DEFAULT: '#F59E0B',
+                    DEFAULT: '#ED8936',
                     light: '#FFFBEB',
                 },
                 border: '#E2E8F0',
-                'text-primary': '#1E293B',   // slate-800
-                'text-secondary': '#64748B', // slate-500
+                'text-primary': '#0F172A',
+                'text-secondary': '#64748B',
             },
         },
     },

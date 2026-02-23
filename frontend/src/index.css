@@ -5,67 +5,54 @@
 @tailwind utilities;
 
 body {
-    background-color: #EEF2F7;
-    color: #1E293B;
+    background-color: #F1F5F9;
+    color: #0F172A;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── Smooth scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #EEF2F7; }
-::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background-color: #94A3B8; }
-
-/* ════════════════════════════════════════════════════════
-   Pequeños ajustes al tema claro para la zona de contenido
-   (el sidebar usa gradiente directo en Layout.jsx)
-   ════════════════════════════════════════════════════════ */
-
-/* bg-gray-50 → mismo tono que el fondo */
-.bg-gray-50 { background-color: #EEF2F7 !important; }
-.bg-gray-100{ background-color: #E2E8F0 !important; }
-
-/* Hover filas/listas sobre fondo claro */
-.hover\:bg-gray-50:hover  { background-color: #EEF2F7 !important; }
-.hover\:bg-gray-100:hover { background-color: #E2E8F0 !important; }
-
-/* Inputs */
-input:not([type="range"]),
-select,
-textarea {
-    background-color: #FFFFFF !important;
-    color: #1E293B !important;
-    border-color: #CBD5E1 !important;
-}
-input::placeholder,
-textarea::placeholder { color: #94A3B8 !important; }
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: #6366F1 !important;
-    outline-color: #6366F1 !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-/* ════════════════════════════════════════════════════════
-   IMPRESIÓN — restaurar blanco/negro para facturas
-   ════════════════════════════════════════════════════════ */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+
+/* ===== ESTILOS DE IMPRESIÓN ===== */
 @media print {
-    body * { visibility: hidden; }
+    body * {
+        visibility: hidden;
+    }
 
     #print-area,
-    #print-area * { visibility: visible; }
+    #print-area * {
+        visibility: visible;
+    }
 
     #print-area {
         position: fixed;
-        left: 0; top: 0;
+        left: 0;
+        top: 0;
         width: 100%;
         padding: 20px;
-        background: white !important;
-        color: black !important;
+        background: white;
     }
 
-    @page { margin: 1.5cm; size: A4; }
+    @page {
+        margin: 1.5cm;
+        size: A4;
+    }
 }
