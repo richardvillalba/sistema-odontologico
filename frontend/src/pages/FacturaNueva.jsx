@@ -1,16 +1,46 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { usePointOfSale } from '../context/PointOfSaleContext';
 import { useAuth } from '../contexts/AuthContext';
-import { billingService } from '../services/api';
+import { billingService, cajaService } from '../services/api';
 import PacienteSelector from '../components/facturacion/PacienteSelector';
 import TratamientosPendientes from '../components/facturacion/TratamientosPendientes';
 import FacturaItemsTable from '../components/facturacion/FacturaItemsTable';
 
 const FacturaNueva = () => {
     const navigate = useNavigate();
-    const { usuario } = useAuth();
+    const { usuario, empresaActiva, sucursalActiva } = useAuth();
     const { selectedPoint, isValid, refreshPoints } = usePointOfSale();
+    const empresaId = empresaActiva?.empresa_id;
+    const usuarioId = usuario?.usuario_id;
+    const esSuperAdmin = usuario?.es_superadmin === 'S';
+
+    // Verificar si el usuario tiene caja asignada
+    const { data: cajasData, isLoading: loadingCajas } = useQuery({
+        queryKey: ['cajas-usuario', empresaId, usuarioId],
+        queryFn: () => cajaService.listar(empresaId),
+    });
+    const cajasUsuario = esSuperAdmin
+        ? (cajasData?.data?.items || [])
+        : (cajasData?.data?.items || []).filter(c => c.usuario_asignado_id === usuarioId || !c.usuario_asignado_id);
+    const tieneCaja = cajasUsuario.length > 0;
+    // Priorizar la caja asignada al usuario, luego cualquier abierta
+    const cajaAbierta = cajasUsuario.find(c => c.estado === 'ABIERTA' && c.usuario_asignado_id === usuarioId)
+        || cajasUsuario.find(c => c.estado === 'ABIERTA')
+        || null;
+
+    // Categorías de movimiento de caja
+    const { data: categoriasRes } = useQuery({
+        queryKey: ['caja-categorias-ingreso'],
+        queryFn: () => cajaService.getCategorias('INGRESO'),
+        enabled: !!cajaAbierta,
+    });
+    const categoriasCaja = categoriasRes?.data?.items || categoriasRes?.data || [];
+    const catCobroFactura = categoriasCaja.find(c =>
+        (c.nombre || c.NOMBRE || '').toLowerCase().includes('factura')
+    );
+    const catIdCobroFactura = catCobroFactura?.categoria_id || catCobroFactura?.CATEGORIA_ID || null;
 
     // Form State
     const [selectedPaciente, setSelectedPaciente] = useState(null);
@@ -66,9 +96,9 @@ const FacturaNueva = () => {
             // 1. Crear Cabecera
             const facturaRes = await billingService.createFactura({
                 paciente_id: selectedPaciente.paciente_id,
-                usuario_id: usuario?.usuario_id || 1,
-                empresa_id: usuario?.empresa_id || 1,
-                sucursal_id: 1, // TODO: Context/Sucursal
+                usuario_id: usuario?.usuario_id,
+                empresa_id: empresaActiva?.empresa_id,
+                sucursal_id: sucursalActiva?.sucursal_id,
                 timbrado_id: selectedPoint?.timbrado_id, // Punto de expedición seleccionado
                 tipo_factura: headerData.tipo_factura,
                 condicion_operacion: headerData.condicion_operacion,
@@ -106,8 +136,25 @@ const FacturaNueva = () => {
                 await billingService.registrarPago(facturaId, {
                     monto: subtotal,
                     metodo_pago: 'EFECTIVO',
-                    registrado_por: usuario?.usuario_id || 1
+                    registrado_por: usuario?.usuario_id
                 });
+
+                // 4b. Registrar movimiento en caja abierta (no bloquea si falla)
+                if (cajaAbierta?.caja_id) {
+                    try {
+                        await cajaService.registrarMovimiento(cajaAbierta.caja_id, {
+                            tipo: 'INGRESO',
+                            categoria_id: catIdCobroFactura,
+                            concepto: `Cobro factura #${facturaId}`,
+                            monto: subtotal,
+                            factura_id: facturaId,
+                            referencia: String(facturaId),
+                            registrado_por: usuarioId,
+                        });
+                    } catch (cajaErr) {
+                        console.warn('No se pudo registrar movimiento en caja:', cajaErr);
+                    }
+                }
             }
 
             // 5. Si es CREDITO con cuotas, generarlas (no bloquea si falla)
@@ -138,27 +185,81 @@ const FacturaNueva = () => {
         }
     };
 
+    // Bloquear si no tiene caja asignada
+    if (!loadingCajas && !tieneCaja && !esSuperAdmin) {
+        return (
+            <div className="max-w-lg mx-auto mt-20 text-center">
+                <div className="bg-white rounded-3xl border-2 border-amber-200 p-10 shadow-sm">
+                    <div className="w-20 h-20 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-900 mb-3">Sin caja asignada</h2>
+                    <p className="text-slate-600 font-medium mb-6">No tienes una caja asignada. Contacta al administrador para que te asigne una caja antes de emitir facturas.</p>
+                    <button
+                        onClick={() => navigate('/facturas')}
+                        className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-colors"
+                    >
+                        Volver a Facturas
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Bloquear si tiene caja pero está cerrada
+    if (!loadingCajas && tieneCaja && !cajaAbierta) {
+        return (
+            <div className="max-w-lg mx-auto mt-20 text-center">
+                <div className="bg-white rounded-3xl border-2 border-rose-200 p-10 shadow-sm">
+                    <div className="w-20 h-20 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-10 h-10 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-900 mb-3">Caja cerrada</h2>
+                    <p className="text-slate-600 font-medium mb-6">Tu caja está cerrada. Debes abrirla desde el módulo de Caja antes de poder emitir facturas.</p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => navigate('/caja')}
+                            className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-colors"
+                        >
+                            Ir a Caja
+                        </button>
+                        <button
+                            onClick={() => navigate('/facturas')}
+                            className="px-8 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                        >
+                            Volver
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                        <span className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg">🧾</span>
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2 sm:gap-3">
+                        <span className="p-1.5 sm:p-2 bg-indigo-600 rounded-xl text-white shadow-lg text-lg sm:text-2xl">🧾</span>
                         Nueva Factura
                     </h1>
-                    <p className="text-slate-500 font-medium ml-12">Emisión de facturas legales para pacientes.</p>
+                    <p className="hidden xs:block text-slate-500 font-medium ml-10 sm:ml-12 text-sm">Emisión de facturas legales para pacientes.</p>
                 </div>
-                <div className="flex items-center gap-6">
-                    <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Timbrado</p>
-                        <p className={`font-bold text-sm ${isValid ? 'text-slate-700' : 'text-rose-500'}`}>
+                <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end bg-slate-100 sm:bg-transparent p-3 sm:p-0 rounded-2xl sm:rounded-none">
+                    <div className="text-left sm:text-right">
+                        <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Timbrado</p>
+                        <p className={`font-bold text-xs sm:text-sm ${isValid ? 'text-slate-700' : 'text-rose-500'}`}>
                             {selectedPoint ? selectedPoint.numero_timbrado : "-"}
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Próxima Factura</p>
-                        <p className={`font-black text-lg font-mono ${isValid ? 'text-indigo-600' : 'text-rose-500'}`}>
+                        <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Próxima Factura</p>
+                        <p className={`font-black text-base sm:text-lg font-mono ${isValid ? 'text-indigo-600' : 'text-rose-500'}`}>
                             {selectedPoint
                                 ? `${selectedPoint.establecimiento}-${selectedPoint.punto_expedicion}-${String(selectedPoint.numero_actual).padStart(7, '0')}`
                                 : "No seleccionado"}
@@ -210,7 +311,7 @@ const FacturaNueva = () => {
                 {/* Área Principal: Detalle de Factura */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Header Details */}
-                    <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Condición</label>
                             <div className="flex p-1 bg-slate-100 rounded-xl">
@@ -219,8 +320,8 @@ const FacturaNueva = () => {
                                         key={type}
                                         onClick={() => setHeaderData({ ...headerData, condicion_operacion: type })}
                                         className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all ${headerData.condicion_operacion === type
-                                                ? 'bg-white text-indigo-600 shadow-sm'
-                                                : 'text-slate-500 hover:text-slate-700'
+                                            ? 'bg-white text-indigo-600 shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-700'
                                             }`}
                                     >
                                         {type}
@@ -265,28 +366,28 @@ const FacturaNueva = () => {
                                 </div>
                                 {/* Preview de cuotas */}
                                 {subtotal > 0 && headerData.cantidad_cuotas > 0 && (
-                                    <div className="md:col-span-3 bg-amber-50 border border-amber-200 rounded-xl p-4 animate-in zoom-in-95">
+                                    <div className="sm:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 rounded-xl p-4 animate-in zoom-in-95">
                                         <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2">Plan de Cuotas</p>
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-center">
-                                                <p className="text-2xl font-black text-amber-700">
+                                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                                            <div className="text-center bg-white px-3 py-1 rounded-lg border border-amber-100 min-w-[70px]">
+                                                <p className="text-xl sm:text-2xl font-black text-amber-700">
                                                     {headerData.cantidad_cuotas}
                                                 </p>
-                                                <p className="text-[10px] text-amber-600 font-bold">CUOTAS</p>
+                                                <p className="text-[8px] sm:text-[10px] text-amber-600 font-bold">CUOTAS</p>
                                             </div>
-                                            <div className="text-amber-400 text-xl">×</div>
-                                            <div className="text-center">
-                                                <p className="text-2xl font-black text-amber-700">
+                                            <div className="text-amber-400 text-lg sm:text-xl">×</div>
+                                            <div className="text-center bg-white px-3 py-1 rounded-lg border border-amber-100 min-w-[80px]">
+                                                <p className="text-xl sm:text-2xl font-black text-amber-700">
                                                     {new Intl.NumberFormat('es-PY').format(Math.ceil(subtotal / headerData.cantidad_cuotas))}
                                                 </p>
-                                                <p className="text-[10px] text-amber-600 font-bold">GS C/U</p>
+                                                <p className="text-[8px] sm:text-[10px] text-amber-600 font-bold">GS C/U</p>
                                             </div>
-                                            <div className="text-amber-400 text-xl">=</div>
-                                            <div className="text-center">
-                                                <p className="text-2xl font-black text-amber-700">
+                                            <div className="text-amber-400 text-lg sm:text-xl">=</div>
+                                            <div className="text-center bg-white px-3 py-1 rounded-lg border border-amber-100 min-w-[100px]">
+                                                <p className="text-xl sm:text-2xl font-black text-amber-700">
                                                     {new Intl.NumberFormat('es-PY').format(subtotal)}
                                                 </p>
-                                                <p className="text-[10px] text-amber-600 font-bold">TOTAL</p>
+                                                <p className="text-[8px] sm:text-[10px] text-amber-600 font-bold">TOTAL</p>
                                             </div>
                                         </div>
                                         <p className="text-xs text-amber-600 mt-2">
@@ -297,7 +398,7 @@ const FacturaNueva = () => {
                             </>
                         )}
 
-                        <div className="md:col-span-3 space-y-1.5">
+                        <div className="sm:col-span-2 lg:col-span-3 space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Observaciones</label>
                             <input
                                 type="text"
@@ -337,24 +438,23 @@ const FacturaNueva = () => {
                     )}
 
                     {/* Submit Bar */}
-                    <div className="pt-4 flex justify-end gap-4">
+                    <div className="pt-4 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
                         <button
                             disabled={isSubmitting}
                             onClick={() => navigate('/facturas')}
-                            className="px-8 py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors"
+                            className="px-8 py-3.5 text-slate-400 font-bold hover:text-slate-600 transition-colors text-sm sm:text-base order-last sm:order-first"
                         >
                             Cancelar
                         </button>
                         <button
                             disabled={isSubmitting || items.length === 0 || !selectedPaciente || !isValid}
                             onClick={handleSubmit}
-                            className={`px-12 py-4 rounded-2xl font-black shadow-xl transition-all flex items-center gap-3 ${
-                                isSubmitting
+                            className={`w-full sm:w-auto px-10 sm:px-12 py-4 rounded-2xl font-black shadow-xl transition-all flex items-center justify-center gap-3 text-sm sm:text-base ${isSubmitting
                                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                     : (items.length === 0 || !selectedPaciente || !isValid)
                                         ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200 hover:scale-105 active:scale-95'
-                            }`}
+                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200 hover:scale-[1.02] active:scale-95'
+                                }`}
                         >
                             {isSubmitting ? (
                                 <>
@@ -364,7 +464,7 @@ const FacturaNueva = () => {
                             ) : (
                                 <>
                                     <span>Emitir Factura Legal</span>
-                                    <span className="text-xl">➔</span>
+                                    <span className="text-xl hidden sm:inline">➔</span>
                                 </>
                             )}
                         </button>

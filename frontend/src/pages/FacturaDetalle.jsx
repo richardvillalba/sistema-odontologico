@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { billingService, empresaService } from '../services/api';
+import { billingService, empresaService, cajaService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import FacturaPrint from '../components/facturacion/FacturaPrint';
 
@@ -9,7 +9,9 @@ const FacturaDetalle = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { usuario } = useAuth();
+    const { usuario, empresaActiva } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
+    const usuarioId = usuario?.usuario_id;
     const [actionError, setActionError] = useState(null);
 
     // Queries
@@ -34,15 +36,28 @@ const FacturaDetalle = () => {
     });
 
     const { data: empresaRes } = useQuery({
-        queryKey: ['empresa'],
-        queryFn: () => empresaService.get(),
+        queryKey: ['empresa', empresaId],
+        queryFn: () => empresaService.getById(empresaId),
+        enabled: !!empresaId,
     });
+
+    // Caja abierta del usuario (para registrar egresos en anulaciones)
+    const { data: cajasData, isLoading: loadingCajas } = useQuery({
+        queryKey: ['cajas-detalle', empresaId],
+        queryFn: () => cajaService.listar(empresaId),
+        enabled: !!empresaId,
+    });
+    const cajasUsuario = cajasData?.data?.items || [];
+    // Priorizar la caja asignada al usuario, luego cualquier abierta
+    const cajaAbierta = cajasUsuario.find(c => c.estado === 'ABIERTA' && c.usuario_asignado_id === usuarioId)
+        || cajasUsuario.find(c => c.estado === 'ABIERTA')
+        || null;
 
     const factura = facturaRes?.data?.items?.[0] || facturaRes?.data?.factura?.[0] || facturaRes?.data?.factura;
     const detalles = detallesRes?.data?.items || [];
     const cuotas = cuotasRes?.data?.items || [];
     const pagos = pagosRes?.data?.items || [];
-    const empresa = empresaRes?.data || {};
+    const empresa = empresaRes?.data?.items?.[0] || {};
 
     // Estado para modal de pago de cuota
     const [pagoModal, setPagoModal] = useState({ open: false, cuota: null });
@@ -60,7 +75,27 @@ const FacturaDetalle = () => {
     // Mutations
     const anularMutation = useMutation({
         mutationFn: (motivo) => billingService.anularFactura(id, motivo, usuario?.usuario_id),
-        onSuccess: () => {
+        onSuccess: async () => {
+            // Registrar EGRESO en caja para revertir los pagos de la factura
+            if (cajaAbierta?.caja_id && factura) {
+                const montoPagado = Number(factura.total_pagado || factura.TOTAL_PAGADO || 0);
+                if (montoPagado > 0) {
+                    try {
+                        const nroFactura = factura.nro_factura || factura.NRO_FACTURA || id;
+                        await cajaService.registrarMovimiento(cajaAbierta.caja_id, {
+                            tipo: 'EGRESO',
+                            categoria_id: null,
+                            concepto: `Anulación factura #${nroFactura}`,
+                            monto: montoPagado,
+                            factura_id: Number(id),
+                            referencia: String(nroFactura),
+                            registrado_por: usuarioId,
+                        });
+                    } catch (cajaErr) {
+                        console.warn('No se pudo registrar egreso en caja:', cajaErr);
+                    }
+                }
+            }
             queryClient.invalidateQueries(['factura', id]);
             setAnularModal(false);
             setMotivoAnulacion('');
@@ -92,7 +127,27 @@ const FacturaDetalle = () => {
 
     const anularPagoMutation = useMutation({
         mutationFn: ({ pagoId, motivo }) => billingService.anularPago(pagoId, motivo, usuario?.usuario_id),
-        onSuccess: () => {
+        onSuccess: async () => {
+            // Registrar EGRESO en caja para revertir el pago anulado
+            if (cajaAbierta?.caja_id && anularPagoModal.pago) {
+                try {
+                    const montoPago = Number(anularPagoModal.pago.monto || anularPagoModal.pago.MONTO || 0);
+                    const nroFactura = factura?.nro_factura || factura?.NRO_FACTURA || id;
+                    if (montoPago > 0) {
+                        await cajaService.registrarMovimiento(cajaAbierta.caja_id, {
+                            tipo: 'EGRESO',
+                            categoria_id: null,
+                            concepto: `Anulación pago - Factura #${nroFactura}`,
+                            monto: montoPago,
+                            factura_id: Number(id),
+                            referencia: String(nroFactura),
+                            registrado_por: usuarioId,
+                        });
+                    }
+                } catch (cajaErr) {
+                    console.warn('No se pudo registrar egreso en caja:', cajaErr);
+                }
+            }
             queryClient.invalidateQueries(['factura', id]);
             queryClient.invalidateQueries(['factura-pagos', id]);
             queryClient.invalidateQueries(['factura-cuotas', id]);
@@ -119,6 +174,98 @@ const FacturaDetalle = () => {
         setPagoModal({ open: true, cuota });
         setMontoPago(cuota.saldo_cuota);
         setMetodoPago('EFECTIVO');
+    };
+
+    const imprimirRecibo = (pago) => {
+        const fmt = (n) => new Intl.NumberFormat('es-PY').format(n || 0);
+        const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
+
+        const empresaNombre = empresa?.nombre_comercial || empresa?.razon_social || 'Clínica Odontológica';
+        const nroFactura = factura.numero_factura_completo || `#${id}`;
+
+        const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Recibo de Pago N°${pago.pago_id}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 0; padding: 20px; }
+  .recibo { max-width: 480px; margin: 0 auto; border: 2px solid #000; padding: 24px; position: relative; }
+  .empresa { text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 12px; margin-bottom: 12px; }
+  .empresa h2 { margin: 0 0 3px; font-size: 15px; }
+  .empresa p { margin: 2px 0; font-size: 10px; color: #555; }
+  .titulo { text-align: center; font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-bottom: 2px; }
+  .subtitulo { text-align: center; font-size: 11px; color: #555; margin-bottom: 14px; }
+  .section { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+  .row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; }
+  .label { color: #666; }
+  .value { font-weight: bold; text-align: right; }
+  .monto-box { border: 2px solid #000; padding: 14px; text-align: center; margin: 16px 0; }
+  .monto-label { font-size: 10px; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .monto-value { font-size: 30px; font-weight: bold; font-family: monospace; }
+  .monto-gs { font-size: 14px; font-weight: normal; }
+  .sello { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 14px; border-top: 2px solid #000; }
+  .sello-box { text-align: center; }
+  .sello-line { border-top: 1px solid #000; width: 160px; margin: 0 auto 4px; }
+  .sello-label { font-size: 10px; color: #555; }
+  .pie { text-align: center; font-size: 9px; color: #aaa; margin-top: 14px; }
+  @media print { body { margin: 0; padding: 10px; } }
+</style>
+</head>
+<body>
+<div class="recibo">
+  <div class="empresa">
+    <h2>${empresaNombre}</h2>
+    ${empresa?.ruc ? `<p><strong>RUC:</strong> ${empresa.ruc}</p>` : ''}
+    ${empresa?.direccion ? `<p>${empresa.direccion}</p>` : ''}
+    ${empresa?.telefono ? `<p>Tel: ${empresa.telefono}</p>` : ''}
+  </div>
+
+  <div class="titulo">RECIBO DE PAGO</div>
+  <div class="subtitulo">N° ${pago.pago_id}</div>
+
+  <div class="section">
+    <div class="row"><span class="label">Factura:</span><span class="value">${nroFactura}</span></div>
+    <div class="row"><span class="label">Fecha de Pago:</span><span class="value">${fmtFecha(pago.fecha_pago)}</span></div>
+    <div class="row"><span class="label">Cliente:</span><span class="value">${factura.nombre_cliente || '-'}</span></div>
+    ${factura.numero_documento_cliente ? `<div class="row"><span class="label">${factura.tipo_documento_cliente || 'Doc'}:</span><span class="value">${factura.numero_documento_cliente}</span></div>` : ''}
+    <div class="row"><span class="label">Método de Pago:</span><span class="value">${pago.metodo_pago}</span></div>
+    ${pago.referencia ? `<div class="row"><span class="label">Referencia:</span><span class="value">${pago.referencia}</span></div>` : ''}
+    ${pago.banco ? `<div class="row"><span class="label">Banco:</span><span class="value">${pago.banco}</span></div>` : ''}
+  </div>
+
+  <div class="monto-box">
+    <div class="monto-label">Monto Recibido</div>
+    <div class="monto-value">${fmt(pago.monto)} <span class="monto-gs">Gs</span></div>
+  </div>
+
+  <div class="section">
+    <div class="row"><span class="label">Total Factura:</span><span class="value">${fmt(factura.total)} Gs</span></div>
+    <div class="row"><span class="label">Total Pagado:</span><span class="value">${fmt(factura.total_pagado)} Gs</span></div>
+    <div class="row"><span class="label">Saldo Pendiente:</span><span class="value">${fmt(factura.saldo_pendiente)} Gs</span></div>
+  </div>
+
+  <div class="sello">
+    <div class="sello-box">
+      <div class="sello-line"></div>
+      <div class="sello-label">Firma del Cliente</div>
+    </div>
+    <div class="sello-box">
+      <div class="sello-line"></div>
+      <div class="sello-label">Firma y Sello de la Empresa</div>
+    </div>
+  </div>
+
+  <div class="pie">Emitido el ${new Date().toLocaleDateString('es-PY')} — ${empresaNombre}</div>
+</div>
+<script>window.onload = function() { window.print(); }</script>
+</body>
+</html>`;
+
+        const ventana = window.open('', '_blank', 'width=580,height=720');
+        ventana.document.write(html);
+        ventana.document.close();
     };
 
     if (loadingFactura || loadingDetalles) return (
@@ -179,8 +326,10 @@ const FacturaDetalle = () => {
 
                     {(factura.estado === 'PENDIENTE' || factura.estado === 'PARCIAL') && (
                         <button
-                            onClick={() => navigate(`/facturas/${id}/registrar-pago`)}
-                            className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-emerald-200 transition-all text-sm"
+                            onClick={() => cajaAbierta ? navigate(`/facturas/${id}/registrar-pago`) : null}
+                            disabled={!cajaAbierta}
+                            title={!cajaAbierta ? 'Debes abrir tu caja para registrar pagos' : ''}
+                            className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black shadow-lg transition-all text-sm ${cajaAbierta ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
                         >
                             Registrar Pago
                         </button>
@@ -188,8 +337,10 @@ const FacturaDetalle = () => {
 
                     {factura.estado !== 'ANULADA' && factura.estado !== 'PAGADA' && (
                         <button
-                            onClick={() => setAnularModal(true)}
-                            className="flex-1 sm:flex-none bg-white border-2 border-slate-100 text-rose-600 hover:bg-rose-50 px-6 py-3 rounded-2xl font-black transition-all text-sm"
+                            onClick={() => cajaAbierta ? setAnularModal(true) : null}
+                            disabled={!cajaAbierta}
+                            title={!cajaAbierta ? 'Debes abrir tu caja para anular esta factura' : ''}
+                            className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black transition-all text-sm ${cajaAbierta ? 'bg-white border-2 border-slate-100 text-rose-600 hover:bg-rose-50' : 'bg-slate-100 text-slate-400 cursor-not-allowed border-2 border-slate-100'}`}
                         >
                             Anular
                         </button>
@@ -208,6 +359,24 @@ const FacturaDetalle = () => {
                 <div className="bg-rose-50 border-2 border-rose-100 p-4 rounded-2xl flex items-center gap-4 animate-shake mx-4 sm:mx-0">
                     <span className="text-2xl">⚠️</span>
                     <p className="text-rose-700 font-bold">{actionError}</p>
+                </div>
+            )}
+
+            {/* Banner: caja cerrada */}
+            {!loadingCajas && !cajaAbierta && factura.estado !== 'ANULADA' && factura.estado !== 'PAGADA' && (
+                <div className="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex items-center justify-between gap-4 mx-4 sm:mx-0">
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl shrink-0">🔐</span>
+                        <p className="text-amber-800 font-bold text-sm">
+                            Caja cerrada — Abre tu caja para poder registrar pagos o anular esta factura.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate('/caja')}
+                        className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all"
+                    >
+                        Ir a Caja
+                    </button>
                 </div>
             )}
 
@@ -351,8 +520,10 @@ const FacturaDetalle = () => {
                                                 </div>
                                                 {!isPagada && factura.estado !== 'ANULADA' && (
                                                     <button
-                                                        onClick={() => openPagoModal(cuota)}
-                                                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black rounded-lg sm:rounded-xl transition-all uppercase tracking-widest"
+                                                        onClick={() => cajaAbierta ? openPagoModal(cuota) : null}
+                                                        disabled={!cajaAbierta}
+                                                        title={!cajaAbierta ? 'Debes abrir tu caja para pagar cuotas' : ''}
+                                                        className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] font-black rounded-lg sm:rounded-xl transition-all uppercase tracking-widest ${cajaAbierta ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                                                     >
                                                         Pagar
                                                     </button>
@@ -396,10 +567,19 @@ const FacturaDetalle = () => {
                                             <p className="font-black text-emerald-600 text-base sm:text-lg">
                                                 {new Intl.NumberFormat('es-PY').format(pago.monto)} <span className="text-[10px]">Gs</span>
                                             </p>
+                                            <button
+                                                onClick={() => imprimirRecibo(pago)}
+                                                title="Imprimir recibo de este pago"
+                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black rounded-lg transition-all flex items-center gap-1"
+                                            >
+                                                🖨️ <span className="hidden sm:inline">Recibo</span>
+                                            </button>
                                             {factura.estado !== 'ANULADA' && (
                                                 <button
-                                                    onClick={() => setAnularPagoModal({ open: true, pago })}
-                                                    className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg transition-all"
+                                                    onClick={() => cajaAbierta ? setAnularPagoModal({ open: true, pago }) : null}
+                                                    disabled={!cajaAbierta}
+                                                    title={!cajaAbierta ? 'Debes abrir tu caja para anular pagos' : ''}
+                                                    className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${cajaAbierta ? 'bg-rose-50 hover:bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
                                                 >
                                                     Anular
                                                 </button>
