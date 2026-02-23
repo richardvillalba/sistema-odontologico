@@ -168,7 +168,7 @@ export default function Layout({ children }) {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden w-full">
-                <header className="h-16 lg:h-20 bg-surface-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-8 z-10">
+                <header className="h-16 lg:h-20 bg-surface-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-8 z-50 relative">
                     <div className="flex items-center gap-3 lg:gap-6">
                         {/* Hamburger menu - mobile only */}
                         <button
@@ -243,7 +243,7 @@ export default function Layout({ children }) {
                             </button>
 
                             {showNotifications && (
-                                <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-surface-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in fade-in slide-in-from-top-5 duration-200">
+                                <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-surface-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in fade-in slide-in-from-top-5 duration-200 z-[9999]">
                                     <div className="p-4 border-b border-border flex justify-between items-center bg-surface-raised">
                                         <span className="text-xs font-black text-text-primary uppercase tracking-widest">Notificaciones</span>
                                         <span className="text-[10px] font-black bg-primary-light text-primary px-2 py-0.5 rounded-full">{count} nuevas</span>
