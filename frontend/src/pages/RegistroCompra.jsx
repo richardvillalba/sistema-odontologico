@@ -61,14 +61,20 @@ export default function RegistroCompra() {
 
     const registrarMutation = useMutation({
         mutationFn: (data) => comprasService.registrarFactura(data),
-        onSuccess: () => {
+        onSuccess: (response) => {
+            const result = response?.data;
+            if (result && result.success === false) {
+                alert('Error al registrar compra: ' + (result.message || 'Error desconocido en la base de datos'));
+                return;
+            }
             queryClient.invalidateQueries(['inventario']);
-            queryClient.invalidateQueries(['articulos']);
+            queryClient.invalidateQueries(['facturas-compra']);
             alert('Compra registrada exitosamente');
-            navigate('/compras');
+            navigate('/compras/facturas');
         },
         onError: (err) => {
-            alert('Error al registrar compra: ' + (err.response?.data?.message || err.message));
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message;
+            alert('Error al registrar compra: ' + msg);
         }
     });
 

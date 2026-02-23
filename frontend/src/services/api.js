@@ -267,6 +267,8 @@ export const comprasService = {
     getUnidadesMedida: () => api.get('/compras/unidades-medida'),
 
     // Facturas de Compra
+    getFacturasCompra: (empresaId, sucursalId = null) =>
+        api.get('/compras/facturas', { params: { empresa_id: empresaId, ...(sucursalId ? { sucursal_id: sucursalId } : {}) } }),
     registrarFactura: (data) => api.post('/compras/facturas', data),
 };
 

@@ -20,6 +20,7 @@ import Proveedores from './pages/Proveedores';
 import Articulos from './pages/Articulos';
 import Inventario from './pages/Inventario';
 import RegistroCompra from './pages/RegistroCompra';
+import FacturasCompra from './pages/FacturasCompra';
 import Timbrados from './pages/Timbrados';
 import DatosClinica from './pages/configuraciones/DatosClinica';
 import ConfiguracionCajas from './pages/configuraciones/ConfiguracionCajas';
@@ -102,6 +103,7 @@ function App() {
                                             <Route path="/compras/proveedores" element={<Proveedores />} />
                                             <Route path="/compras/articulos" element={<Articulos />} />
                                             <Route path="/compras/inventario" element={<Inventario />} />
+                                            <Route path="/compras/facturas" element={<FacturasCompra />} />
                                             <Route path="/compras/facturas/nueva" element={<RegistroCompra />} />
 
                                             {/* Facturación */}
