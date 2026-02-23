@@ -1,12 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { comprasService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const EstadoBadge = ({ estado }) => {
     const styles = {
-        REGISTRADA: 'bg-secondary/10 text-secondary',
-        ANULADA:    'bg-danger/10 text-danger',
+        RECIBIDA:  'bg-secondary/10 text-secondary',
+        PROCESADA: 'bg-primary/10 text-primary',
+        PAGADA:    'bg-accent/10 text-accent',
+        ANULADA:   'bg-danger/10 text-danger',
     };
     return (
         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${styles[estado] || 'bg-surface text-text-secondary'}`}>
@@ -15,9 +18,48 @@ const EstadoBadge = ({ estado }) => {
     );
 };
 
+// Modal de confirmación para anular
+const ModalAnular = ({ factura, onConfirm, onCancel, loading }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
+        <div className="relative bg-surface-card rounded-[2rem] shadow-2xl border border-border p-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+            </div>
+            <h3 className="text-xl font-black text-text-primary text-center uppercase tracking-tight mb-2">Anular Factura</h3>
+            <p className="text-text-secondary text-sm text-center mb-2">
+                Nro: <span className="font-black text-text-primary">{factura.numero_factura}</span>
+            </p>
+            <p className="text-[11px] text-text-secondary text-center opacity-60 mb-8">
+                Se revertirá el stock de todos los artículos de esta compra. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-4">
+                <button
+                    onClick={onCancel}
+                    disabled={loading}
+                    className="flex-1 px-6 py-3.5 rounded-2xl border-2 border-border text-text-secondary font-black text-[10px] uppercase tracking-widest hover:border-primary/30 hover:text-primary transition-all"
+                >
+                    Cancelar
+                </button>
+                <button
+                    onClick={onConfirm}
+                    disabled={loading}
+                    className="flex-1 px-6 py-3.5 rounded-2xl bg-danger text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-danger/20 hover:bg-danger/90 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                >
+                    {loading ? 'Anulando...' : 'Confirmar Anulación'}
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
 export default function FacturasCompra() {
     const navigate = useNavigate();
-    const { empresaActiva, sucursalActiva } = useAuth();
+    const queryClient = useQueryClient();
+    const { empresaActiva, sucursalActiva, usuario } = useAuth();
+    const [facturaAAnular, setFacturaAAnular] = useState(null);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['facturas-compra', empresaActiva?.empresa_id],
@@ -25,14 +67,41 @@ export default function FacturasCompra() {
         enabled: !!empresaActiva?.empresa_id,
     });
 
+    const anularMutation = useMutation({
+        mutationFn: ({ id }) => comprasService.anularFactura(id, usuario?.usuario_id),
+        onSuccess: (response) => {
+            const result = response?.data;
+            if (result && result.success === false) {
+                alert('Error: ' + result.message);
+                return;
+            }
+            queryClient.invalidateQueries(['facturas-compra']);
+            queryClient.invalidateQueries(['inventario']);
+            setFacturaAAnular(null);
+        },
+        onError: (err) => {
+            alert('Error al anular: ' + (err.response?.data?.message || err.message));
+        }
+    });
+
     const facturas = data?.data?.items || [];
 
-    const totalMes = facturas
+    const totalActivo = facturas
         .filter(f => f.estado !== 'ANULADA')
         .reduce((acc, f) => acc + (f.total_general || 0), 0);
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {/* Modal */}
+            {facturaAAnular && (
+                <ModalAnular
+                    factura={facturaAAnular}
+                    loading={anularMutation.isPending}
+                    onConfirm={() => anularMutation.mutate({ id: facturaAAnular.factura_compra_id })}
+                    onCancel={() => setFacturaAAnular(null)}
+                />
+            )}
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
                 <div>
@@ -52,15 +121,15 @@ export default function FacturasCompra() {
                 </button>
             </div>
 
-            {/* Stat */}
+            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-surface-card rounded-3xl border border-border p-8">
-                    <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 mb-3">Total compras</p>
+                    <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 mb-3">Total compras activas</p>
                     <p className="text-4xl font-black text-text-primary">{facturas.filter(f => f.estado !== 'ANULADA').length}</p>
                 </div>
                 <div className="bg-surface-card rounded-3xl border border-border p-8">
                     <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] opacity-40 mb-3">Inversión total</p>
-                    <p className="text-4xl font-black text-primary">{new Intl.NumberFormat('es-PY').format(totalMes)}</p>
+                    <p className="text-4xl font-black text-primary">{new Intl.NumberFormat('es-PY').format(totalActivo)}</p>
                     <p className="text-[10px] font-black text-text-secondary uppercase opacity-30 mt-1">Guaraníes</p>
                 </div>
                 <div className="bg-surface-card rounded-3xl border border-border p-8">
@@ -119,11 +188,12 @@ export default function FacturasCompra() {
                                         <th className="px-10 py-5">Condición</th>
                                         <th className="px-10 py-5 text-right">Total</th>
                                         <th className="px-10 py-5 text-center">Estado</th>
+                                        <th className="px-10 py-5 text-center">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/50">
                                     {facturas.map((f) => (
-                                        <tr key={f.factura_compra_id} className="hover:bg-surface-raised/30 transition-all">
+                                        <tr key={f.factura_compra_id} className={`hover:bg-surface-raised/30 transition-all ${f.estado === 'ANULADA' ? 'opacity-50' : ''}`}>
                                             <td className="px-10 py-5">
                                                 <span className="font-black text-sm text-text-primary">{f.numero_factura}</span>
                                             </td>
@@ -145,6 +215,19 @@ export default function FacturasCompra() {
                                             <td className="px-10 py-5 text-center">
                                                 <EstadoBadge estado={f.estado} />
                                             </td>
+                                            <td className="px-10 py-5 text-center">
+                                                {f.estado !== 'ANULADA' && f.estado !== 'PAGADA' && (
+                                                    <button
+                                                        onClick={() => setFacturaAAnular(f)}
+                                                        className="p-2.5 rounded-xl text-danger hover:bg-danger/10 transition-all"
+                                                        title="Anular factura"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -154,13 +237,25 @@ export default function FacturasCompra() {
                         {/* Mobile */}
                         <div className="md:hidden divide-y divide-border/50">
                             {facturas.map((f) => (
-                                <div key={f.factura_compra_id} className="p-8 space-y-4">
+                                <div key={f.factura_compra_id} className={`p-8 space-y-4 ${f.estado === 'ANULADA' ? 'opacity-50' : ''}`}>
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <p className="font-black text-text-primary text-sm">{f.numero_factura}</p>
                                             <p className="text-[11px] text-text-secondary font-medium mt-1">{f.proveedor_nombre}</p>
                                         </div>
-                                        <EstadoBadge estado={f.estado} />
+                                        <div className="flex items-center gap-3">
+                                            <EstadoBadge estado={f.estado} />
+                                            {f.estado !== 'ANULADA' && f.estado !== 'PAGADA' && (
+                                                <button
+                                                    onClick={() => setFacturaAAnular(f)}
+                                                    className="p-2 rounded-xl text-danger hover:bg-danger/10 transition-all"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex justify-between items-center pt-2 border-t border-border">
                                         <span className="text-[10px] font-black text-text-secondary opacity-40 uppercase">{f.fecha_factura}</span>

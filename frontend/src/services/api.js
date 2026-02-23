@@ -270,6 +270,7 @@ export const comprasService = {
     getFacturasCompra: (empresaId, sucursalId = null) =>
         api.get('/compras/facturas', { params: { empresa_id: empresaId, ...(sucursalId ? { sucursal_id: sucursalId } : {}) } }),
     registrarFactura: (data) => api.post('/compras/facturas', data),
+    anularFactura: (id, usuarioId) => api.delete(`/compras/facturas/${id}`, { params: { usuario_id: usuarioId } }),
 };
 
 export const inventarioService = {

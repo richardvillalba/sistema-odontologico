@@ -415,6 +415,40 @@ BEGIN
 END;'
         );
 
+        -- =============================================
+        -- ANULACIÓN DE FACTURA DE COMPRA
+        -- =============================================
+        ORDS.DEFINE_TEMPLATE(p_module_name => 'compras', p_pattern => 'facturas/:id');
+        ORDS.DEFINE_HANDLER(
+            p_module_name => 'compras',
+            p_pattern     => 'facturas/:id',
+            p_method      => 'DELETE',
+            p_source_type => 'plsql/block',
+            p_source      => '
+DECLARE
+    v_res NUMBER;
+    v_msg VARCHAR2(1000);
+BEGIN
+    PKG_COMPRAS.anular_factura_compra(
+        p_factura_compra_id => :id,
+        p_usuario_id        => NVL(:usuario_id, 1),
+        p_resultado         => v_res,
+        p_mensaje           => v_msg
+    );
+
+    APEX_JSON.initialize_clob_output;
+    APEX_JSON.open_object;
+    APEX_JSON.write(''success'', v_res = 1);
+    APEX_JSON.write(''message'', v_msg);
+    APEX_JSON.close_object;
+
+    :status := CASE WHEN v_res = 1 THEN 200 ELSE 400 END;
+    :content_type := ''application/json'';
+    htp.p(APEX_JSON.get_clob_output);
+    APEX_JSON.free_output;
+END;'
+        );
+
         COMMIT;
     END;
     """

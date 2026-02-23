@@ -2,7 +2,7 @@ CREATE OR REPLACE PACKAGE PKG_COMPRAS AS
     /*
     Módulo: Compras y Proveedores
     Descripción: Gestión de proveedores, catálogo de artículos, inventario y registro de compras.
-    Versión: 1.0
+    Versión: 1.1
     */
 
     -- Tipos para cursores
@@ -82,10 +82,10 @@ CREATE OR REPLACE PACKAGE PKG_COMPRAS AS
         p_articulo_id   IN  NUMBER,
         p_empresa_id    IN  NUMBER,
         p_sucursal_id   IN  NUMBER,
-        p_tipo_mov      IN  VARCHAR2, -- 'INGRESO', 'EGRESO', 'AJUSTE'
+        p_tipo_mov      IN  VARCHAR2, -- 'ENTRADA', 'SALIDA', 'AJUSTE', 'DEVOLUCION'
         p_cantidad      IN  NUMBER,
         p_motivo        IN  VARCHAR2,
-        p_referencia_id IN  NUMBER DEFAULT NULL, -- ID de Factura Compra o Cita
+        p_referencia_id IN  NUMBER DEFAULT NULL,
         p_usuario_id    IN  NUMBER,
         p_resultado     OUT NUMBER,
         p_mensaje       OUT VARCHAR2
@@ -103,7 +103,14 @@ CREATE OR REPLACE PACKAGE PKG_COMPRAS AS
         p_condicion_pago    IN  VARCHAR2,
         p_moneda            IN  VARCHAR2,
         p_total_general     IN  NUMBER,
-        p_detalles_json     IN  CLOB, -- Contiene array de {articulo_id, cantidad, costo_unitario}
+        p_detalles_json     IN  CLOB,
+        p_usuario_id        IN  NUMBER,
+        p_resultado         OUT NUMBER,
+        p_mensaje           OUT VARCHAR2
+    );
+
+    PROCEDURE anular_factura_compra(
+        p_factura_compra_id IN  NUMBER,
         p_usuario_id        IN  NUMBER,
         p_resultado         OUT NUMBER,
         p_mensaje           OUT VARCHAR2
@@ -151,8 +158,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
     BEGIN
         IF p_proveedor_id IS NULL THEN
             INSERT INTO ODO_PROVEEDORES (
-                NOMBRE, RUC, NOMBRE_CONTACTO, TELEFONO, EMAIL, 
-                DIRECCION, CIUDAD, DEPARTAMENTO, BARRIO, PAIS, 
+                NOMBRE, RUC, NOMBRE_CONTACTO, TELEFONO, EMAIL,
+                DIRECCION, CIUDAD, DEPARTAMENTO, BARRIO, PAIS,
                 CONDICIONES_PAGO, MONEDA, ACTIVO, CREADO_POR, FECHA_CREACION
             ) VALUES (
                 p_nombre, p_ruc, p_nombre_contacto, p_telefono, p_email,
@@ -279,9 +286,9 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
     ) IS
     BEGIN
         OPEN p_cursor FOR
-            SELECT 
-                i.*, 
-                a.NOMBRE as ARTICULO_NOMBRE, 
+            SELECT
+                i.*,
+                a.NOMBRE as ARTICULO_NOMBRE,
                 a.CODIGO as ARTICULO_CODIGO,
                 a.UNIDAD_MEDIDA
             FROM ODO_INVENTARIO i
@@ -307,19 +314,19 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
         v_inventario_id NUMBER;
         v_stock_actual  NUMBER := 0;
     BEGIN
-        -- Verificar si existe registro en inventario para esta sucursal
+        -- Buscar registro de inventario solo por ARTICULO_ID (tiene UNIQUE constraint)
         BEGIN
-            SELECT INVENTARIO_ID, CANTIDAD_ACTUAL 
+            SELECT INVENTARIO_ID, CANTIDAD_ACTUAL
             INTO v_inventario_id, v_stock_actual
             FROM ODO_INVENTARIO
-            WHERE ARTICULO_ID = p_articulo_id AND SUCURSAL_ID = p_sucursal_id;
+            WHERE ARTICULO_ID = p_articulo_id;
         EXCEPTION
             WHEN NO_DATA_FOUND THEN
                 v_inventario_id := NULL;
         END;
 
         IF v_inventario_id IS NULL THEN
-            -- Si no existe, crear registro inicial
+            -- Crear registro inicial de inventario para el artículo
             INSERT INTO ODO_INVENTARIO (
                 ARTICULO_ID, EMPRESA_ID, SUCURSAL_ID, CANTIDAD_ACTUAL, CREADO_POR, FECHA_CREACION
             ) VALUES (
@@ -394,9 +401,9 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
 
         -- 2. Procesar detalles desde JSON
         FOR r IN (
-            SELECT 
-                articulo_id, 
-                cantidad, 
+            SELECT
+                articulo_id,
+                cantidad,
                 costo_unitario
             FROM JSON_TABLE(p_detalles_json, '$[*]'
                 COLUMNS (
@@ -416,17 +423,22 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
 
             -- Actualizar stock e inventario
             registrar_movimiento_inventario(
-                p_articulo_id => r.articulo_id,
-                p_empresa_id => p_empresa_id,
-                p_sucursal_id => p_sucursal_id,
-                p_tipo_mov => 'ENTRADA',
-                p_cantidad => r.cantidad,
-                p_motivo => 'Compra Factura Nro: ' || p_numero_factura,
+                p_articulo_id   => r.articulo_id,
+                p_empresa_id    => p_empresa_id,
+                p_sucursal_id   => p_sucursal_id,
+                p_tipo_mov      => 'ENTRADA',
+                p_cantidad      => r.cantidad,
+                p_motivo        => 'Compra Factura Nro: ' || p_numero_factura,
                 p_referencia_id => v_factura_id,
-                p_usuario_id => p_usuario_id,
-                p_resultado => v_res,
-                p_mensaje => v_msg
+                p_usuario_id    => p_usuario_id,
+                p_resultado     => v_res,
+                p_mensaje       => v_msg
             );
+
+            -- Si falla el movimiento de inventario, abortar
+            IF v_res = 0 THEN
+                RAISE_APPLICATION_ERROR(-20001, 'Error actualizando inventario artículo ' || r.articulo_id || ': ' || v_msg);
+            END IF;
 
             -- Actualizar último costo en el artículo
             UPDATE ODO_ARTICULOS SET
@@ -434,13 +446,13 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
                 MODIFICADO_POR = p_usuario_id,
                 FECHA_MODIFICACION = SYSTIMESTAMP
             WHERE ARTICULO_ID = r.articulo_id;
-            
-            -- Actualizar en inventario también
+
+            -- Actualizar último costo en inventario
             UPDATE ODO_INVENTARIO SET
                 ULTIMO_COSTO = r.costo_unitario,
                 MODIFICADO_POR = p_usuario_id,
                 FECHA_MODIFICACION = SYSTIMESTAMP
-            WHERE ARTICULO_ID = r.articulo_id AND SUCURSAL_ID = p_sucursal_id;
+            WHERE ARTICULO_ID = r.articulo_id;
         END LOOP;
 
         COMMIT;
@@ -452,6 +464,84 @@ CREATE OR REPLACE PACKAGE BODY PKG_COMPRAS AS
             p_resultado := 0;
             p_mensaje := 'Error al registrar factura de compra: ' || SQLERRM;
     END registrar_factura_compra;
+
+    -- =============================================
+    -- ANULACIÓN DE FACTURA DE COMPRA
+    -- =============================================
+    PROCEDURE anular_factura_compra(
+        p_factura_compra_id IN  NUMBER,
+        p_usuario_id        IN  NUMBER,
+        p_resultado         OUT NUMBER,
+        p_mensaje           OUT VARCHAR2
+    ) IS
+        v_estado    VARCHAR2(20);
+        v_nro       VARCHAR2(50);
+        v_empresa   NUMBER;
+        v_sucursal  NUMBER;
+        v_res       NUMBER;
+        v_msg       VARCHAR2(1000);
+    BEGIN
+        -- Verificar que existe y su estado
+        BEGIN
+            SELECT ESTADO, NUMERO_FACTURA, EMPRESA_ID, SUCURSAL_ID
+            INTO v_estado, v_nro, v_empresa, v_sucursal
+            FROM ODO_FACTURA_COMPRA
+            WHERE FACTURA_COMPRA_ID = p_factura_compra_id;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                p_resultado := 0;
+                p_mensaje := 'Factura no encontrada';
+                RETURN;
+        END;
+
+        IF v_estado = 'ANULADA' THEN
+            p_resultado := 0;
+            p_mensaje := 'La factura ya está anulada';
+            RETURN;
+        END IF;
+
+        IF v_estado = 'PAGADA' THEN
+            p_resultado := 0;
+            p_mensaje := 'No se puede anular una factura ya pagada';
+            RETURN;
+        END IF;
+
+        -- Revertir stock por cada ítem
+        FOR r IN (
+            SELECT ARTICULO_ID, CANTIDAD
+            FROM ODO_FACTURA_COMPRA_DET
+            WHERE FACTURA_COMPRA_ID = p_factura_compra_id
+        ) LOOP
+            registrar_movimiento_inventario(
+                p_articulo_id   => r.ARTICULO_ID,
+                p_empresa_id    => v_empresa,
+                p_sucursal_id   => v_sucursal,
+                p_tipo_mov      => 'SALIDA',
+                p_cantidad      => r.CANTIDAD,
+                p_motivo        => 'Anulación Factura Compra Nro: ' || v_nro,
+                p_referencia_id => p_factura_compra_id,
+                p_usuario_id    => p_usuario_id,
+                p_resultado     => v_res,
+                p_mensaje       => v_msg
+            );
+        END LOOP;
+
+        -- Marcar como anulada
+        UPDATE ODO_FACTURA_COMPRA
+        SET ESTADO = 'ANULADA',
+            MODIFICADO_POR = p_usuario_id,
+            FECHA_MODIFICACION = SYSTIMESTAMP
+        WHERE FACTURA_COMPRA_ID = p_factura_compra_id;
+
+        COMMIT;
+        p_resultado := 1;
+        p_mensaje := 'Factura anulada y stock revertido correctamente';
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            p_resultado := 0;
+            p_mensaje := 'Error al anular factura: ' || SQLERRM;
+    END anular_factura_compra;
 
 END PKG_COMPRAS;
 /
