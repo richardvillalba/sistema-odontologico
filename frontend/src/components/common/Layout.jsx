@@ -85,21 +85,30 @@ export default function Layout({ children }) {
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:relative lg:translate-x-0 lg:z-20
             `}>
-                <div className="p-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-black flex items-center gap-2.5 tracking-tight">
-                        <svg className="w-8 h-8 text-blue-400" viewBox="0 0 64 64" fill="currentColor"><path d="M32 4C24.5 4 20 8 18 12C16 16 14 18 10 20C6 22 4 28 6 34C8 40 12 44 16 52C18 56 20 60 24 60C28 60 28 52 30 46C31 43 32 42 32 42C32 42 33 43 34 46C36 52 36 60 40 60C44 60 46 56 48 52C52 44 56 40 58 34C60 28 58 22 54 20C50 18 48 16 46 12C44 8 39.5 4 32 4Z" /></svg>
-                        Denta
-                    </h1>
-                    {/* Botón cerrar sidebar en mobile */}
+
+                {/* ── Logo ── */}
+                <div className="px-5 pt-6 pb-5 flex items-center justify-between border-b border-white/[0.06]">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/40 shrink-0">
+                            <svg className="w-5 h-5 text-white" viewBox="0 0 64 64" fill="currentColor">
+                                <path d="M32 4C24.5 4 20 8 18 12C16 16 14 18 10 20C6 22 4 28 6 34C8 40 12 44 16 52C18 56 20 60 24 60C28 60 28 52 30 46C31 43 32 42 32 42C32 42 33 43 34 46C36 52 36 60 40 60C44 60 46 56 48 52C52 44 56 40 58 34C60 28 58 22 54 20C50 18 48 16 46 12C44 8 39.5 4 32 4Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 className="text-[17px] font-black tracking-tight text-white leading-none">Denta</h1>
+                            <p className="text-[9px] text-primary-300 uppercase tracking-[0.18em] font-semibold mt-0.5">Gestión Odontológica</p>
+                        </div>
+                    </div>
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden w-8 h-8 rounded-lg bg-primary-900 hover:bg-primary-800 flex items-center justify-center text-primary-200"
-                    >
-                        ✕
-                    </button>
+                        className="lg:hidden w-7 h-7 rounded-lg bg-white/8 hover:bg-white/15 flex items-center justify-center text-white/50 hover:text-white transition-all text-xs"
+                    >✕</button>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
+                {/* ── Navegación ── */}
+                <nav className="flex-1 px-3 pt-4 pb-2 overflow-y-auto">
+                    <p className="text-[9px] text-white/25 font-bold uppercase tracking-[0.2em] px-3 mb-2">Módulos</p>
+
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.path ||
                             (item.path !== '/' && location.pathname.startsWith(item.path));
@@ -108,60 +117,89 @@ export default function Layout({ children }) {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                                    : 'text-primary-200 hover:bg-primary/10 hover:text-white'
-                                    }`}
+                                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl mb-0.5 transition-all duration-150 group ${
+                                    isActive
+                                        ? 'bg-white/10 text-white'
+                                        : 'text-white/50 hover:bg-white/5 hover:text-white/85'
+                                }`}
                             >
-                                <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+                                {/* Barra acento izquierda */}
+                                {isActive && (
+                                    <span className="absolute left-0 top-2 bottom-2 w-[3px] bg-primary-300 rounded-r-full" />
+                                )}
+
+                                {/* Contenedor del ícono */}
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150 ${
+                                    isActive
+                                        ? 'bg-primary shadow-md shadow-primary/40'
+                                        : 'bg-white/[0.06] group-hover:bg-white/10'
+                                }`}>
                                     <IconComp />
+                                </div>
+
+                                <span className={`text-sm tracking-wide transition-all ${isActive ? 'font-semibold text-white' : 'font-medium'}`}>
+                                    {item.name}
                                 </span>
-                                <span className="font-bold text-sm tracking-wide">{item.name}</span>
+
+                                {isActive && (
+                                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-300 shrink-0" />
+                                )}
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-primary-800/50 space-y-2">
-                    {/* Empresa y Sucursal activa */}
+                {/* ── Footer ── */}
+                <div className="px-3 pb-4 pt-3 border-t border-white/[0.06] space-y-2">
+
+                    {/* Empresa / Sucursal */}
                     <button
                         onClick={() => navigate('/seleccionar-contexto')}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl border border-indigo-500/20 transition-all group text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.07] transition-all group text-left"
                         title="Cambiar empresa o sucursal"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
-                            <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-7 h-7 rounded-lg bg-primary/40 flex items-center justify-center shrink-0">
+                            <svg className="w-3.5 h-3.5 text-primary-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                         </div>
-                        <div className="overflow-hidden flex-1">
-                            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest truncate">
+                        <div className="overflow-hidden flex-1 min-w-0">
+                            <p className="text-[11px] font-semibold text-white/80 truncate leading-tight">
                                 {empresaActiva?.nombre || 'Sin empresa'}
                             </p>
-                            <p className="text-xs text-slate-400 truncate">
+                            <p className="text-[10px] text-white/35 truncate leading-tight">
                                 {sucursalActiva?.nombre || 'Sin sucursal'}
                             </p>
                         </div>
-                        <svg className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                        <svg className="w-3 h-3 text-white/25 group-hover:text-white/60 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                         </svg>
                     </button>
 
-                    {/* Usuario */}
-                    <div className="flex items-center gap-3 px-4 py-3 bg-primary-800/30 rounded-2xl border border-white/5">
-                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-black shadow-inner uppercase text-sm">
+                    {/* Usuario + logout */}
+                    <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white/[0.05] rounded-xl border border-white/[0.07]">
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-xs text-white uppercase shadow-md shadow-primary/40 shrink-0">
                             {usuario?.nombre?.charAt(0) || ''}{usuario?.apellido?.charAt(0) || '?'}
                         </div>
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-black truncate leading-tight">
+                        <div className="overflow-hidden flex-1 min-w-0">
+                            <p className="text-[12px] font-semibold text-white truncate leading-tight">
                                 {usuario?.nombre && usuario?.apellido
                                     ? `${usuario.nombre} ${usuario.apellido}`
                                     : usuario?.username || 'Usuario'}
                             </p>
-                            <p className="text-[10px] text-primary-300 font-bold uppercase tracking-widest">
-                                {selectedPoint ? `${selectedPoint.establecimiento}-${selectedPoint.punto_expedicion}` : "Sin Punto"}
+                            <p className="text-[9px] text-white/35 uppercase tracking-widest font-medium truncate">
+                                {selectedPoint ? `${selectedPoint.establecimiento}-${selectedPoint.punto_expedicion}` : 'Sin punto'}
                             </p>
                         </div>
+                        <button
+                            onClick={logout}
+                            title="Cerrar sesión"
+                            className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-red-500/20 flex items-center justify-center text-white/30 hover:text-red-400 transition-all shrink-0"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </aside>
