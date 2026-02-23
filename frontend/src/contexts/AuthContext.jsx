@@ -27,14 +27,14 @@ export const AuthProvider = ({ children }) => {
 
     const verificarSesion = async () => {
         try {
-            const usuarioGuardado = localStorage.getItem('usuario');
+            const usuarioGuardado = sessionStorage.getItem('usuario');
             if (usuarioGuardado) {
                 const userData = JSON.parse(usuarioGuardado);
                 await cargarDatosUsuario(userData.usuario_id);
 
-                // Restaurar empresa y sucursal de localStorage
-                const empresaGuardada = localStorage.getItem('empresa_activa');
-                const sucursalGuardada = localStorage.getItem('sucursal_activa');
+                // Restaurar empresa y sucursal de sessionStorage
+                const empresaGuardada = sessionStorage.getItem('empresa_activa');
+                const sucursalGuardada = sessionStorage.getItem('sucursal_activa');
                 if (empresaGuardada) {
                     const emp = JSON.parse(empresaGuardada);
                     setEmpresaActivaState(emp);
@@ -79,8 +79,8 @@ export const AuthProvider = ({ children }) => {
             setPermisos([]);
             setIsAuthenticated(true);
 
-            localStorage.setItem('usuario', JSON.stringify(userData));
-            localStorage.setItem('programas', JSON.stringify(userProgramas));
+            sessionStorage.setItem('usuario', JSON.stringify(userData));
+            sessionStorage.setItem('programas', JSON.stringify(userProgramas));
 
             // Auto-seleccionar empresa si tiene solo una
             if (userEmpresas.length === 1) {
@@ -95,26 +95,26 @@ export const AuthProvider = ({ children }) => {
     const setEmpresaActiva = (empresa) => {
         setEmpresaActivaState(empresa);
         if (empresa) {
-            localStorage.setItem('empresa_activa', JSON.stringify(empresa));
+            sessionStorage.setItem('empresa_activa', JSON.stringify(empresa));
             // Usar programas específicos de la empresa si existen
             if (empresa.programas && empresa.programas.length > 0) {
                 setProgramas(empresa.programas);
-                localStorage.setItem('programas', JSON.stringify(empresa.programas));
+                sessionStorage.setItem('programas', JSON.stringify(empresa.programas));
             }
         } else {
-            localStorage.removeItem('empresa_activa');
+            sessionStorage.removeItem('empresa_activa');
         }
         // Al cambiar empresa, limpiar sucursal
         setSucursalActivaState(null);
-        localStorage.removeItem('sucursal_activa');
+        sessionStorage.removeItem('sucursal_activa');
     };
 
     const setSucursalActiva = (sucursal) => {
         setSucursalActivaState(sucursal);
         if (sucursal) {
-            localStorage.setItem('sucursal_activa', JSON.stringify(sucursal));
+            sessionStorage.setItem('sucursal_activa', JSON.stringify(sucursal));
         } else {
-            localStorage.removeItem('sucursal_activa');
+            sessionStorage.removeItem('sucursal_activa');
         }
     };
 
@@ -145,10 +145,10 @@ export const AuthProvider = ({ children }) => {
         setEmpresaActivaState(null);
         setSucursalActivaState(null);
         setIsAuthenticated(false);
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('programas');
-        localStorage.removeItem('empresa_activa');
-        localStorage.removeItem('sucursal_activa');
+        sessionStorage.removeItem('usuario');
+        sessionStorage.removeItem('programas');
+        sessionStorage.removeItem('empresa_activa');
+        sessionStorage.removeItem('sucursal_activa');
 
         window.location.href = '/login';
     };

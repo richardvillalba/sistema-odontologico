@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { billingService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,7 +15,7 @@ export const usePointOfSale = () => {
 
 export const PointOfSaleProvider = ({ children }) => {
     const location = useLocation();
-    const { usuario, isAuthenticated, empresaActiva } = useAuth();
+    const { usuario, empresaActiva } = useAuth();
     const [points, setPoints] = useState([]);
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -55,8 +55,8 @@ export const PointOfSaleProvider = ({ children }) => {
                 : allPoints;
             setPoints(activePoints);
 
-            // Prioridad: 1) ID pasado como parámetro, 2) localStorage, 3) punto actual
-            const savedPointId = localStorage.getItem('selectedPointId');
+            // Prioridad: 1) ID pasado como parámetro, 2) sessionStorage, 3) punto actual
+            const savedPointId = sessionStorage.getItem('selectedPointId');
             const pointIdToFind = currentSelectedPointId || (savedPointId ? Number(savedPointId) : null);
 
             if (pointIdToFind) {
@@ -66,13 +66,13 @@ export const PointOfSaleProvider = ({ children }) => {
                 } else {
                     // El punto guardado no pertenece a esta empresa, limpiar
                     setSelectedPoint(null);
-                    localStorage.removeItem('selectedPointId');
+                    sessionStorage.removeItem('selectedPointId');
                 }
             } else if (activePoints.length === 1) {
                 const status = checkPointStatus(activePoints[0]);
                 if (status.valid) {
                     setSelectedPoint(activePoints[0]);
-                    localStorage.setItem('selectedPointId', activePoints[0].timbrado_id);
+                    sessionStorage.setItem('selectedPointId', activePoints[0].timbrado_id);
                 }
             }
             setError(null);
@@ -118,7 +118,7 @@ export const PointOfSaleProvider = ({ children }) => {
         }
 
         setSelectedPoint(point);
-        localStorage.setItem('selectedPointId', point.timbrado_id);
+        sessionStorage.setItem('selectedPointId', point.timbrado_id);
         setShowSelector(false);
         setIsMandatory(false);
         setError(null);
