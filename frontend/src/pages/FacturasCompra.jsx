@@ -18,22 +18,22 @@ const EstadoBadge = ({ estado }) => {
     );
 };
 
-// Modal de confirmación para anular
-const ModalAnular = ({ factura, onConfirm, onCancel, loading }) => (
+// Modal de confirmación para eliminar
+const ModalEliminar = ({ factura, onConfirm, onCancel, loading }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
         <div className="relative bg-surface-card rounded-[2rem] shadow-2xl border border-border p-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
             <div className="w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center mx-auto mb-6">
                 <svg className="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
-            <h3 className="text-xl font-black text-text-primary text-center uppercase tracking-tight mb-2">Anular Factura</h3>
+            <h3 className="text-xl font-black text-text-primary text-center uppercase tracking-tight mb-2">Eliminar Factura</h3>
             <p className="text-text-secondary text-sm text-center mb-2">
                 Nro: <span className="font-black text-text-primary">{factura.numero_factura}</span>
             </p>
             <p className="text-[11px] text-text-secondary text-center opacity-60 mb-8">
-                Se revertirá el stock de todos los artículos de esta compra. Esta acción no se puede deshacer.
+                Se eliminará permanentemente la factura y se revertirá el stock de todos los artículos. Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-4">
                 <button
@@ -48,7 +48,7 @@ const ModalAnular = ({ factura, onConfirm, onCancel, loading }) => (
                     disabled={loading}
                     className="flex-1 px-6 py-3.5 rounded-2xl bg-danger text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-danger/20 hover:bg-danger/90 hover:-translate-y-0.5 transition-all disabled:opacity-50"
                 >
-                    {loading ? 'Anulando...' : 'Confirmar Anulación'}
+                    {loading ? 'Eliminando...' : 'Eliminar Definitivamente'}
                 </button>
             </div>
         </div>
@@ -59,7 +59,7 @@ export default function FacturasCompra() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { empresaActiva, sucursalActiva, usuario } = useAuth();
-    const [facturaAAnular, setFacturaAAnular] = useState(null);
+    const [facturaAEliminar, setFacturaAEliminar] = useState(null);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['facturas-compra', empresaActiva?.empresa_id],
@@ -77,10 +77,10 @@ export default function FacturasCompra() {
             }
             queryClient.invalidateQueries(['facturas-compra']);
             queryClient.invalidateQueries(['inventario']);
-            setFacturaAAnular(null);
+            setFacturaAEliminar(null);
         },
         onError: (err) => {
-            alert('Error al anular: ' + (err.response?.data?.message || err.message));
+            alert('Error al eliminar: ' + (err.response?.data?.message || err.message));
         }
     });
 
@@ -93,12 +93,12 @@ export default function FacturasCompra() {
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {/* Modal */}
-            {facturaAAnular && (
-                <ModalAnular
-                    factura={facturaAAnular}
+            {facturaAEliminar && (
+                <ModalEliminar
+                    factura={facturaAEliminar}
                     loading={anularMutation.isPending}
-                    onConfirm={() => anularMutation.mutate({ id: facturaAAnular.factura_compra_id })}
-                    onCancel={() => setFacturaAAnular(null)}
+                    onConfirm={() => anularMutation.mutate({ id: facturaAEliminar.factura_compra_id })}
+                    onCancel={() => setFacturaAEliminar(null)}
                 />
             )}
 
@@ -218,7 +218,7 @@ export default function FacturasCompra() {
                                             <td className="px-10 py-5 text-center">
                                                 {f.estado !== 'ANULADA' && f.estado !== 'PAGADA' && (
                                                     <button
-                                                        onClick={() => setFacturaAAnular(f)}
+                                                        onClick={() => setFacturaAEliminar(f)}
                                                         className="p-2.5 rounded-xl text-danger hover:bg-danger/10 transition-all"
                                                         title="Anular factura"
                                                     >
@@ -247,7 +247,7 @@ export default function FacturasCompra() {
                                             <EstadoBadge estado={f.estado} />
                                             {f.estado !== 'ANULADA' && f.estado !== 'PAGADA' && (
                                                 <button
-                                                    onClick={() => setFacturaAAnular(f)}
+                                                    onClick={() => setFacturaAEliminar(f)}
                                                     className="p-2 rounded-xl text-danger hover:bg-danger/10 transition-all"
                                                 >
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
