@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { citasService, pacientesService, doctoresService } from '../services/api';
+import { citasService, pacientesService, doctoresService, whatsappService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const Citas = () => {
@@ -18,6 +18,7 @@ const Citas = () => {
     const [selectedPaciente, setSelectedPaciente] = useState(null);
     const [citaDetalle, setCitaDetalle] = useState(null);
     const [showLOV, setShowLOV] = useState(false);
+    const [waModal, setWaModal] = useState(null); // cita para enviar WA
     const searchInputRef = useRef(null);
     const lovRef = useRef(null);
 
@@ -147,6 +148,21 @@ const Citas = () => {
             setCitaDetalle(null);
         }
     });
+
+    const waMutation = useMutation({
+        mutationFn: (data) => whatsappService.enviarMensaje(data),
+        onSuccess: (res) => {
+            if (res.data?.success) {
+                alert('Mensaje WhatsApp enviado correctamente');
+                setWaModal(null);
+            } else {
+                alert('Error al enviar: ' + (res.data?.error || 'Error desconocido'));
+            }
+        },
+        onError: (err) => alert('Error: ' + err.message),
+    });
+
+    const waHabilitado = empresaActiva?.wa_habilitado === 'S';
 
     const citas = data?.data?.items || [];
     const doctores = doctoresRes?.data?.items || doctoresRes?.data || [];
@@ -397,6 +413,15 @@ const Citas = () => {
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                             </button>
+                                            {waHabilitado && estado !== 'CANCELADA' && estado !== 'NO_ASISTIO' && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setWaModal({ citaId, pacienteId, pacienteNombre, doctorNombre, fecha: filterDate, horaInicio }); }}
+                                                    className="p-2.5 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-xl transition-all"
+                                                    title="Enviar recordatorio WhatsApp"
+                                                >
+                                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                                </button>
+                                            )}
                                             {estado !== 'COMPLETADA' && estado !== 'CANCELADA' && estado !== 'NO_ASISTIO' && (
                                                 <button
                                                     onClick={(e) => {
@@ -478,6 +503,36 @@ const Citas = () => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal WhatsApp */}
+            {waModal && (
+                <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWaModal(null)} />
+                    <div className="relative bg-surface-card rounded-[2rem] shadow-2xl border border-border p-8 w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-2xl bg-[#25D366]/10 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            </div>
+                            <h3 className="font-black text-text-primary uppercase tracking-tight">Enviar recordatorio</h3>
+                        </div>
+                        <p className="text-sm text-text-secondary mb-1">Paciente: <span className="font-black text-text-primary">{waModal.pacienteNombre}</span></p>
+                        <p className="text-sm text-text-secondary mb-6">Cita: <span className="font-black text-text-primary">{waModal.fecha} {waModal.horaInicio}</span></p>
+                        <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest opacity-40 mb-2">El mensaje usará la plantilla configurada en WhatsApp Business</p>
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={() => setWaModal(null)} className="flex-1 px-5 py-3 rounded-2xl border-2 border-border text-text-secondary font-black text-[10px] uppercase tracking-widest hover:border-primary/30 hover:text-primary transition-all">
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => waMutation.mutate({ paciente_id: waModal.pacienteId, cita_id: waModal.citaId, empresa_id: empresaId })}
+                                disabled={waMutation.isPending}
+                                className="flex-1 px-5 py-3 rounded-2xl bg-[#25D366] text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-[#25D366]/20 hover:bg-[#20b858] transition-all disabled:opacity-50"
+                            >
+                                {waMutation.isPending ? 'Enviando...' : 'Enviar'}
+                            </button>
                         </div>
                     </div>
                 </div>

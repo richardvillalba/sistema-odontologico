@@ -313,6 +313,15 @@ export const reportesService = {
     getResumenInventario: (params) => api.get('/facturas/reportes/inventario', { params }),
 };
 
+export const whatsappService = {
+    getConfig: (empresaId) => api.get('/whatsapp/config', { params: { empresa_id: empresaId } }),
+    saveConfig: (data) => api.post('/whatsapp/config', data),
+    getMensajes: (empresaId) => api.get('/whatsapp/mensajes', { params: { empresa_id: empresaId } }),
+    // enviarMensaje y ejecutarCron van al serverless Vercel (misma origin), no a ORDS
+    enviarMensaje: (data) => axios.post('/api/whatsapp/send', data),
+    ejecutarCron: () => axios.get('/api/whatsapp/cron'),
+};
+
 export const ubicacionesService = {
     getDepartamentos: () => api.get('/ubicaciones/departamentos'),
     getCiudades: (departamentoId) => api.get('/ubicaciones/ciudades', { params: { departamento_id: departamentoId } }),

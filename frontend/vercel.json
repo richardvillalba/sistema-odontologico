@@ -1,8 +1,14 @@
 {
   "rewrites": [
     {
-      "source": "/((?!assets/).*)",
+      "source": "/((?!assets/|api/).*)",
       "destination": "/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/whatsapp/cron",
+      "schedule": "0 * * * *"
     }
   ]
 }

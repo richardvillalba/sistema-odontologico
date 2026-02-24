@@ -21,6 +21,8 @@ import Articulos from './pages/Articulos';
 import Inventario from './pages/Inventario';
 import RegistroCompra from './pages/RegistroCompra';
 import FacturasCompra from './pages/FacturasCompra';
+import WhatsApp from './pages/WhatsApp';
+import ConfiguracionWhatsApp from './pages/configuraciones/ConfiguracionWhatsApp';
 import Timbrados from './pages/Timbrados';
 import DatosClinica from './pages/configuraciones/DatosClinica';
 import ConfiguracionCajas from './pages/configuraciones/ConfiguracionCajas';
@@ -113,6 +115,9 @@ function App() {
                                             <Route path="/facturas/:id" element={<FacturaDetalle />} />
                                             <Route path="/facturas/:id/registrar-pago" element={<RegistrarPago />} />
 
+                                            {/* WhatsApp */}
+                                            <Route path="/whatsapp" element={<WhatsApp />} />
+
                                             {/* Configuraciones */}
                                             <Route path="/configuraciones" element={<Configuraciones />} />
                                             <Route path="/configuraciones/timbrados" element={<Timbrados />} />
@@ -120,6 +125,7 @@ function App() {
                                             <Route path="/configuraciones/usuarios" element={<GestionUsuarios />} />
                                             <Route path="/configuraciones/roles" element={<GestionRoles />} />
                                             <Route path="/configuraciones/cajas" element={<ConfiguracionCajas />} />
+                                            <Route path="/configuraciones/whatsapp" element={<ConfiguracionWhatsApp />} />
                                             <Route path="/configuraciones/empresas" element={<GestionEmpresas />} />
                                             <Route path="/configuraciones/sucursales" element={<GestionSucursales />} />
 
