@@ -121,11 +121,8 @@ function CajaCard({ caja, onAbrir, onClick }) {
 
     return (
         <div
-            onClick={() => isAbierta && onClick(caja)}
-            className={`group bg-surface-card rounded-[2.5rem] border border-border transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-primary/10 overflow-hidden ${isAbierta
-                ? 'hover:border-primary/30 cursor-pointer translate-y-0 hover:-translate-y-2'
-                : 'opacity-80'
-                }`}
+            onClick={() => onClick(caja)}
+            className="group bg-surface-card rounded-[2.5rem] border border-border transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-primary/10 overflow-hidden hover:border-primary/30 cursor-pointer translate-y-0 hover:-translate-y-2"
         >
             <div className="p-8">
                 {/* Header */}
@@ -199,11 +196,11 @@ function CajaCard({ caja, onAbrir, onClick }) {
                 </div>
 
                 {/* Actions */}
-                <div className="mt-8">
+                <div className="mt-8 flex flex-col gap-3">
                     {isAbierta ? (
                         <button
                             onClick={(e) => { e.stopPropagation(); onClick(caja); }}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-4.5 bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 group/btn"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 group/btn"
                         >
                             Ver Detalles y Movimientos
                             <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,15 +208,26 @@ function CajaCard({ caja, onAbrir, onClick }) {
                             </svg>
                         </button>
                     ) : (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onAbrir(caja); }}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-4.5 bg-secondary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-secondary-dark transition-all shadow-xl shadow-secondary/20 flex items-center justify-center gap-3"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                            </svg>
-                            Abrir Caja de Hoy
-                        </button>
+                        <>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onClick(caja); }}
+                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-surface-raised border-2 border-border text-text-secondary font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-surface-card hover:border-primary/20 hover:text-primary transition-all group/btn"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Ver Arqueo e Historial
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onAbrir(caja); }}
+                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-secondary text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-secondary-dark transition-all shadow-xl shadow-secondary/20"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                </svg>
+                                Abrir Caja de Hoy
+                            </button>
+                        </>
                     )}
                 </div>
             </div>

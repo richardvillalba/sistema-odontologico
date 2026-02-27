@@ -502,6 +502,31 @@ export default function CajaDetalle() {
                 )}
             </div>
 
+            {/* Arqueo de cierre - solo caja cerrada */}
+            {!isAbierta && (
+                <div className="bg-surface-raised border-2 border-border rounded-[2rem] p-8">
+                    <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.25em] opacity-40 mb-6">Arqueo de Cierre</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {[
+                            { label: 'Apertura', value: caja.saldo_inicial || 0, color: 'text-text-primary' },
+                            { label: 'Total Ingresos', value: totalIngresos, color: 'text-secondary' },
+                            { label: 'Total Egresos', value: totalEgresos, color: 'text-danger' },
+                            { label: 'Saldo de Cierre', value: caja.saldo_final ?? ((caja.saldo_inicial || 0) + totalIngresos - totalEgresos), color: 'text-primary', highlight: true },
+                        ].map(item => (
+                            <div key={item.label} className={`${item.highlight ? 'bg-primary/5 border-2 border-primary/20 rounded-2xl p-4' : ''}`}>
+                                <p className="text-[9px] font-black text-text-secondary uppercase tracking-widest opacity-40 mb-1">{item.label}</p>
+                                <p className={`text-xl font-black tracking-tighter ${item.color}`}>{formatCurrency(item.value)}</p>
+                            </div>
+                        ))}
+                    </div>
+                    {caja.fecha_cierre && (
+                        <p className="text-[9px] font-black text-text-secondary uppercase tracking-widest opacity-30 mt-6">
+                            Cerrada el {formatDateTime(caja.fecha_cierre)}
+                        </p>
+                    )}
+                </div>
+            )}
+
             {/* Resumen financiero */}
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
