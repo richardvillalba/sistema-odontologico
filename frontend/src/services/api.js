@@ -188,6 +188,7 @@ export const billingService = {
     createTimbrado: (data) => api.post('/facturas/timbrados', data),
     updateTimbrado: (id, data) => api.put(`/facturas/timbrados/${id}`, data),
     toggleTimbradoStatus: (id, activo, modificadoPor) => api.put(`/facturas/timbrados/${id}/status`, { activo, modificado_por: modificadoPor }),
+    actualizarContadorRecibo: (id, numeroReciboActual) => api.put(`/facturas/timbrados/${id}/recibo-contador`, { numero_recibo_actual: numeroReciboActual }),
 
     // Asignaciones
     getUsuariosTimbrado: (timbradoId) => api.get(`/facturas/timbrados/${timbradoId}/usuarios`),

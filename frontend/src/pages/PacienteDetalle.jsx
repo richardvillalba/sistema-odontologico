@@ -234,7 +234,7 @@ const PacienteDetalle = () => {
         { id: 'historia', label: 'Historia Clínica', icon: '📋', codigo: 'PAC_HISTORIA' },
         { id: 'tratamientos', label: 'Tratamientos', icon: '💊', codigo: 'PAC_TRATAMIENTOS' },
         { id: 'facturacion', label: 'Facturación / Pagos', icon: '💰', codigo: 'PAC_FACTURACION' },
-        { id: 'archivos', label: 'Archivos / Rayos X', icon: '📁', codigo: 'PAC_ARCHIVOS' },
+        // { id: 'archivos', label: 'Archivos / Rayos X', icon: '📁', codigo: 'PAC_ARCHIVOS' },
     ];
 
     const tabs = allTabs.filter(t => tieneAccesoPrograma(t.codigo));

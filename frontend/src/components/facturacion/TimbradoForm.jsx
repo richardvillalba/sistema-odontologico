@@ -14,6 +14,7 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
         fecha_vencimiento: '',
         tipo_documento: 'FACTURA'
     });
+    const [contadorRecibo, setContadorRecibo] = useState(0);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -23,6 +24,7 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
                 fecha_inicio: initialData.fecha_inicio ? initialData.fecha_inicio.split('T')[0] : '',
                 fecha_vencimiento: initialData.fecha_vencimiento ? initialData.fecha_vencimiento.split('T')[0] : ''
             });
+            setContadorRecibo(initialData.numero_recibo_actual ?? 0);
         }
     }, [initialData]);
 
@@ -58,6 +60,10 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
             let response;
             if (initialData) {
                 response = await billingService.updateTimbrado(initialData.timbrado_id, dataToSave);
+                // Si cambió el contador de recibos, actualizarlo también
+                if (Number(contadorRecibo) !== Number(initialData.numero_recibo_actual ?? 0)) {
+                    await billingService.actualizarContadorRecibo(initialData.timbrado_id, Number(contadorRecibo));
+                }
             } else {
                 response = await billingService.createTimbrado(dataToSave);
             }
@@ -200,6 +206,31 @@ const TimbradoForm = ({ onClose, onSuccess, initialData = null }) => {
                             />
                         </div>
                     </div>
+
+                    {/* Contador de recibos - solo en modo edición */}
+                    {initialData && (
+                        <div className="p-8 bg-secondary/5 rounded-3xl border-2 border-secondary/20">
+                            <label className="block text-[10px] font-black text-secondary uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                Contador de Recibos de Pago
+                            </label>
+                            <div className="flex items-center gap-4">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={contadorRecibo}
+                                    onChange={(e) => setContadorRecibo(e.target.value)}
+                                    className="w-48 px-6 py-3.5 rounded-xl border-2 border-secondary/30 bg-white focus:border-secondary transition-all text-sm font-black font-mono text-text-primary text-center shadow-inner"
+                                />
+                                <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-60 leading-relaxed">
+                                    El próximo recibo será:<br />
+                                    <span className="text-secondary font-mono text-sm opacity-100">
+                                        {initialData.establecimiento}-{initialData.punto_expedicion}-{String(Number(contadorRecibo) + 1).padStart(7, '0')}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-4 pt-8 border-t-2 border-border/50">
                         <button

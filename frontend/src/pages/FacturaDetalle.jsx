@@ -223,7 +223,7 @@ const FacturaDetalle = () => {
   </div>
 
   <div class="titulo">RECIBO DE PAGO</div>
-  <div class="subtitulo">N° ${pago.pago_id}</div>
+  <div class="subtitulo">N° ${pago.recibo_numero || pago.RECIBO_NUMERO || pago.pago_id}</div>
 
   <div class="section">
     <div class="row"><span class="label">Factura:</span><span class="value">${nroFactura}</span></div>
@@ -613,6 +613,9 @@ const FacturaDetalle = () => {
                                                 </p>
                                                 <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 mt-1">
                                                     Operación: <span className="text-text-primary opacity-100">{new Date(pago.fecha_pago).toLocaleDateString()}</span>
+                                                    {(pago.recibo_numero || pago.RECIBO_NUMERO) && (
+                                                        <span className="ml-3 text-primary opacity-100">Recibo: {pago.recibo_numero || pago.RECIBO_NUMERO}</span>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { billingService, cajaService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const RegistrarPago = () => {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { usuario, empresaActiva } = useAuth();
     const empresaId = empresaActiva?.empresa_id;
     const { id: idFromParams } = useParams();
@@ -74,7 +75,7 @@ const RegistrarPago = () => {
                 } catch (cajaErr) {
                     console.warn('No se pudo registrar movimiento en caja:', cajaErr);
                 }
-                navigate(`/facturas/${facturaId}?pagoExitoso=true`);
+                window.location.href = `/facturas/${facturaId}?pagoExitoso=true`;
             } else {
                 setError(res.data.mensaje || "Error al registrar el pago.");
             }

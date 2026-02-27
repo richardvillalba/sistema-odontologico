@@ -657,8 +657,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_FACTURAS AS
             ESTADO = 'ANULADA',
             SALDO_PENDIENTE = 0,
             OBSERVACIONES = OBSERVACIONES || CHR(10) || 'ANULADA: ' || p_motivo || ' (Por: usuario #' || p_anulado_por || ' el ' || TO_CHAR(SYSTIMESTAMP, 'DD/MM/YYYY HH24:MI') || ')',
-            FECHA_MODIFICACION = SYSTIMESTAMP,
-            MODIFICADO_POR = p_anulado_por
+            ANULADO_POR = p_anulado_por
         WHERE FACTURA_ID = p_factura_id;
 
         COMMIT;
@@ -821,84 +820,94 @@ CREATE OR REPLACE PACKAGE BODY PKG_FACTURAS AS
         v_nuevo_saldo NUMBER;
         v_nuevo_estado VARCHAR2(50);
         v_numero_factura VARCHAR2(100);
-        -- Variables para caja
-        v_caja_cursor PKG_CAJA.t_cursor;
-        v_caja_id NUMBER;
-        v_caja_res NUMBER;
-        v_caja_msg VARCHAR2(4000);
-        v_mov_id NUMBER;
+        -- Variables para numeracion de recibo
+        v_timbrado_id NUMBER;
+        v_establecimiento VARCHAR2(10);
+        v_punto_expedicion VARCHAR2(10);
+        v_numero_recibo NUMBER;
+        v_recibo_completo VARCHAR2(30);
+        -- Variables para distribucion en cuotas
+        v_restante NUMBER;
+        v_aplicar NUMBER;
+        v_nuevo_saldo_cuota NUMBER;
+        v_nuevo_estado_cuota VARCHAR2(20);
+        CURSOR c_cuotas IS
+            SELECT CUOTA_ID, SALDO_CUOTA
+            FROM ODO_CUOTAS_FACTURA
+            WHERE FACTURA_ID = p_factura_id
+              AND ESTADO != 'PAGADA'
+            ORDER BY NUMERO_CUOTA;
     BEGIN
-        -- Obtener datos de la factura
-        SELECT SALDO_PENDIENTE, TOTAL, PACIENTE_ID, EMPRESA_ID, ESTADO, NUMERO_FACTURA_COMPLETO
-        INTO v_saldo_pendiente, v_total, v_paciente_id, v_empresa_id, v_nuevo_estado, v_numero_factura
+        -- Obtener datos de la factura (incluyendo timbrado para numeracion de recibo)
+        SELECT SALDO_PENDIENTE, TOTAL, PACIENTE_ID, EMPRESA_ID, ESTADO, NUMERO_FACTURA_COMPLETO,
+               TIMBRADO_ID, ESTABLECIMIENTO, PUNTO_EXPEDICION
+        INTO v_saldo_pendiente, v_total, v_paciente_id, v_empresa_id, v_nuevo_estado, v_numero_factura,
+             v_timbrado_id, v_establecimiento, v_punto_expedicion
         FROM ODO_FACTURAS
         WHERE FACTURA_ID = p_factura_id;
-        
+
         -- Validar que no est anulada
         IF v_nuevo_estado = 'ANULADA' THEN
             p_resultado := 0;
             p_mensaje := 'No se puede registrar pago en factura anulada';
             RETURN;
         END IF;
-        
+
         -- Validar monto
         IF p_monto > v_saldo_pendiente THEN
             p_resultado := 0;
             p_mensaje := 'El monto excede el saldo pendiente';
             RETURN;
         END IF;
-        
+
         IF p_monto <= 0 THEN
             p_resultado := 0;
             p_mensaje := 'El monto debe ser mayor a cero';
             RETURN;
         END IF;
-        
-        -- Registrar pago
+
+        -- Asignar numero de recibo incrementando el contador del timbrado (atomico)
+        UPDATE ODO_TIMBRADOS
+        SET NUMERO_RECIBO_ACTUAL = NUMERO_RECIBO_ACTUAL + 1
+        WHERE TIMBRADO_ID = v_timbrado_id
+        RETURNING NUMERO_RECIBO_ACTUAL INTO v_numero_recibo;
+
+        v_recibo_completo := v_establecimiento || '-' || v_punto_expedicion || '-' ||
+                             LPAD(TO_CHAR(v_numero_recibo), 7, '0');
+
+        -- Registrar pago con numero de recibo
         INSERT INTO ODO_PAGOS (
             FACTURA_ID, PACIENTE_ID, EMPRESA_ID,
             FECHA_PAGO, MONTO, METODO_PAGO,
-            REFERENCIA, BANCO, REGISTRADO_POR, FECHA_REGISTRO
+            REFERENCIA, BANCO, REGISTRADO_POR, FECHA_REGISTRO,
+            RECIBO_NUMERO
         ) VALUES (
             p_factura_id, v_paciente_id, v_empresa_id,
             SYSTIMESTAMP, p_monto, p_metodo_pago,
-            p_referencia, p_banco, p_registrado_por, SYSTIMESTAMP
+            p_referencia, p_banco, p_registrado_por, SYSTIMESTAMP,
+            v_recibo_completo
         ) RETURNING PAGO_ID INTO p_pago_id;
-        
-        -- INTEGRACIÓN CON CAJA: Intentar registrar movimiento si el usuario tiene caja abierta
-        BEGIN
-            PKG_CAJA.get_caja_activa_usuario(v_empresa_id, p_registrado_por, v_caja_cursor, v_caja_res, v_caja_msg);
-            
-            IF v_caja_res = 1 THEN
-                LOOP
-                    FETCH v_caja_cursor INTO v_caja_id, v_empresa_id, v_caja_msg, v_caja_msg, v_caja_id, v_caja_msg, v_saldo_pendiente, v_saldo_pendiente, v_saldo_pendiente, v_saldo_pendiente, v_saldo_pendiente, v_nuevo_estado, v_caja_msg, v_caja_msg, v_caja_msg;
-                    EXIT WHEN v_caja_cursor%NOTFOUND;
-                    
-                    PKG_CAJA.registrar_movimiento(
-                        p_caja_id        => v_caja_id,
-                        p_tipo           => 'INGRESO',
-                        p_categoria_id   => NULL, -- Podríamos definir una categoría fija para cobros
-                        p_concepto       => 'Cobro Factura ' || v_numero_factura,
-                        p_monto          => p_monto,
-                        p_referencia     => NVL(p_referencia, 'PAGO-' || p_pago_id),
-                        p_factura_id     => p_factura_id,
-                        p_registrado_por => p_registrado_por,
-                        p_movimiento_id  => v_mov_id,
-                        p_resultado      => v_caja_res,
-                        p_mensaje        => v_caja_msg
-                    );
-                END LOOP;
-                CLOSE v_caja_cursor;
-            END IF;
-        EXCEPTION
-            WHEN OTHERS THEN
-                -- No bloqueamos el pago si falla el registro en caja, pero sería ideal loguearlo
-                NULL;
-        END;
-        
-        -- Calcular nuevo saldo
+
+        -- Distribuir pago entre cuotas pendientes (orden: cuota mas antigua primero)
+        v_restante := p_monto;
+        FOR r IN c_cuotas LOOP
+            EXIT WHEN v_restante <= 0;
+            v_aplicar := LEAST(v_restante, r.SALDO_CUOTA);
+            v_nuevo_saldo_cuota := r.SALDO_CUOTA - v_aplicar;
+            v_nuevo_estado_cuota := CASE WHEN v_nuevo_saldo_cuota = 0 THEN 'PAGADA' ELSE 'PARCIAL' END;
+            UPDATE ODO_CUOTAS_FACTURA
+            SET MONTO_PAGADO = MONTO_PAGADO + v_aplicar,
+                SALDO_CUOTA = v_nuevo_saldo_cuota,
+                ESTADO = v_nuevo_estado_cuota,
+                FECHA_PAGO = CASE WHEN v_nuevo_saldo_cuota = 0 THEN SYSTIMESTAMP ELSE FECHA_PAGO END,
+                FECHA_MODIFICACION = SYSTIMESTAMP
+            WHERE CUOTA_ID = r.CUOTA_ID;
+            v_restante := v_restante - v_aplicar;
+        END LOOP;
+
+        -- Calcular nuevo saldo de la factura
         v_nuevo_saldo := v_saldo_pendiente - p_monto;
-        
+
         -- Determinar nuevo estado
         IF v_nuevo_saldo = 0 THEN
             v_nuevo_estado := 'PAGADA';
@@ -907,18 +916,18 @@ CREATE OR REPLACE PACKAGE BODY PKG_FACTURAS AS
         ELSE
             v_nuevo_estado := 'PENDIENTE';
         END IF;
-        
+
         -- Actualizar factura
         UPDATE ODO_FACTURAS
-        SET 
+        SET
             SALDO_PENDIENTE = v_nuevo_saldo,
             ESTADO = v_nuevo_estado
         WHERE FACTURA_ID = p_factura_id;
-        
+
         COMMIT;
         p_resultado := 1;
         p_mensaje := 'Pago registrado. Nuevo saldo: ' || v_nuevo_saldo;
-        
+
     EXCEPTION
         WHEN OTHERS THEN
             ROLLBACK;
