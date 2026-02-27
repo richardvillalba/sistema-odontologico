@@ -245,6 +245,8 @@ export const cajaService = {
         if (tipo) params.tipo = tipo;
         return api.get('/facturas/caja/categorias', { params });
     },
+    pendientesArqueo: (empresaId, usuarioId) =>
+        api.get('/facturas/caja/pendientes-arqueo', { params: { empresa_id: empresaId, usuario_id: usuarioId } }),
 };
 
 export const dashboardService = {

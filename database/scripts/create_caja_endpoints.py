@@ -448,21 +448,64 @@ END;'
     """)
     print("   OK")
 
+    # ─── 11. GET /caja/pendientes-arqueo ──────────────────────────────────────
+    print("\n11. GET /caja/pendientes-arqueo (cajas sin cerrar de días anteriores)...")
+    cursor.execute("""
+        BEGIN
+            ORDS.DEFINE_TEMPLATE(p_module_name => 'facturas', p_pattern => 'caja/pendientes-arqueo');
+            ORDS.DEFINE_HANDLER(
+                p_module_name => 'facturas',
+                p_pattern     => 'caja/pendientes-arqueo',
+                p_method      => 'GET',
+                p_source_type => 'plsql/block',
+                p_source      => '
+DECLARE
+    v_cursor SYS_REFCURSOR;
+BEGIN
+    OPEN v_cursor FOR
+        SELECT
+            c.CAJA_ID,
+            c.NOMBRE,
+            c.FECHA_APERTURA,
+            TRUNC(SYSDATE) - TRUNC(c.FECHA_APERTURA) AS DIAS_PENDIENTE
+        FROM ODO_CAJAS c
+        WHERE c.EMPRESA_ID            = :empresa_id
+          AND c.USUARIO_ASIGNADO_ID   = :usuario_id
+          AND c.ESTADO                = ''ABIERTA''
+          AND TRUNC(c.FECHA_APERTURA) < TRUNC(SYSDATE)
+        ORDER BY c.FECHA_APERTURA;
+
+    APEX_JSON.initialize_clob_output;
+    APEX_JSON.open_object;
+    APEX_JSON.write(''items'', v_cursor);
+    APEX_JSON.close_object;
+    :status := 200;
+    :content_type := ''application/json'';
+    htp.p(APEX_JSON.get_clob_output);
+    APEX_JSON.free_output;
+END;'
+            );
+            COMMIT;
+        END;
+    """)
+    print("   OK")
+
     conn.commit()
     print("\n" + "=" * 60)
     print("¡Endpoints ORDS de Caja creados exitosamente!")
     print("=" * 60)
     print("\nEndpoints disponibles:")
-    print("  GET    /facturas/caja                  - Listar cajas")
-    print("  POST   /facturas/caja                  - Crear caja")
-    print("  GET    /facturas/caja/categorias        - Listar categorías")
-    print("  GET    /facturas/caja/:id               - Obtener caja")
-    print("  PUT    /facturas/caja/:id               - Editar caja")
-    print("  POST   /facturas/caja/:id/abrir         - Abrir caja")
-    print("  POST   /facturas/caja/:id/cerrar        - Cerrar caja")
-    print("  GET    /facturas/caja/:id/movimientos   - Listar movimientos")
-    print("  POST   /facturas/caja/:id/movimientos   - Registrar movimiento")
-    print("  GET    /facturas/caja/:id/resumen       - Resumen por categoría")
+    print("  GET    /facturas/caja                          - Listar cajas")
+    print("  POST   /facturas/caja                          - Crear caja")
+    print("  GET    /facturas/caja/categorias               - Listar categorías")
+    print("  GET    /facturas/caja/pendientes-arqueo        - Cajas sin cerrar días anteriores")
+    print("  GET    /facturas/caja/:id                      - Obtener caja")
+    print("  PUT    /facturas/caja/:id                      - Editar caja")
+    print("  POST   /facturas/caja/:id/abrir                - Abrir caja")
+    print("  POST   /facturas/caja/:id/cerrar               - Cerrar caja")
+    print("  GET    /facturas/caja/:id/movimientos          - Listar movimientos")
+    print("  POST   /facturas/caja/:id/movimientos          - Registrar movimiento")
+    print("  GET    /facturas/caja/:id/resumen              - Resumen por categoría")
 
     cursor.close()
     conn.close()

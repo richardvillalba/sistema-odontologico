@@ -335,7 +335,7 @@ function MovimientoRow({ mov }) {
 export default function CajaDetalle() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { usuario } = useAuth();
+    const { usuario, empresaActiva, verificarCajasPendientes } = useAuth();
     const usuarioId = usuario?.usuario_id;
 
     const [caja, setCaja] = useState(null);
@@ -381,6 +381,7 @@ export default function CajaDetalle() {
     const handleCerrarSuccess = () => {
         setModalCerrar(false);
         showToast('Caja cerrada exitosamente');
+        verificarCajasPendientes(empresaActiva?.empresa_id, usuario?.usuario_id);
         navigate('/caja');
     };
 

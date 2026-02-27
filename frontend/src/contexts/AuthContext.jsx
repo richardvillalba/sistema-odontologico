@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/api';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authService, cajaService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
     const [sucursalActiva, setSucursalActivaState] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [cajasPendientes, setCajasPendientes] = useState([]);
 
     useEffect(() => {
         verificarSesion();
@@ -118,6 +119,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const verificarCajasPendientes = useCallback(async (empresaId, usuarioId) => {
+        if (!empresaId || !usuarioId) { setCajasPendientes([]); return; }
+        try {
+            const res = await cajaService.pendientesArqueo(empresaId, usuarioId);
+            setCajasPendientes(res.data.items || []);
+        } catch {
+            setCajasPendientes([]);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (empresaActiva?.empresa_id && sucursalActiva && usuario?.usuario_id) {
+            verificarCajasPendientes(empresaActiva.empresa_id, usuario.usuario_id);
+        } else {
+            setCajasPendientes([]);
+        }
+    }, [empresaActiva?.empresa_id, sucursalActiva?.sucursal_id, usuario?.usuario_id, verificarCajasPendientes]);
+
     const login = async (username, password) => {
         try {
             const response = await authService.login(username, password);
@@ -188,7 +207,9 @@ export const AuthProvider = ({ children }) => {
         tieneAccesoPrograma,
         tienePermiso,
         esSuperAdmin,
-        recargarPermisos: () => cargarDatosUsuario(usuario?.usuario_id)
+        recargarPermisos: () => cargarDatosUsuario(usuario?.usuario_id),
+        cajasPendientes,
+        verificarCajasPendientes,
     };
 
     return (

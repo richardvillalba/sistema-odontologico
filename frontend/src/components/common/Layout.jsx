@@ -19,7 +19,7 @@ const IconSettings = () => <svg className="w-5 h-5" fill="none" stroke="currentC
 export default function Layout({ children }) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { logout, usuario, tieneAccesoPrograma, empresaActiva, sucursalActiva } = useAuth();
+    const { logout, usuario, tieneAccesoPrograma, empresaActiva, sucursalActiva, cajasPendientes } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
     const { alertas, count, hasCritical } = useTimbradoAlerts({ empresaId: empresaActiva?.empresa_id, usuarioId: usuario?.usuario_id });
     const { selectedPoint, setShowSelector, isValid } = usePointOfSale();
@@ -67,7 +67,11 @@ export default function Layout({ children }) {
         { name: 'WhatsApp', path: '/whatsapp', icon: IconWhatsApp, codigo: 'WHATSAPP' },
         { name: 'Configuraciones', path: '/configuraciones', icon: IconSettings, codigo: 'CONFIGURACIONES' },
     ];
-    const menuItems = allMenuItems.filter(item => tieneAccesoPrograma(item.codigo));
+    const hayBloqueo = cajasPendientes && cajasPendientes.length > 0;
+    const menuItems = allMenuItems.filter(item => {
+        if (hayBloqueo) return item.codigo === 'CAJA';
+        return tieneAccesoPrograma(item.codigo);
+    });
 
     return (
         <div className="flex h-screen bg-surface font-sans">
@@ -334,6 +338,40 @@ export default function Layout({ children }) {
 
                 <div className="flex-1 overflow-auto bg-surface">
                     <div className="p-4 lg:p-8 max-w-[1600px] mx-auto">
+                        {hayBloqueo && (
+                            <div className="mb-8 bg-danger/5 border-2 border-danger/30 rounded-[2rem] p-6 flex items-start gap-5 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <div className="w-12 h-12 bg-danger rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-danger/20">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-black text-danger uppercase tracking-tight text-sm">
+                                        Caja{cajasPendientes.length > 1 ? 's' : ''} pendiente{cajasPendientes.length > 1 ? 's' : ''} de arqueo
+                                    </p>
+                                    <p className="text-danger/70 text-[11px] font-bold mt-1 leading-relaxed">
+                                        Tenes {cajasPendientes.length} caja{cajasPendientes.length > 1 ? 's' : ''} sin cerrar del día anterior.
+                                        Solo podés acceder al módulo de Caja hasta regularizar el arqueo.
+                                    </p>
+                                    <ul className="mt-3 space-y-1.5">
+                                        {cajasPendientes.map(c => (
+                                            <li key={c.caja_id} className="flex items-center gap-2 text-[10px] font-black text-danger uppercase tracking-widest">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse shrink-0"></span>
+                                                {c.nombre} — abierta el {new Date(c.fecha_apertura).toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                {c.dias_pendiente > 1 && ` (${c.dias_pendiente} días sin cerrar)`}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Link
+                                        to="/caja"
+                                        className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-danger text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-danger-dark transition-all shadow-lg shadow-danger/20"
+                                    >
+                                        <IconCash />
+                                        Ir a Caja y Arquear
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                         {children}
                     </div>
                 </div>
