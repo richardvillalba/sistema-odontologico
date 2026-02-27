@@ -279,7 +279,7 @@ function ModalCerrarCaja({ caja, usuarioId, onClose, onSuccess }) {
 
 // ─── Fila de Movimiento ───────────────────────────────────────────────────────
 function MovimientoRow({ mov }) {
-    const isIngreso = mov.tipo === 'INGRESO';
+    const isIngreso = mov.tipo?.trim() === 'INGRESO';
     return (
         <tr className="hover:bg-primary-light/5 transition-all border-b border-border last:border-0 group">
             <td className="px-6 py-5">
@@ -385,11 +385,11 @@ export default function CajaDetalle() {
     };
 
     const movsFiltrados = filtroTipo
-        ? movimientos.filter(m => m.tipo === filtroTipo)
+        ? movimientos.filter(m => m.tipo?.trim() === filtroTipo)
         : movimientos;
 
-    const totalIngresos = movimientos.filter(m => m.tipo === 'INGRESO').reduce((s, m) => s + (m.monto || 0), 0);
-    const totalEgresos = movimientos.filter(m => m.tipo === 'EGRESO').reduce((s, m) => s + (m.monto || 0), 0);
+    const totalIngresos = movimientos.filter(m => m.tipo?.trim() === 'INGRESO').reduce((s, m) => s + (m.monto || 0), 0);
+    const totalEgresos = movimientos.filter(m => m.tipo?.trim() === 'EGRESO').reduce((s, m) => s + (m.monto || 0), 0);
 
     if (loading) {
         return (
@@ -622,7 +622,7 @@ export default function CajaDetalle() {
                         {/* Mobile View */}
                         <div className="md:hidden divide-y divide-border">
                             {movsFiltrados.map(mov => {
-                                const isIngreso = mov.tipo === 'INGRESO';
+                                const isIngreso = mov.tipo?.trim() === 'INGRESO';
                                 return (
                                     <div key={mov.movimiento_id} className="p-6 space-y-5 hover:bg-surface-raised/50 transition-colors">
                                         <div className="flex items-start justify-between gap-4">
