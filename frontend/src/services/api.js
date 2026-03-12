@@ -71,6 +71,7 @@ export const tratamientosService = {
     getCatalogo: (empresaId) => api.get('/tratamientos/catalogo', { params: { empresa_id: empresaId } }),
     createCatalogo: (data) => api.post('/tratamientos/catalogo', data), // empresa_id should be in data
     updateCatalogo: (id, data) => api.put(`/tratamientos/catalogo/${id}`, data), // empresa_id should be in data
+    deleteCatalogo: (id) => api.delete(`/tratamientos/catalogo/${id}`),
     getByPaciente: (pacienteId, empresaId) =>
         api.get(`/tratamientos/paciente/${pacienteId}`, { params: { empresa_id: empresaId } }),
     asignar: (data) => api.post('/tratamientos/asignar', data), // empresa_id should be in data
@@ -93,7 +94,7 @@ export const historiasService = {
 };
 
 export const doctoresService = {
-    getAll: () => api.get('/doctores'),
+    getAll: (empresaId = null) => api.get('/doctores', { params: empresaId ? { empresa_id: empresaId } : {} }),
 };
 
 export const odontogramaService = {
@@ -105,7 +106,7 @@ export const odontogramaService = {
     getHallazgosAll: (pacienteId, empresaId) => api.get(`/odontograma/paciente/${pacienteId}/hallazgos-all`, { params: { empresa_id: empresaId } }),
     getTratamientosDiente: (dienteId) => api.get(`/odontograma/diente/${dienteId}/tratamientos`),
     getTratamientosPaciente: (pacienteId, empresaId) => api.get(`/odontograma/tratamientos/paciente/${pacienteId}`, { params: { empresa_id: empresaId } }),
-    getTratamientosSugeridos: (tipoHallazgo) => api.get(`/tratamientos/sugeridos/${tipoHallazgo}`),
+    getTratamientosSugeridos: (tipoHallazgo, empresaId = null) => api.get(`/tratamientos/sugeridos/${tipoHallazgo}`, { params: empresaId ? { empresa_id: empresaId } : {} }),
     create: (data) => api.post('/odontograma', data),
     registrarHallazgo: (data) => api.post('/odontograma/hallazgo', data),
     asignarTratamiento: (dienteId, catalogoId, doctorId) =>
@@ -119,7 +120,7 @@ export const odontogramaService = {
 };
 
 export const usersService = {
-    getAll: () => api.get('/facturas/usuarios'),
+    getAll: (empresaId) => api.get('/facturas/usuarios', empresaId ? { params: { empresa_id: empresaId } } : {}),
     getById: (id) => api.get(`/facturas/usuarios/${id}`),
     create: (data) => api.post('/facturas/usuarios', data),
     update: (id, data) => api.put(`/facturas/usuarios/${id}`, data),
@@ -148,15 +149,16 @@ export const authService = {
 export const rolesService = {
     getAll: () => api.get('/facturas/roles'),
     getById: (id) => api.get(`/facturas/roles/${id}`),
-    getProgramas: (rolId) => api.get(`/facturas/roles/${rolId}/programas`),
+    getProgramas: (rolId, empresaId) =>
+        api.get(`/facturas/roles/${rolId}/programas`, { params: { empresa_id: empresaId } }),
     getPermisos: (rolId) => api.get(`/facturas/roles/${rolId}/permisos`),
     create: (data) => api.post('/facturas/roles', data),
     update: (id, data) => api.put(`/facturas/roles/${id}`, data),
     delete: (id) => api.delete(`/facturas/roles/${id}`),
-    asignarPrograma: (rolId, programaId) =>
-        api.post(`/facturas/roles/${rolId}/programas`, { programa_id: programaId }),
-    quitarPrograma: (rolId, programaId) =>
-        api.delete(`/facturas/roles/${rolId}/programas/${programaId}`),
+    asignarPrograma: (rolId, programaId, empresaId) =>
+        api.post(`/facturas/roles/${rolId}/programas`, { programa_id: programaId, empresa_id: empresaId }),
+    quitarPrograma: (rolId, programaId, empresaId) =>
+        api.delete(`/facturas/roles/${rolId}/programas/${programaId}`, { params: { empresa_id: empresaId } }),
     asignarPermiso: (rolId, permisoId) =>
         api.post(`/facturas/roles/${rolId}/permisos`, { permiso_id: permisoId }),
     quitarPermiso: (rolId, permisoId) =>
@@ -165,6 +167,8 @@ export const rolesService = {
 
 export const securityService = {
     getProgramasUsuario: (usuarioId) => api.get(`/facturas/usuarios/${usuarioId}/programas`),
+    getProgramasEmpresa: (usuarioId, empresaId) =>
+        api.get(`/facturas/usuarios/${usuarioId}/programas-empresa`, { params: { empresa_id: empresaId } }),
     getPermisosUsuario: (usuarioId) => api.get(`/facturas/usuarios/${usuarioId}/permisos`),
     tienePermiso: (usuarioId, codigo) => api.get(`/facturas/usuarios/${usuarioId}/tiene-permiso/${codigo}`),
     asignarRol: (usuarioId, rolId) => api.put(`/facturas/usuarios/${usuarioId}/rol`, { rol_id: rolId }),
@@ -256,12 +260,12 @@ export const dashboardService = {
 
 export const comprasService = {
     // Proveedores
-    getProveedores: (activo = 'S') => api.get('/compras/proveedores', { params: { activo: activo === 'ALL' ? null : activo } }),
+    getProveedores: (activo = 'S', empresaId = null) => api.get('/compras/proveedores', { params: { activo: activo === 'ALL' ? null : activo, empresa_id: empresaId } }),
     upsertProveedor: (data) => api.post('/compras/proveedores', data),
 
     // Artículos y Categorías
-    getArticulos: (categoriaId = null, activo = 'S') =>
-        api.get('/compras/articulos', { params: { categoria_id: categoriaId, activo: activo === 'ALL' ? null : activo } }),
+    getArticulos: (categoriaId = null, activo = 'S', empresaId = null) =>
+        api.get('/compras/articulos', { params: { categoria_id: categoriaId, activo: activo === 'ALL' ? null : activo, empresa_id: empresaId } }),
     upsertArticulo: (data) => api.post('/compras/articulos', data),
     getCategorias: () => api.get('/compras/categorias'),
     upsertCategoria: (data) => api.post('/compras/categorias', data),
@@ -316,13 +320,21 @@ export const reportesService = {
     getResumenInventario: (params) => api.get('/facturas/reportes/inventario', { params }),
 };
 
+// URL del servidor Baileys — en dev: http://localhost:3001, en prod: variable de entorno
+const WA_SERVER = import.meta.env.VITE_WA_SERVER_URL || 'http://localhost:3001';
+
 export const whatsappService = {
-    getConfig: (empresaId) => api.get('/whatsapp/config', { params: { empresa_id: empresaId } }),
-    saveConfig: (data) => api.post('/whatsapp/config', data),
-    getMensajes: (empresaId) => api.get('/whatsapp/mensajes', { params: { empresa_id: empresaId } }),
-    // enviarMensaje y ejecutarCron van al serverless Vercel (misma origin), no a ORDS
-    enviarMensaje: (data) => axios.post('/api/whatsapp/send', data),
-    ejecutarCron: () => axios.get('/api/whatsapp/cron'),
+    getConfig:    (empresaId) => api.get('/whatsapp/config', { params: { empresa_id: empresaId } }),
+    saveConfig:   (data)      => api.post('/whatsapp/config', data),
+    getMensajes:   (empresaId) => api.get('/whatsapp/mensajes', { params: { empresa_id: empresaId } }),
+    deleteMensaje: (logId)     => api.delete(`/whatsapp/mensajes/${logId}`),
+    getStatus:       (empresaId) => axios.get(`${WA_SERVER}/status`, { params: { empresa_id: empresaId } }),
+    conectar:        (empresaId) => axios.post(`${WA_SERVER}/connect`, { empresa_id: empresaId }),
+    desconectar:     (empresaId) => axios.post(`${WA_SERVER}/disconnect`, { empresa_id: empresaId }),
+    getServerConfig: (empresaId) => axios.get(`${WA_SERVER}/server-config`, { params: { empresa_id: empresaId } }),
+    saveServerConfig:(data)      => axios.post(`${WA_SERVER}/server-config`, data),
+    enviarMensaje:   (data)      => axios.post(`${WA_SERVER}/send`, data),
+    ejecutarCron:    (empresaId) => axios.post(`${WA_SERVER}/cron`, { empresa_id: empresaId }),
 };
 
 export const ubicacionesService = {

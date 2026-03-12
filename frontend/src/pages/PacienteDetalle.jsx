@@ -12,6 +12,12 @@ import CuentaCorriente from '../components/facturacion/CuentaCorriente';
 const inputClass = "w-full border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-surface-raised text-text-primary font-medium";
 const labelClass = "block text-[10px] font-black text-text-secondary opacity-60 uppercase tracking-widest mb-1";
 
+const validarTelefono = (tel) => {
+    if (!tel) return true;
+    const clean = tel.replace(/[\s\-]/g, '');
+    return /^\+5959\d{8}$/.test(clean) || /^09\d{8}$/.test(clean);
+};
+
 const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
     const { empresaActiva } = useAuth();
     const [tab, setTab] = useState('basico');
@@ -25,6 +31,7 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
         genero: paciente.genero || '',
         telefono_principal: paciente.telefono_principal || '',
         telefono_secundario: paciente.telefono_secundario || '',
+        wa_recordatorio: paciente.wa_recordatorio || 'N',
         email: paciente.email || '',
         direccion: paciente.direccion || '',
         departamento_id: paciente.departamento_id || '',
@@ -68,6 +75,7 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
         e.preventDefault();
         setError(null);
         if (!form.nombre.trim() || !form.apellido.trim()) { setError('Nombre y apellido son obligatorios.'); return; }
+        if (form.telefono_principal && !validarTelefono(form.telefono_principal)) { setError('Teléfono inválido. Use +5959XXXXXXXX u 09XXXXXXXX (8 dígitos).'); return; }
         mutation.mutate({
             empresa_id: empresaActiva?.empresa_id,
             nombre: form.nombre.trim(),
@@ -80,6 +88,7 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
             email: form.email.trim() || null,
             telefono_principal: form.telefono_principal.trim() || null,
             telefono_secundario: form.telefono_secundario.trim() || null,
+            wa_recordatorio: form.wa_recordatorio,
             direccion: form.direccion.trim() || null,
             departamento_id: form.departamento_id || null,
             ciudad_id: form.ciudad_id || null,
@@ -146,7 +155,18 @@ const ModalEditarPaciente = ({ paciente, onClose, onSuccess }) => {
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div><label className={labelClass}>Teléfono Principal</label><input type="text" name="telefono_principal" value={form.telefono_principal} onChange={handleChange} className={inputClass} /></div>
+                                    <div>
+                                        <label className={labelClass}>Teléfono Principal</label>
+                                        <input type="text" name="telefono_principal" value={form.telefono_principal} onChange={handleChange} className={inputClass} />
+                                        {form.telefono_principal && validarTelefono(form.telefono_principal) && (
+                                            <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                                                <input type="checkbox" checked={form.wa_recordatorio === 'S'}
+                                                    onChange={e => setForm(p => ({ ...p, wa_recordatorio: e.target.checked ? 'S' : 'N' }))}
+                                                    className="w-4 h-4 accent-[#25D366] cursor-pointer" />
+                                                <span className="text-[10px] font-black text-[#25D366] uppercase tracking-widest">Enviar recordatorios por WhatsApp</span>
+                                            </label>
+                                        )}
+                                    </div>
                                     <div><label className={labelClass}>Teléfono Secundario</label><input type="text" name="telefono_secundario" value={form.telefono_secundario} onChange={handleChange} className={inputClass} /></div>
                                 </div>
                                 <div><label className={labelClass}>Correo Electrónico</label><input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} /></div>

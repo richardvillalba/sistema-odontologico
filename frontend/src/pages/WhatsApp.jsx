@@ -17,11 +17,31 @@ const EstadoBadge = ({ estado }) => {
     );
 };
 
+const validarTelefono = (tel) => {
+    if (!tel) return false;
+    const clean = tel.replace(/[\s\-]/g, '');
+    return /^\+5959\d{8}$/.test(clean) || /^09\d{8}$/.test(clean) || /^5959\d{8}$/.test(clean);
+};
+
 // Modal para enviar mensaje manual
 const ModalEnviar = ({ onClose, onSend, loading }) => {
     const { empresaActiva } = useAuth();
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
+    const [phoneError, setPhoneError] = useState('');
+
+    const handlePhoneChange = (e) => {
+        setPhone(e.target.value);
+        setPhoneError('');
+    };
+
+    const handleSend = () => {
+        if (!validarTelefono(phone)) {
+            setPhoneError('Formato inválido. Use +5959XXXXXXXX, 5959XXXXXXXX u 09XXXXXXXX');
+            return;
+        }
+        onSend({ phone, message, empresa_id: empresaActiva?.empresa_id });
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -34,10 +54,11 @@ const ModalEnviar = ({ onClose, onSend, loading }) => {
                         <input
                             type="text"
                             value={phone}
-                            onChange={e => setPhone(e.target.value)}
-                            placeholder="595981234567 (con código de país)"
-                            className="w-full px-5 py-3.5 bg-surface-raised border border-border rounded-2xl text-text-primary text-sm font-medium focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
+                            onChange={handlePhoneChange}
+                            placeholder="+5959XXXXXXXX o 09XXXXXXXX"
+                            className={`w-full px-5 py-3.5 bg-surface-raised border rounded-2xl text-text-primary text-sm font-medium focus:outline-none focus:ring-2 transition-all ${phoneError ? 'border-danger/50 focus:ring-danger/10' : 'border-border focus:border-primary/50 focus:ring-primary/10'}`}
                         />
+                        {phoneError && <p className="text-[10px] text-danger font-black mt-1">{phoneError}</p>}
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-40 mb-2">Mensaje</label>
@@ -54,7 +75,7 @@ const ModalEnviar = ({ onClose, onSend, loading }) => {
                         Cancelar
                     </button>
                     <button
-                        onClick={() => onSend({ phone, message, empresa_id: empresaActiva?.empresa_id })}
+                        onClick={handleSend}
                         disabled={loading || !phone || !message}
                         className="flex-1 px-6 py-3.5 rounded-2xl bg-[#25D366] text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-[#25D366]/20 hover:bg-[#20b858] transition-all disabled:opacity-50"
                     >
@@ -69,7 +90,7 @@ const ModalEnviar = ({ onClose, onSend, loading }) => {
 export default function WhatsApp() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { empresaActiva } = useAuth();
+    const { empresaActiva, esSuperAdmin } = useAuth();
     const empresaId = empresaActiva?.empresa_id;
     const [showModal, setShowModal] = useState(false);
     const [toast, setToast] = useState(null);
@@ -99,8 +120,17 @@ export default function WhatsApp() {
         onError: (err) => showToast('Error: ' + err.message, 'error'),
     });
 
+    const deleteMutation = useMutation({
+        mutationFn: (logId) => whatsappService.deleteMensaje(logId),
+        onSuccess: () => {
+            showToast('Registro eliminado');
+            queryClient.invalidateQueries(['wa-mensajes', empresaId]);
+        },
+        onError: (err) => showToast('Error al eliminar: ' + err.message, 'error'),
+    });
+
     const enviarRecordatoriosMutation = useMutation({
-        mutationFn: () => whatsappService.ejecutarCron(),
+        mutationFn: () => whatsappService.ejecutarCron(empresaId),
         onSuccess: (res) => {
             const d = res.data;
             showToast(`Enviados: ${d?.enviados || 0}, Errores: ${d?.errores || 0}`);
@@ -222,6 +252,7 @@ export default function WhatsApp() {
                                     <th className="px-8 py-5">Mensaje</th>
                                     <th className="px-8 py-5">Fecha</th>
                                     <th className="px-8 py-5 text-center">Estado</th>
+                                    {esSuperAdmin() && <th className="px-8 py-5"></th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/50">
@@ -243,6 +274,18 @@ export default function WhatsApp() {
                                         <td className="px-8 py-4 text-center">
                                             <EstadoBadge estado={m.estado} />
                                         </td>
+                                        {esSuperAdmin() && (
+                                            <td className="px-4 py-4 text-center">
+                                                <button
+                                                    onClick={() => deleteMutation.mutate(m.log_id)}
+                                                    disabled={deleteMutation.isPending}
+                                                    className="p-2 rounded-xl text-danger/40 hover:text-danger hover:bg-danger/10 transition-all disabled:opacity-30"
+                                                    title="Eliminar registro"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

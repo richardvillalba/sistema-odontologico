@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePointOfSale } from '../../context/PointOfSaleContext';
 import { useTimbradoAlerts } from '../../hooks/useTimbradoAlerts';
 import PointOfSaleSelector from '../facturacion/PointOfSaleSelector';
+import { whatsappService } from '../../services/api';
 
 /* ────────────────────────── SVG Icons ────────────────────────── */
 const IconHome = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -19,7 +21,16 @@ const IconSettings = () => <svg className="w-5 h-5" fill="none" stroke="currentC
 export default function Layout({ children }) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { logout, usuario, tieneAccesoPrograma, empresaActiva, sucursalActiva, cajasPendientes } = useAuth();
+    const { logout, usuario, tieneAccesoPrograma, esSuperAdmin, empresaActiva, sucursalActiva, cajasPendientes } = useAuth();
+    const empresaId = empresaActiva?.empresa_id;
+
+    const { data: waConfigRes } = useQuery({
+        queryKey: ['wa-config', empresaId],
+        queryFn: () => whatsappService.getConfig(empresaId),
+        enabled: !!empresaId,
+        staleTime: 5 * 60 * 1000,
+    });
+    const waHabilitado = waConfigRes?.data?.habilitado === 'S';
     const [showNotifications, setShowNotifications] = useState(false);
     const { alertas, count, hasCritical } = useTimbradoAlerts({ empresaId: empresaActiva?.empresa_id, usuarioId: usuario?.usuario_id });
     const { selectedPoint, setShowSelector, isValid } = usePointOfSale();
@@ -70,6 +81,7 @@ export default function Layout({ children }) {
     const hayBloqueo = cajasPendientes && cajasPendientes.length > 0;
     const menuItems = allMenuItems.filter(item => {
         if (hayBloqueo) return item.codigo === 'CAJA';
+        if (item.codigo === 'WHATSAPP' && !esSuperAdmin() && !waHabilitado) return false;
         return tieneAccesoPrograma(item.codigo);
     });
 
