@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentación — Denta</title>
+    <meta name="description" content="Documentación oficial del sistema Denta. Guías de uso, módulos y referencia para administradores y usuarios." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        navy: { 900: '#070E1C', 800: '#0B1120', 700: '#0D1B30', 600: '#102035', 500: '#1E3A5F' },
+                        brand: { DEFAULT: '#2563EB', light: '#3B82F6', dark: '#1D4ED8' },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scroll-behavior: smooth; }
+        body { background: #0B1120; color: #F8FAFC; font-family: 'Inter', sans-serif; }
+        .navbar-glass { background: #0B1120; border-bottom: 1px solid rgba(37,99,235,0.12); }
+        .sidebar-glass { background: rgba(13,27,48,0.6); border-right: 1px solid rgba(37,99,235,0.1); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0B1120; }
+        ::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563EB; }
+        .nav-item.active { background: rgba(37,99,235,0.15); color: #60A5FA; border-left: 2px solid #2563EB; }
+        .nav-item { border-left: 2px solid transparent; transition: all 0.15s ease; }
+        .nav-item:hover { background: rgba(255,255,255,0.04); color: #CBD5E1; }
+        .nav-sub { display: none; }
+        .nav-sub.open { display: block; }
+        .nav-sub-item.active { color: #60A5FA; }
+        .nav-sub-item { transition: all 0.15s ease; }
+        .nav-sub-item:hover { color: #CBD5E1; }
+        .nav-parent-arrow { transition: transform 0.2s ease; }
+        .nav-parent-arrow.open { transform: rotate(90deg); }
+        .doc-section { display: none; }
+        .doc-section.active { display: block; }
+        .code-block { background: #070E1C; border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 1rem 1.25rem; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #93C5FD; overflow-x: auto; }
+        .inline-code { background: rgba(37,99,235,0.12); color: #93C5FD; padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+        .alert-info { background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.25); border-radius: 12px; }
+        .alert-warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; }
+        .alert-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; }
+        .step-badge { width: 28px; height: 28px; border-radius: 8px; background: rgba(37,99,235,0.2); color: #60A5FA; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .field-row { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.04); }
+        .field-name { color: #60A5FA; font-weight: 700; font-size: 13px; font-family: monospace; }
+        .field-desc { color: #94A3B8; font-size: 13px; }
+        .field-req { background: rgba(239,68,68,0.15); color: #FCA5A5; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; display: inline-block; }
+        .field-opt { background: rgba(99,102,241,0.15); color: #A5B4FC; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; display: inline-block; }
+        #sidebar-overlay { display: none; }
+        #sidebar-overlay.open { display: block; }
+        #sidebar { transition: transform 0.3s ease; }
+        @media (max-width: 768px) {
+            #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; transform: translateX(-100%); width: 280px; }
+            #sidebar.open { transform: translateX(0); }
+        }
+        .layout-wrapper { isolation: isolate; transform: translateZ(0); }
+        h2, h3 { scroll-margin-top: 80px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: rgba(37,99,235,0.1); color: #93C5FD; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 14px; text-align: left; }
+        td { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.04); color: #CBD5E1; font-size: 14px; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+    </style>
+</head>
+<body class="antialiased">
+
+<nav class="navbar-glass fixed top-0 left-0 right-0 z-50 h-16 flex items-center">
+    <div class="max-w-screen-2xl mx-auto px-4 w-full flex items-center gap-4">
+        <button id="sidebar-btn" class="md:hidden w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="index.html" class="flex items-center gap-2.5 flex-shrink-0">
+            <div class="w-8 h-8 rounded-xl bg-brand flex items-center justify-center" style="box-shadow:0 0 20px rgba(37,99,235,0.4)">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 64 64" fill="currentColor">
+                    <path d="M32 4C24.5 4 20 8 18 12C16 16 14 18 10 20C6 22 4 28 6 34C8 40 12 44 16 52C18 56 20 60 24 60C28 60 28 52 30 46C31 43 32 42 32 42C32 42 33 43 34 46C36 52 36 60 40 60C44 60 46 56 48 52C52 44 56 40 58 34C60 28 58 22 54 20C50 18 48 16 46 12C44 8 39.5 4 32 4Z"/>
+                </svg>
+            </div>
+            <span class="text-base font-black text-white">Denta</span>
+        </a>
+        <div class="hidden sm:flex items-center gap-2 text-sm text-slate-500">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <span class="text-blue-400 font-semibold">Documentación</span>
+        </div>
+        <div class="flex-1"></div>
+        <a href="index.html" class="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-sm font-medium rounded-xl transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Volver al sitio
+        </a>
+    </div>
+</nav>
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30"></div>
+
+<div class="flex pt-16 min-h-screen layout-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar-glass w-72 flex-shrink-0 overflow-y-auto h-[calc(100vh-4rem)] sticky top-16">
+        <div class="p-5">
+            <div class="mb-5 px-3 py-2 bg-brand/10 border border-brand/20 rounded-xl flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs text-slate-400 font-medium">Versión <span class="text-white font-bold">v2.0</span></span>
+            </div>
+            <nav class="space-y-5">
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-3">Introducción</p>
+                    <div class="space-y-0.5">
+                        <button onclick="showSection('intro')" class="nav-item active w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-blue-400">¿Qué es Denta?</button>
+                        <button onclick="showSection('inicio-rapido')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400">Inicio rápido</button>
+                        <button onclick="showSection('roles')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400">Roles y permisos</button>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-3">Módulos</p>
+                    <div class="space-y-0.5">
+                        <button onclick="showSection('login')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400">🔐 Login</button>
+                        <button onclick="showSection('dashboard')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400">📊 Dashboard</button>
+
+                        <!-- Pacientes con sub-items -->
+                        <div>
+                            <button onclick="toggleParent('pacientes-group')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center justify-between">
+                                <span>👤 Pacientes</span>
+                                <svg id="arrow-pacientes-group" class="nav-parent-arrow w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div id="nav-pacientes-group" class="nav-sub pl-3 mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-4">
+                                <button onclick="showSection('pacientes')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">📋 Registro y ficha</button>
+                                <button onclick="showSection('odontograma')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">🦷 Odontograma</button>
+                                <button onclick="showSection('historia')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">📋 Historia Clínica</button>
+                                <button onclick="showSection('tratamientos')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">💊 Tratamientos</button>
+                            </div>
+                        </div>
+
+                        <button onclick="showSection('citas')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400">📅 Agenda / Citas</button>
+
+                        <!-- Facturación con sub-items -->
+                        <div>
+                            <button onclick="toggleParent('factura-group')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center justify-between">
+                                <span>🧾 Facturación</span>
+                                <svg id="arrow-factura-group" class="nav-parent-arrow w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div id="nav-factura-group" class="nav-sub pl-3 mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-4">
+                                <button onclick="showSection('facturacion')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">🧾 Facturas</button>
+                                <button onclick="showSection('caja')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">💰 Caja y Pagos</button>
+                            </div>
+                        </div>
+
+                        <!-- Compras con sub-items -->
+                        <div>
+                            <button onclick="toggleParent('compras-group')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center justify-between">
+                                <span>🛒 Compras</span>
+                                <svg id="arrow-compras-group" class="nav-parent-arrow w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div id="nav-compras-group" class="nav-sub pl-3 mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-4">
+                                <button onclick="showSection('compras')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">🏢 Proveedores</button>
+                                <button onclick="showSection('compras-articulos')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">📦 Catálogo de Artículos</button>
+                                <button onclick="showSection('compras-facturas')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">🧾 Facturas de Compra</button>
+                                <button onclick="showSection('compras-inventario')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">📊 Stock e Inventario</button>
+                            </div>
+                        </div>
+
+                        <button onclick="showSection('whatsapp')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400">💬 WhatsApp</button>
+
+                        <!-- Reportes con sub-items -->
+                        <div>
+                            <button onclick="toggleParent('reportes-group')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center justify-between">
+                                <span>📈 Reportes</span>
+                                <svg id="arrow-reportes-group" class="nav-parent-arrow w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div id="nav-reportes-group" class="nav-sub pl-3 mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-4">
+                                <button onclick="showSection('reportes')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">💰 Análisis Financiero</button>
+                                <button onclick="showSection('reporte-citas')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">📅 Gestión de Citas</button>
+                                <button onclick="showSection('reporte-pacientes')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">👤 Legajo de Pacientes</button>
+                                <button onclick="showSection('reporte-inventario')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">📦 Control de Insumos</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-3">Administración</p>
+                    <div class="space-y-0.5">
+                        <!-- Configuración con sub-items -->
+                        <div>
+                            <button onclick="toggleParent('config-group')" class="nav-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center justify-between">
+                                <span>⚙️ Configuración</span>
+                                <svg id="arrow-config-group" class="nav-parent-arrow w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div id="nav-config-group" class="nav-sub pl-3 mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-4">
+                                <button onclick="showSection('usuarios')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">👥 Gestión de Usuarios</button>
+                                <button onclick="showSection('gestion-roles')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">🔑 Gestión de Roles</button>
+                                <button onclick="showSection('config-cajas')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">💰 Gestión de Cajas</button>
+                                <button onclick="showSection('config-whatsapp')" class="nav-sub-item w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400">💬 WhatsApp Business</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 min-w-0 p-6 lg:p-10 max-w-4xl">
+
+        <!-- ══ INTRO ══ -->
+        <div id="section-intro" class="doc-section active">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">Introducción</div>
+                <h1 class="text-4xl font-black text-white mb-4">¿Qué es Denta?</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Denta es un sistema de gestión odontológica diseñado para clínicas dentales modernas. Centraliza pacientes, agenda, historias clínicas, odontograma 3D, facturación y reportes en una sola plataforma web, accesible desde cualquier dispositivo.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-navy-700/50 border border-white/[0.06] rounded-2xl p-5">
+                    <div class="text-2xl mb-2">🌐</div>
+                    <h3 class="font-bold text-white text-sm mb-1">100% Web</h3>
+                    <p class="text-xs text-slate-400">Sin instalaciones. Funciona en cualquier navegador moderno desde PC, tablet o celular.</p>
+                </div>
+                <div class="bg-navy-700/50 border border-white/[0.06] rounded-2xl p-5">
+                    <div class="text-2xl mb-2">🏢</div>
+                    <h3 class="font-bold text-white text-sm mb-1">Multi-empresa</h3>
+                    <p class="text-xs text-slate-400">Gestiona múltiples sucursales o clínicas con datos completamente independientes.</p>
+                </div>
+                <div class="bg-navy-700/50 border border-white/[0.06] rounded-2xl p-5">
+                    <div class="text-2xl mb-2">🔒</div>
+                    <h3 class="font-bold text-white text-sm mb-1">Control de acceso</h3>
+                    <p class="text-xs text-slate-400">Roles y permisos granulares. Cada usuario ve solo lo que le corresponde.</p>
+                </div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Módulos del sistema</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>📊</span><span class="text-sm font-bold text-white">Dashboard</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>👤</span><span class="text-sm font-bold text-white">Pacientes</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>🦷</span><span class="text-sm font-bold text-white">Odontograma 3D</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>📋</span><span class="text-sm font-bold text-white">Historia Clínica</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>📅</span><span class="text-sm font-bold text-white">Agenda / Citas</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>💊</span><span class="text-sm font-bold text-white">Tratamientos</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>🧾</span><span class="text-sm font-bold text-white">Facturación</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>💰</span><span class="text-sm font-bold text-white">Caja</span></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl flex items-center gap-2"><span>📈</span><span class="text-sm font-bold text-white">Reportes</span></div>
+            </div>
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Acceso al sistema</p><p class="text-sm text-slate-400">El sistema está disponible en <span class="inline-code">www.sysdenta.com</span>. Las credenciales son proporcionadas por el administrador de tu clínica.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ INICIO RÁPIDO ══ -->
+        <div id="section-inicio-rapido" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🚀 Primeros pasos</div>
+                <h1 class="text-4xl font-black text-white mb-4">Inicio rápido</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Seguí estos pasos para empezar a operar el sistema desde cero.</p>
+            </div>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-4 p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="step-badge">1</div>
+                    <div><h3 class="font-bold text-white mb-1">Iniciar sesión</h3><p class="text-sm text-slate-400">Ingresá a <span class="inline-code">www.sysdenta.com</span> con tu usuario y contraseña. El sistema te redirigirá automáticamente al Dashboard de tu clínica.</p></div>
+                </div>
+                <div class="flex gap-4 p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="step-badge">2</div>
+                    <div><h3 class="font-bold text-white mb-1">Verificar la empresa activa</h3><p class="text-sm text-slate-400">En el header del sistema aparece el nombre de la clínica activa. Si tenés acceso a varias sucursales, podés cambiar desde ese selector.</p></div>
+                </div>
+                <div class="flex gap-4 p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="step-badge">3</div>
+                    <div><h3 class="font-bold text-white mb-1">Registrar pacientes</h3><p class="text-sm text-slate-400">Ir a <strong class="text-white">Pacientes</strong> → botón <strong class="text-white">Registrar Paciente</strong>. Completar datos básicos, médicos y de emergencia.</p></div>
+                </div>
+                <div class="flex gap-4 p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="step-badge">4</div>
+                    <div><h3 class="font-bold text-white mb-1">Crear citas</h3><p class="text-sm text-slate-400">Ir a <strong class="text-white">Agenda</strong> → <strong class="text-white">Nueva Cita</strong>. Seleccionar paciente, doctor, fecha y hora.</p></div>
+                </div>
+                <div class="flex gap-4 p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="step-badge">5</div>
+                    <div><h3 class="font-bold text-white mb-1">Registrar consultas</h3><p class="text-sm text-slate-400">Desde el perfil del paciente → tab <strong class="text-white">Historia Clínica</strong> → <strong class="text-white">Nueva Consulta</strong>. Registrar motivo, examen, diagnóstico y tratamiento.</p></div>
+                </div>
+                <div class="flex gap-4 p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="step-badge">6</div>
+                    <div><h3 class="font-bold text-white mb-1">Facturar y cobrar</h3><p class="text-sm text-slate-400">Ir a <strong class="text-white">Facturación</strong> → <strong class="text-white">Emitir Factura</strong>. Seleccionar paciente y los tratamientos a facturar. Luego registrar el pago desde la factura.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ROLES ══ -->
+        <div id="section-roles" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🔐 Control de acceso</div>
+                <h1 class="text-4xl font-black text-white mb-4">Roles y Permisos</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El sistema usa roles para controlar qué puede hacer cada usuario. Los módulos disponibles se configuran por rol y se pueden personalizar por empresa.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Roles predeterminados</h2>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Rol</th><th>Descripción</th><th>Módulos típicos</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="px-2 py-1 bg-red-500/10 text-red-400 rounded-lg text-xs font-bold">ADMIN</span></td><td>Control total del sistema</td><td>Todos los módulos + configuración</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold">DOCTOR</span></td><td>Odontólogo de la clínica</td><td>Pacientes, Agenda, Historia Clínica, Odontograma, Tratamientos</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-xs font-bold">RECEPCION</span></td><td>Gestión de citas y pacientes</td><td>Pacientes, Agenda, Caja</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-amber-500/10 text-amber-400 rounded-lg text-xs font-bold">CAJERA</span></td><td>Gestión financiera</td><td>Facturación, Caja, Reportes</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert-info p-4 flex gap-3 mb-6">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Permisos por empresa</p><p class="text-sm text-slate-400">Los módulos de cada rol se configuran <strong class="text-white">por empresa</strong>. El mismo rol DOCTOR puede tener acceso a Facturación en una sucursal y no en otra.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ LOGIN ══ -->
+        <div id="section-login" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🔐 Acceso</div>
+                <h1 class="text-4xl font-black text-white mb-4">Login</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">La pantalla de inicio de sesión es el punto de entrada al sistema. Solo los usuarios registrados por el administrador pueden acceder.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Campos del formulario</h2>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Usuario</span><div class="flex items-center gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Nombre de usuario asignado por el administrador. Sensible a mayúsculas.</span></div>
+                <div class="field-row"><span class="field-name">Contraseña</span><div class="flex items-center gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Contraseña del usuario. El campo tiene un botón para mostrar/ocultar el texto.</span></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Flujo después del login</h2>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">1</div><p class="text-sm text-slate-400 pt-0.5">El sistema valida las credenciales contra el servidor.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">2</div><p class="text-sm text-slate-400 pt-0.5">Si el usuario tiene acceso a más de una empresa, aparece la pantalla de <strong class="text-white">Selección de Empresa</strong>.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">3</div><p class="text-sm text-slate-400 pt-0.5">Una vez seleccionada la empresa activa, se redirige al <strong class="text-white">Dashboard</strong>.</p></div>
+            </div>
+            <div class="alert-warn p-4 flex gap-3">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div><p class="text-sm font-bold text-amber-300 mb-1">¿Olvidaste tu contraseña?</p><p class="text-sm text-slate-400">Contactá al administrador de tu clínica para que restablezca tu contraseña desde el módulo de Gestión de Usuarios.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ DASHBOARD ══ -->
+        <div id="section-dashboard" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📊 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Dashboard</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Es la pantalla principal del sistema. Muestra un resumen del estado de la clínica en tiempo real: estadísticas del día, agenda, actividad semanal y accesos rápidos.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Tarjetas de estadísticas</h2>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Indicador</th><th>Descripción</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-blue-400 font-semibold">Total Pacientes</td><td>Cantidad total de pacientes activos registrados en la empresa activa</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Citas Hoy</td><td>Número de citas programadas para el día actual</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Tratamientos Activos</td><td>Tratamientos en proceso en este momento</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Ingresos del Mes</td><td>Total de cobros registrados en el mes actual (formato guaraníes)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Secciones del Dashboard</h2>
+            <div class="space-y-3 mb-8">
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl">
+                    <p class="font-bold text-white mb-1">📅 Agenda del Día</p>
+                    <p class="text-sm text-slate-400">Lista todas las citas del día con hora, nombre del paciente, motivo y estado. Desde aquí podés hacer clic en el paciente para ir directo a su expediente.</p>
+                </div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl">
+                    <p class="font-bold text-white mb-1">📊 Gráfico de Actividad Semanal</p>
+                    <p class="text-sm text-slate-400">Muestra las citas programadas vs. completadas por cada día de la semana. Incluye porcentaje de cumplimiento y totales de la semana.</p>
+                </div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl">
+                    <p class="font-bold text-white mb-1">🗓️ Mini Calendario</p>
+                    <p class="text-sm text-slate-400">Calendario mensual navegable. Resalta el día actual y permite ver la distribución de citas.</p>
+                </div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl">
+                    <p class="font-bold text-white mb-1">👤 Pacientes Recientes</p>
+                    <p class="text-sm text-slate-400">Muestra los últimos 5 pacientes registrados en el sistema con su avatar de iniciales y número de historia clínica.</p>
+                </div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Acciones rápidas</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-xl mb-1">📅</p><p class="text-xs font-bold text-white">Nueva Cita</p></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-xl mb-1">👤</p><p class="text-xs font-bold text-white">Nuevo Paciente</p></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-xl mb-1">🦷</p><p class="text-xs font-bold text-white">Odontograma</p></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-xl mb-1">🧾</p><p class="text-xs font-bold text-white">Facturación</p></div>
+            </div>
+        </div>
+
+        <!-- ══ PACIENTES ══ -->
+        <div id="section-pacientes" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">👤 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Pacientes</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El módulo central del sistema. Aquí se registran y gestionan todos los pacientes de la clínica, con acceso a su expediente completo.</p>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Listado de pacientes</h2>
+            <p class="text-slate-400 text-sm mb-4">La pantalla principal muestra la tabla de pacientes con las siguientes columnas:</p>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Columna</th><th>Contenido</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-blue-400 font-semibold">Paciente</td><td>Avatar con iniciales + Nombre completo + Fecha de registro</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Documento / HC</td><td>Número de documento y Número de Historia Clínica (ej: HC-0042)</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Edad</td><td>Edad calculada automáticamente + Fecha de nacimiento</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Contacto</td><td>Teléfono principal + Email</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Estado</td><td>Badge Activo / Inactivo</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Acciones</td><td>Ver expediente · Nueva cita</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-2">Registrar nuevo paciente</h2>
+            <p class="text-slate-400 text-sm mb-4">El formulario de registro tiene <strong class="text-white">3 pestañas</strong>:</p>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Pestaña 1 — Datos Básicos</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Nombre</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Primer nombre del paciente.</span></div>
+                <div class="field-row"><span class="field-name">Apellido</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Apellido del paciente.</span></div>
+                <div class="field-row"><span class="field-name">Tipo de documento</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Opciones: CI · RUC · Pasaporte · DNI.</span></div>
+                <div class="field-row"><span class="field-name">Número de documento</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Número del documento de identidad seleccionado.</span></div>
+                <div class="field-row"><span class="field-name">Fecha de nacimiento</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">La edad se calcula automáticamente a partir de esta fecha.</span></div>
+                <div class="field-row"><span class="field-name">Género</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Opciones: Masculino · Femenino · Sin especificar.</span></div>
+                <div class="field-row"><span class="field-name">Teléfono principal</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Número de contacto principal. Formatos aceptados: <span class="inline-code">09XXXXXXXX</span> · <span class="inline-code">5959XXXXXXXX</span> · <span class="inline-code">+5959XXXXXXXX</span>. El sistema normaliza automáticamente al formato internacional.</span></div>
+                <div class="field-row"><span class="field-name">Recordatorios WhatsApp</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Checkbox que aparece cuando el teléfono principal tiene un formato válido. Al activarlo, el paciente recibirá recordatorios automáticos de citas por WhatsApp. Requiere que el módulo WhatsApp esté habilitado para la empresa.</span></div>
+                <div class="field-row"><span class="field-name">Teléfono secundario</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Número alternativo de contacto.</span></div>
+                <div class="field-row"><span class="field-name">Email</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Correo electrónico del paciente.</span></div>
+                <div class="field-row"><span class="field-name">Dirección</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Dirección de domicilio.</span></div>
+                <div class="field-row"><span class="field-name">Departamento</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Selector con lista de departamentos.</span></div>
+                <div class="field-row"><span class="field-name">Ciudad</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Se carga automáticamente según el departamento seleccionado.</span></div>
+                <div class="field-row"><span class="field-name">Barrio</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Se carga automáticamente según la ciudad seleccionada.</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Pestaña 2 — Datos Médicos</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Grupo sanguíneo</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Opciones: A+ · A- · B+ · B- · AB+ · AB- · O+ · O-</span></div>
+                <div class="field-row"><span class="field-name">Alergias conocidas</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Área de texto libre. Esta información aparece como alerta en el expediente del paciente para que el doctor esté siempre al tanto.</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Pestaña 3 — Contacto de Emergencia</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Nombre del contacto</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Nombre completo de la persona de contacto en caso de emergencia.</span></div>
+                <div class="field-row"><span class="field-name">Teléfono del contacto</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Número de teléfono de la persona de contacto.</span></div>
+                <div class="field-row"><span class="field-name">Relación</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Opciones: Cónyuge · Padre/Madre · Hijo/a · Hermano/a · Amigo/a · Otro.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Ficha del paciente</h2>
+            <p class="text-slate-400 text-sm mb-4">Al hacer clic en un paciente se abre su expediente completo con 5 pestañas:</p>
+            <div class="space-y-3 mb-6">
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><p class="font-bold text-white mb-1">👤 Información Personal</p><p class="text-sm text-slate-400">Todos los datos de contacto, dirección completa, grupo sanguíneo y alergias. También muestra el contacto de emergencia registrado.</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><p class="font-bold text-white mb-1">🦷 Odontograma</p><p class="text-sm text-slate-400">Visualización 3D interactiva de la dentición del paciente. Permite ver y registrar el estado de cada pieza dental.</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><p class="font-bold text-white mb-1">📋 Historia Clínica</p><p class="text-sm text-slate-400">Expediente de consultas ordenadas por fecha. Permite crear nuevas consultas y ver/editar consultas anteriores.</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><p class="font-bold text-white mb-1">💊 Tratamientos</p><p class="text-sm text-slate-400">Plan de tratamiento del paciente con el estado de cada procedimiento y su vinculación con la facturación.</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><p class="font-bold text-white mb-1">🧾 Facturación / Pagos</p><p class="text-sm text-slate-400">Estado de cuenta del paciente: saldo pendiente, facturas emitidas e historial de pagos.</p></div>
+            </div>
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Alertas críticas</p><p class="text-sm text-slate-400">Si el paciente tiene alergias registradas, aparece un cuadro de alerta visible en el lateral de su expediente para que el doctor siempre lo tenga presente.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ ODONTOGRAMA ══ -->
+        <div id="section-odontograma" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🦷 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Odontograma 3D</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El odontograma es la representación visual e interactiva de la dentición del paciente. Usa la numeración FDI internacional y permite registrar el estado de cada pieza dental.</p>
+            </div>
+            <div class="alert-info p-4 flex gap-3 mb-8">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Sistema FDI</p><p class="text-sm text-slate-400">Las piezas se identifican con numeración FDI: 11-18 (superior derecho), 21-28 (superior izquierdo), 31-38 (inferior izquierdo), 41-48 (inferior derecho). Dentición adulta completa: 32 piezas.</p></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Estados de las piezas dentales</h2>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Estado</th><th>Color indicador</th><th>Descripción</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-bold">SANO</span></td><td>Verde</td><td>Pieza en buen estado, sin patologías</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-red-500/10 text-red-400 rounded text-xs font-bold">CARIES</span></td><td>Rojo</td><td>Presencia de caries activa</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-orange-500/10 text-orange-400 rounded text-xs font-bold">FRACTURA</span></td><td>Naranja</td><td>Pieza fracturada o con fractura parcial</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-slate-500/10 text-slate-400 rounded text-xs font-bold">AUSENTE</span></td><td>Gris oscuro</td><td>Pieza extraída o que nunca erupcionó</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs font-bold">ENDODONCIA</span></td><td>Azul</td><td>Tratamiento de conducto realizado</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-yellow-500/10 text-yellow-400 rounded text-xs font-bold">CORONA</span></td><td>Amarillo</td><td>Pieza con corona protésica</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-cyan-500/10 text-cyan-400 rounded text-xs font-bold">IMPLANTE</span></td><td>Turquesa</td><td>Implante dental colocado</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-sky-500/10 text-sky-400 rounded text-xs font-bold">OBTURADO</span></td><td>Azul claro</td><td>Pieza con obturación (relleno/resina)</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-rose-500/10 text-rose-400 rounded text-xs font-bold">PERIODONTITIS</span></td><td>Rojo oscuro</td><td>Enfermedad periodontal activa</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-pink-500/10 text-pink-400 rounded text-xs font-bold">GINGIVITIS</span></td><td>Rosa</td><td>Inflamación de encías</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-red-900/30 text-red-300 rounded text-xs font-bold">EXTRACCIÓN INDICADA</span></td><td>Rojo punteado</td><td>Pieza marcada para extracción</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Cómo registrar un hallazgo</h2>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">1</div><p class="text-sm text-slate-400 pt-0.5">Hacé clic sobre la pieza dental en el odontograma 3D.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">2</div><p class="text-sm text-slate-400 pt-0.5">Se abre un modal con el estado actual de la pieza y su historial de cambios.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">3</div><p class="text-sm text-slate-400 pt-0.5">Seleccioná el nuevo estado, agregá notas adicionales si es necesario.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">4</div><p class="text-sm text-slate-400 pt-0.5">Guardá los cambios. El odontograma se actualiza visualmente de forma inmediata.</p></div>
+            </div>
+            <div class="alert-success p-4 flex gap-3">
+                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-emerald-300 mb-1">Sugerencias automáticas</p><p class="text-sm text-slate-400">Al crear una nueva consulta en Historia Clínica, el sistema lee los hallazgos del odontograma y pre-completa automáticamente los campos de Examen Clínico, Diagnóstico y Plan de Tratamiento.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ HISTORIA CLÍNICA ══ -->
+        <div id="section-historia" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📋 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Historia Clínica</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El expediente clínico digital del paciente. Registra todas las consultas con su diagnóstico, tratamiento, signos vitales y recetas. Todo queda guardado con fecha y doctor responsable.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Formulario de consulta</h2>
+            <p class="text-slate-400 text-sm mb-4">El formulario está dividido en 6 secciones:</p>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Sección 1 — Información General</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Doctor Responsable</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Selector con los doctores de la empresa activa. Registra quién atendió al paciente.</span></div>
+                <div class="field-row"><span class="field-name">Motivo de Consulta</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Descripción breve del motivo de la visita. Ej: "Dolor en molar inferior derecho", "Control de rutina".</span></div>
+                <div class="field-row"><span class="field-name">Próxima Cita</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Fecha sugerida para la próxima consulta del paciente.</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Sección 2 — Signos Vitales</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Presión Arterial</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Formato libre. Ej: "120/80".</span></div>
+                <div class="field-row"><span class="field-name">Frecuencia Cardíaca</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Pulsaciones por minuto. Ej: "75 BPM".</span></div>
+                <div class="field-row"><span class="field-name">Temperatura</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Temperatura corporal en grados Celsius. Ej: "36.5 °C".</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Sección 3 — Examen Clínico</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Examen Clínico</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Área de texto para describir los hallazgos del examen físico. <strong class="text-white">Se pre-completa automáticamente</strong> con los hallazgos registrados en el odontograma (caries, fracturas, etc.).</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Sección 4 — Diagnóstico</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Código CIE-10</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Código internacional de clasificación de enfermedades.</span></div>
+                <div class="field-row"><span class="field-name">Diagnóstico Clínico</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Diagnóstico redactado por el doctor. <strong class="text-white">Se sugiere automáticamente</strong> basado en los hallazgos del odontograma.</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Sección 5 — Plan de Tratamiento</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Plan de Tratamiento</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Procedimientos planificados para el paciente. <strong class="text-white">Se pre-completa</strong> con los tratamientos pendientes del odontograma.</span></div>
+            </div>
+
+            <h3 class="text-base font-black text-blue-400 uppercase tracking-widest mb-3">Sección 6 — Observaciones</h3>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Observaciones</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Notas adicionales del doctor sobre la consulta o el paciente.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Editar una consulta</h2>
+            <p class="text-slate-400 text-sm mb-4">Las consultas ya registradas se pueden modificar. Para hacerlo:</p>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">1</div><p class="text-sm text-slate-400 pt-0.5">En el listado de consultas, expandí la consulta que querés modificar.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">2</div><p class="text-sm text-slate-400 pt-0.5">Hacé clic en el botón <strong class="text-white">Editar</strong> en el encabezado de la consulta.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">3</div><p class="text-sm text-slate-400 pt-0.5">El formulario lateral se abre pre-cargado con los datos existentes.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">4</div><p class="text-sm text-slate-400 pt-0.5">Modificá lo que sea necesario y hacé clic en <strong class="text-white">Guardar Cambios</strong>.</p></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Recetas médicas</h2>
+            <p class="text-slate-400 text-sm mb-4">Desde cada consulta podés crear una receta médica para el paciente. La receta incluye:</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-sm"><p class="font-bold text-white mb-0.5">Medicamentos</p><p class="text-xs text-slate-400">Nombre del medicamento a recetar</p></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-sm"><p class="font-bold text-white mb-0.5">Dosis y duración</p><p class="text-xs text-slate-400">Posología y tiempo de tratamiento</p></div>
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-sm"><p class="font-bold text-white mb-0.5">Instrucciones</p><p class="text-xs text-slate-400">Indicaciones especiales para el paciente</p></div>
+            </div>
+
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Búsqueda de historias</p><p class="text-sm text-slate-400">El módulo <strong class="text-white">Historias Clínicas</strong> en el menú permite buscar expedientes por nombre, apellido o documento y filtrar por fecha de última consulta o solo pacientes con historial registrado.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ CITAS ══ -->
+        <div id="section-citas" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📅 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Agenda / Citas</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">La agenda centraliza todas las citas de la clínica. Podés ver las citas en listado o en vista semanal, crear nuevas citas y gestionar los estados de cada una.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Tarjetas de estado</h2>
+            <p class="text-slate-400 text-sm mb-4">La parte superior de la Agenda muestra contadores en tiempo real:</p>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+                <div class="p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-xl mb-1">📋</p><p class="text-xs font-bold text-white">Total</p><p class="text-xs text-slate-400">Todas del filtro</p></div>
+                <div class="p-3 bg-navy-700/40 border border-blue-500/20 rounded-xl text-center"><p class="text-xl mb-1">🕐</p><p class="text-xs font-bold text-blue-400">Pendientes</p><p class="text-xs text-slate-400">Programadas</p></div>
+                <div class="p-3 bg-navy-700/40 border border-emerald-500/20 rounded-xl text-center"><p class="text-xl mb-1">✅</p><p class="text-xs font-bold text-emerald-400">Confirmadas</p></div>
+                <div class="p-3 bg-navy-700/40 border border-violet-500/20 rounded-xl text-center"><p class="text-xl mb-1">🏁</p><p class="text-xs font-bold text-violet-400">Completadas</p></div>
+                <div class="p-3 bg-navy-700/40 border border-red-500/20 rounded-xl text-center"><p class="text-xl mb-1">❌</p><p class="text-xs font-bold text-red-400">Canceladas</p></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Crear una nueva cita</h2>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Paciente</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Búsqueda en tiempo real por nombre o documento. Se muestra una lista de resultados para seleccionar.</span></div>
+                <div class="field-row"><span class="field-name">Doctor</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Selector con los doctores disponibles en la empresa.</span></div>
+                <div class="field-row"><span class="field-name">Fecha</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Fecha de la cita. Selector de calendario.</span></div>
+                <div class="field-row"><span class="field-name">Hora Inicio</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Hora de inicio de la cita. Valor por defecto: 09:00.</span></div>
+                <div class="field-row"><span class="field-name">Duración</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Duración estimada en minutos. Valor por defecto: 30 minutos.</span></div>
+                <div class="field-row"><span class="field-name">Tipo de Cita</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Opciones: Consulta General · Consulta Especial · Revisión · Tratamiento.</span></div>
+                <div class="field-row"><span class="field-name">Motivo</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Breve descripción del motivo de la visita.</span></div>
+                <div class="field-row"><span class="field-name">Notas</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Observaciones adicionales para el doctor o la recepción.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Estados de las citas</h2>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Estado</th><th>Descripción</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs font-bold">PROGRAMADA</span></td><td>Cita registrada, pendiente de confirmación</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-bold">CONFIRMADA</span></td><td>El paciente confirmó su asistencia</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-cyan-500/10 text-cyan-400 rounded text-xs font-bold">EN ATENCIÓN</span></td><td>El paciente está siendo atendido en este momento</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-violet-500/10 text-violet-400 rounded text-xs font-bold">COMPLETADA</span></td><td>La consulta finalizó correctamente</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-red-500/10 text-red-400 rounded text-xs font-bold">CANCELADA</span></td><td>La cita fue cancelada por el paciente o la clínica</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-amber-500/10 text-amber-400 rounded text-xs font-bold">NO SE PRESENTÓ</span></td><td>El paciente no asistió sin cancelar</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Acciones disponibles</h2>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">✏️</span><div><p class="font-bold text-white text-sm">Editar</p><p class="text-xs text-slate-400">Modificar cualquier campo de la cita</p></div></div>
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🔄</span><div><p class="font-bold text-white text-sm">Cambiar Estado</p><p class="text-xs text-slate-400">Avanzar o modificar el estado de la cita. Puede requerir ingresar un motivo</p></div></div>
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">💬</span><div><p class="font-bold text-white text-sm">Enviar WhatsApp</p><p class="text-xs text-slate-400">Envía un recordatorio al paciente si tiene número de teléfono registrado</p></div></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Vistas de la agenda</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl"><p class="font-bold text-white mb-2">📋 Vista Listado</p><p class="text-sm text-slate-400">Tabla con todas las citas del filtro activo (fecha y estado). Ideal para la recepción.</p></div>
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl"><p class="font-bold text-white mb-2">🗓️ Vista Semanal</p><p class="text-sm text-slate-400">Grid de 7 días con bloques horarios de 8:00 a 20:00. Ideal para visualizar disponibilidad.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ TRATAMIENTOS ══ -->
+        <div id="section-tratamientos" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">💊 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Tratamientos</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El módulo de Tratamientos tiene dos partes: el <strong class="text-white">Catálogo</strong> de procedimientos disponibles en la clínica, y el <strong class="text-white">Plan de Tratamiento</strong> individual de cada paciente.</p>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Catálogo de tratamientos</h2>
+            <p class="text-slate-400 text-sm mb-4">Define los procedimientos que ofrece la clínica con sus precios y características. Los campos del formulario son:</p>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Nombre</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Nombre del procedimiento. Ej: "Extracción simple", "Blanqueamiento dental".</span></div>
+                <div class="field-row"><span class="field-name">Código</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Código único del tratamiento. Ej: "EXT-01", "BLAND-01".</span></div>
+                <div class="field-row"><span class="field-name">Descripción</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Descripción detallada del procedimiento.</span></div>
+                <div class="field-row"><span class="field-name">Categoría</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Agrupación del tratamiento. Ej: "Cirugía", "Estética", "Ortodoncia", "Preventivo".</span></div>
+                <div class="field-row"><span class="field-name">Precio Base</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Precio del procedimiento en guaraníes. Es el precio por defecto al facturar.</span></div>
+                <div class="field-row"><span class="field-name">Requiere Anestesia</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Checkbox. Indica si el procedimiento requiere aplicación de anestesia.</span></div>
+                <div class="field-row"><span class="field-name">Duración Estimada</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Duración aproximada del procedimiento en minutos.</span></div>
+                <div class="field-row"><span class="field-name">Activo</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Toggle activo/inactivo. Los tratamientos inactivos no aparecen al facturar.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Plan de tratamiento del paciente</h2>
+            <p class="text-slate-400 text-sm mb-4">Desde el tab <strong class="text-white">Tratamientos</strong> en la ficha del paciente, podés ver y gestionar su plan de tratamiento:</p>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Estado</th><th>Descripción</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="px-2 py-1 bg-amber-500/10 text-amber-400 rounded text-xs font-bold">PENDIENTE</span></td><td>Tratamiento planificado, aún no iniciado</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs font-bold">EN PROCESO</span></td><td>Tratamiento iniciado y en curso</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-bold">COMPLETADO</span></td><td>Tratamiento finalizado exitosamente</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-violet-500/10 text-violet-400 rounded text-xs font-bold">FACTURADO</span></td><td>Tratamiento incluido en una factura emitida</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-red-500/10 text-red-400 rounded text-xs font-bold">CANCELADO</span></td><td>Tratamiento cancelado o descartado</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert-warn p-4 flex gap-3">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div><p class="text-sm font-bold text-amber-300 mb-1">Vinculación con facturación</p><p class="text-sm text-slate-400">Al facturar un tratamiento, pasa automáticamente al estado <strong class="text-white">FACTURADO</strong>. Si la factura es anulada, el tratamiento vuelve a <strong class="text-white">PENDIENTE</strong> para que pueda ser incluido en una nueva factura.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ FACTURACIÓN ══ -->
+        <div id="section-facturacion" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🧾 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Facturación</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Gestión completa de comprobantes de venta. Las facturas se vinculan directamente a los tratamientos del paciente para mantener trazabilidad total.</p>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Listado de facturas</h2>
+            <p class="text-slate-400 text-sm mb-4">La pantalla principal muestra todas las facturas con filtros por estado y rango de fechas. Columnas:</p>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Columna</th><th>Contenido</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-blue-400 font-semibold">Número</td><td>Número de comprobante completo (ej: 001-001-0000042)</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Fecha</td><td>Fecha y hora de emisión</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Paciente</td><td>Nombre completo + Número de documento</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Total</td><td>Monto total de la factura</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Pendiente</td><td>Saldo aún adeudado</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Estado</td><td>Badge con el estado actual</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Emitir una factura</h2>
+            <div class="alert-warn p-4 flex gap-3 mb-6">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div><p class="text-sm font-bold text-amber-300 mb-1">Requisito: caja abierta</p><p class="text-sm text-slate-400">Para emitir facturas el usuario debe tener una caja asignada y estar en estado <strong class="text-white">ABIERTA</strong>. De lo contrario, el botón aparece deshabilitado.</p></div>
+            </div>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">1</div><p class="text-sm text-slate-400 pt-0.5">Ir a <strong class="text-white">Facturación</strong> → <strong class="text-white">Emitir Factura</strong>.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">2</div><p class="text-sm text-slate-400 pt-0.5">Buscar y seleccionar el paciente a facturar.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">3</div><p class="text-sm text-slate-400 pt-0.5">El sistema muestra automáticamente los tratamientos pendientes de facturar del paciente. Seleccioná los que querés incluir.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">4</div><p class="text-sm text-slate-400 pt-0.5">Revisá los montos, aplicá descuentos si corresponde y seleccioná el tipo de comprobante.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">5</div><p class="text-sm text-slate-400 pt-0.5">Hacé clic en <strong class="text-white">Emitir Factura</strong>. Los tratamientos quedan marcados como FACTURADOS.</p></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Estados de factura</h2>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Estado</th><th>Descripción</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="px-2 py-1 bg-slate-500/10 text-slate-400 rounded text-xs font-bold">BORRADOR</span></td><td>Factura en proceso de creación, aún no emitida</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-amber-500/10 text-amber-400 rounded text-xs font-bold">PENDIENTE</span></td><td>Factura emitida, sin pagos registrados</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs font-bold">PARCIAL</span></td><td>Tiene pagos pero queda saldo pendiente</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-bold">PAGADA</span></td><td>Saldo completamente cancelado</td></tr>
+                        <tr><td><span class="px-2 py-1 bg-red-500/10 text-red-400 rounded text-xs font-bold">ANULADA</span></td><td>Factura cancelada, sin efecto</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Anular una factura</h2>
+            <p class="text-slate-400 text-sm mb-4">Las facturas se pueden anular incluso si ya tienen pagos registrados. Al anular:</p>
+            <ul class="space-y-2 mb-6">
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0"></span>Se eliminan todos los pagos asociados a esa factura.</li>
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0"></span>Se eliminan las cuotas pendientes.</li>
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0"></span>Los tratamientos vuelven al estado PENDIENTE y pueden ser incluidos en una nueva factura.</li>
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0"></span>Se registra el motivo de anulación y el usuario que realizó la acción.</li>
+            </ul>
+        </div>
+
+        <!-- ══ CAJA ══ -->
+        <div id="section-caja" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">💰 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Caja</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">La caja controla el flujo de dinero de la clínica. Cada usuario cajero tiene su propia caja asignada. Sin una caja abierta no se pueden registrar pagos ni emitir facturas.</p>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Estados de la caja</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div class="p-5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+                    <p class="font-bold text-emerald-400 mb-2">✅ ABIERTA</p>
+                    <p class="text-sm text-slate-400">La caja está operativa. Se pueden registrar pagos, emitir facturas y registrar movimientos de ingreso o egreso.</p>
+                </div>
+                <div class="p-5 bg-red-500/5 border border-red-500/20 rounded-2xl">
+                    <p class="font-bold text-red-400 mb-2">🔒 CERRADA</p>
+                    <p class="text-sm text-slate-400">La caja está cerrada. No se pueden registrar movimientos hasta reabrirla. Se usa al finalizar la jornada.</p>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Registrar un pago</h2>
+            <p class="text-slate-400 text-sm mb-4">Para registrar el cobro de una factura:</p>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">1</div><p class="text-sm text-slate-400 pt-0.5">Ir al detalle de la factura (desde Facturación o desde el tab de Facturación del paciente).</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">2</div><p class="text-sm text-slate-400 pt-0.5">Hacer clic en <strong class="text-white">Registrar Pago</strong>.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">3</div><p class="text-sm text-slate-400 pt-0.5">Completar el formulario con monto, método de pago y datos opcionales.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">4</div><p class="text-sm text-slate-400 pt-0.5">Confirmar. El sistema actualiza el estado de la factura y registra el movimiento en la caja automáticamente.</p></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Formulario de pago</h2>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Monto</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Importe a cobrar. No puede ser mayor al saldo pendiente ni negativo.</span></div>
+                <div class="field-row"><span class="field-name">Método de Pago</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Opciones: Efectivo · Tarjeta de débito · Tarjeta de crédito · Transferencia · Cheque · Otro.</span></div>
+                <div class="field-row"><span class="field-name">Referencia</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Número de operación, número de cheque o código de transferencia.</span></div>
+                <div class="field-row"><span class="field-name">Banco</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Nombre del banco. Útil cuando el método es transferencia o cheque.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Movimientos de caja</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl"><p class="font-bold text-emerald-400 mb-2">⬆️ INGRESO</p><p class="text-sm text-slate-400">Cobros de facturas y otros ingresos. Se registran automáticamente al confirmar un pago.</p></div>
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl"><p class="font-bold text-red-400 mb-2">⬇️ EGRESO</p><p class="text-sm text-slate-400">Gastos operativos y salidas de dinero que se registran manualmente.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ REPORTES ══ -->
+        <div id="section-reportes" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📈 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">Reportes</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El módulo de Reportes ofrece visibilidad sobre el rendimiento de la clínica a través de métricas y análisis actualizados. El acceso a cada reporte depende del rol del usuario.</p>
+            </div>
+            <div class="space-y-4 mb-8">
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📊</span><h3 class="font-bold text-white">Análisis Financiero</h3></div>
+                    <p class="text-sm text-slate-400 mb-3">Reporte completo de ingresos, facturación y cobros del período seleccionado.</p>
+                    <ul class="space-y-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Total facturado vs total cobrado</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Flujo de caja del período</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Tendencias y proyecciones</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Desglose por método de pago</li>
+                    </ul>
+                </div>
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📅</span><h3 class="font-bold text-white">Gestión de Citas</h3></div>
+                    <p class="text-sm text-slate-400 mb-3">Análisis de la agenda y ausentismo de pacientes.</p>
+                    <ul class="space-y-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Tasa de asistencia y no-shows</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Distribución de citas por doctor</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Horas y días de mayor demanda</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Tiempo promedio de atención</li>
+                    </ul>
+                </div>
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">👤</span><h3 class="font-bold text-white">Legajo de Pacientes</h3></div>
+                    <p class="text-sm text-slate-400 mb-3">Estadísticas demográficas y de actividad de la base de pacientes.</p>
+                    <ul class="space-y-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Nuevos pacientes por período</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Edad promedio y distribución</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Procedimientos más realizados</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Trazabilidad de historias clínicas</li>
+                    </ul>
+                </div>
+                <div class="p-5 bg-navy-700/40 border border-white/[0.06] rounded-2xl">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📦</span><h3 class="font-bold text-white">Control de Insumos</h3></div>
+                    <p class="text-sm text-slate-400 mb-3">Seguimiento del stock de materiales e insumos odontológicos.</p>
+                    <ul class="space-y-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Insumos con stock crítico</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Productos próximos a vencer</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Valoración total del inventario</li>
+                        <li class="flex items-center gap-2 text-xs text-slate-400"><span class="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0"></span>Ciclos de reposición sugeridos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ USUARIOS ══ -->
+        <div id="section-usuarios" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">👥 Administración</div>
+                <h1 class="text-4xl font-black text-white mb-4">Gestión de Usuarios</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Solo los administradores pueden crear y gestionar usuarios. Desde aquí se crean las cuentas del personal, se asignan roles y se define a qué empresas tiene acceso cada usuario.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Campos del formulario de usuario</h2>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Usuario</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Nombre de usuario único para iniciar sesión. <strong class="text-white">No se puede modificar</strong> una vez creado.</span></div>
+                <div class="field-row"><span class="field-name">Email Institucional</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Correo electrónico institucional del usuario.</span></div>
+                <div class="field-row"><span class="field-name">Nombre</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Primer nombre del usuario.</span></div>
+                <div class="field-row"><span class="field-name">Apellido</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Apellido del usuario.</span></div>
+                <div class="field-row"><span class="field-name">Contraseña</span><div class="flex gap-2 mt-1"><span class="field-req">solo al crear</span></div><span class="field-desc">Contraseña inicial. Mínimo 8 caracteres. Se puede cambiar después desde "Cambiar contraseña".</span></div>
+                <div class="field-row"><span class="field-name">Teléfono</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Número de teléfono del usuario.</span></div>
+                <div class="field-row"><span class="field-name">Especialidad</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Especialidad profesional. Ej: "Odontología General", "Endodoncia", "Ortodoncia".</span></div>
+                <div class="field-row"><span class="field-name">Tipo de Documento</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Opciones: CI · RUC · Pasaporte.</span></div>
+                <div class="field-row"><span class="field-name">Número de Documento</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Número del documento de identidad.</span></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Acciones disponibles</h2>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">✏️</span><div><p class="font-bold text-white text-sm">Editar usuario</p><p class="text-xs text-slate-400">Modificar datos personales (excepto username)</p></div></div>
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🔑</span><div><p class="font-bold text-white text-sm">Cambiar contraseña</p><p class="text-xs text-slate-400">Restablecer la contraseña de un usuario desde un modal separado</p></div></div>
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🏢</span><div><p class="font-bold text-white text-sm">Asignar empresa</p><p class="text-xs text-slate-400">Definir a qué empresas/sucursales puede acceder el usuario</p></div></div>
+                <div class="flex items-center gap-3 p-3 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🗑️</span><div><p class="font-bold text-white text-sm">Eliminar usuario</p><p class="text-xs text-slate-400">Desactiva el acceso del usuario al sistema</p></div></div>
+            </div>
+        </div>
+
+        <!-- ══ GESTIÓN DE ROLES ══ -->
+        <div id="section-gestion-roles" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🔑 Administración</div>
+                <h1 class="text-4xl font-black text-white mb-4">Gestión de Roles</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Permite crear y configurar roles personalizados. Para cada rol se define qué módulos puede ver y usar, con la posibilidad de configurarlo de forma diferente por empresa.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Acciones sobre un rol</h2>
+            <div class="space-y-3 mb-8">
+                <div class="flex items-center gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-2xl">📦</span><div><p class="font-bold text-white mb-1">Módulos</p><p class="text-sm text-slate-400">Abre un panel donde se activan o desactivan los módulos a los que el rol tiene acceso. La configuración es <strong class="text-white">por empresa</strong>: si tenés varias sucursales, podés tener configuraciones diferentes para cada una.</p></div></div>
+                <div class="flex items-center gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-2xl">🔐</span><div><p class="font-bold text-white mb-1">Permisos</p><p class="text-sm text-slate-400">Control granular de permisos específicos dentro de cada módulo (ej: solo lectura, crear, editar, eliminar).</p></div></div>
+                <div class="flex items-center gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-2xl">✏️</span><div><p class="font-bold text-white mb-1">Editar</p><p class="text-sm text-slate-400">Modificar el nombre, código y descripción del rol.</p></div></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Estructura de módulos</h2>
+            <p class="text-slate-400 text-sm mb-4">Los módulos tienen una estructura jerárquica: existen módulos principales con sub-módulos dentro. Por ejemplo:</p>
+            <div class="code-block mb-8">
+PACIENTES (módulo principal)<br>
+&nbsp;&nbsp;├─ Información Personal<br>
+&nbsp;&nbsp;├─ Odontograma<br>
+&nbsp;&nbsp;├─ Historia Clínica<br>
+&nbsp;&nbsp;├─ Tratamientos<br>
+&nbsp;&nbsp;└─ Facturación / Pagos<br>
+<br>
+AGENDA (módulo principal)<br>
+&nbsp;&nbsp;└─ Gestión de Citas<br>
+<br>
+FACTURACIÓN (módulo principal)<br>
+&nbsp;&nbsp;├─ Listado de Facturas<br>
+&nbsp;&nbsp;└─ Emitir Facturas
+            </div>
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Configuración por empresa</p><p class="text-sm text-slate-400">En el modal de módulos aparece un selector de empresa. Podés configurar los módulos del rol de forma independiente para cada sucursal. Un doctor puede ver Facturación en Sucursal A y no verla en Sucursal B.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ COMPRAS — PROVEEDORES ══ -->
+        <div id="section-compras" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🛒 Compras</div>
+                <h1 class="text-4xl font-black text-white mb-4">Proveedores</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Gestión del directorio de proveedores de insumos y materiales clínicos. Desde aquí se registran y administran las empresas que abastecen a la clínica.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">El módulo de Compras incluye</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-2xl mb-2">🏢</p><p class="text-xs font-bold text-white">Proveedores</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-2xl mb-2">📦</p><p class="text-xs font-bold text-white">Artículos</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-2xl mb-2">🧾</p><p class="text-xs font-bold text-white">Facturas de Compra</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-2xl mb-2">📊</p><p class="text-xs font-bold text-white">Stock e Inventario</p></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Proveedores</h2>
+            <p class="text-slate-400 text-sm mb-4">El submódulo de Proveedores almacena el directorio de empresas y personas que abastecen los insumos de la clínica. Permite:</p>
+            <ul class="space-y-2 mb-8">
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></span>Registrar nuevos proveedores con datos de contacto completos</li>
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></span>Consultar el historial de compras por proveedor</li>
+                <li class="flex items-center gap-2 text-sm text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></span>Activar o desactivar proveedores según vigencia de la relación comercial</li>
+            </ul>
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Dashboard de Compras</p><p class="text-sm text-slate-400">La pantalla principal del módulo muestra alertas de stock crítico e inversión mensual en suministros.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ COMPRAS — ARTÍCULOS ══ -->
+        <div id="section-compras-articulos" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🛒 Compras</div>
+                <h1 class="text-4xl font-black text-white mb-4">Catálogo de Artículos</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">El maestro de insumos y materiales clínicos. Define todos los artículos que la clínica compra y utiliza, con su unidad de medida, precio de referencia y stock mínimo.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Qué se gestiona aquí</h2>
+            <div class="space-y-3 mb-8">
+                <div class="flex items-center gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🦷</span><div><p class="font-bold text-white text-sm">Insumos odontológicos</p><p class="text-xs text-slate-400">Anestésicos, materiales de obturación, resinas, cemento dental, etc.</p></div></div>
+                <div class="flex items-center gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🧤</span><div><p class="font-bold text-white text-sm">Descartables e higiene</p><p class="text-xs text-slate-400">Guantes, barbijos, baberos, vasos descartables, etc.</p></div></div>
+                <div class="flex items-center gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><span class="text-lg">🔧</span><div><p class="font-bold text-white text-sm">Instrumentos y equipamiento</p><p class="text-xs text-slate-400">Fresas, limas, instrumentos de diagnóstico, materiales de laboratorio, etc.</p></div></div>
+            </div>
+            <p class="text-slate-400 text-sm">Cada artículo del catálogo se vincula con los movimientos de inventario y las facturas de compra para mantener trazabilidad del stock.</p>
+        </div>
+
+        <!-- ══ COMPRAS — FACTURAS ══ -->
+        <div id="section-compras-facturas" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🛒 Compras</div>
+                <h1 class="text-4xl font-black text-white mb-4">Facturas de Compra</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Registro de todas las adquisiciones realizadas por la clínica. Cada factura de compra impacta directamente en el stock del inventario.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Registrar una compra</h2>
+            <div class="space-y-3 mb-8">
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">1</div><p class="text-sm text-slate-400 pt-0.5">Ir a <strong class="text-white">Compras → Facturas de Compra → Nuevo Registro</strong>.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">2</div><p class="text-sm text-slate-400 pt-0.5">Seleccionar el proveedor y completar los datos de la factura (número, fecha, timbrado).</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">3</div><p class="text-sm text-slate-400 pt-0.5">Agregar los artículos comprados con cantidad y precio unitario.</p></div>
+                <div class="flex gap-3 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="step-badge">4</div><p class="text-sm text-slate-400 pt-0.5">Confirmar. El stock de cada artículo se incrementa automáticamente.</p></div>
+            </div>
+            <div class="alert-success p-4 flex gap-3">
+                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-emerald-300 mb-1">Actualización automática de stock</p><p class="text-sm text-slate-400">Al registrar una factura de compra, el sistema suma las unidades al inventario de cada artículo incluido. No es necesario actualizar el stock manualmente.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ COMPRAS — INVENTARIO ══ -->
+        <div id="section-compras-inventario" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">🛒 Compras</div>
+                <h1 class="text-4xl font-black text-white mb-4">Stock e Inventario</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Auditoría de existencias en tiempo real. Permite ver el nivel de stock de cada artículo, identificar cuáles están por debajo del mínimo y tomar decisiones de reposición.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Información disponible</h2>
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.06] mb-8">
+                <table>
+                    <thead><tr><th>Dato</th><th>Descripción</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-blue-400 font-semibold">Stock actual</td><td>Unidades disponibles en este momento</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Stock mínimo</td><td>Umbral de alerta configurado por artículo</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Estado</td><td>Normal / Stock crítico (por debajo del mínimo)</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Último movimiento</td><td>Fecha de la última entrada o salida del artículo</td></tr>
+                        <tr><td class="text-blue-400 font-semibold">Proveedor habitual</td><td>Proveedor asociado para reposición</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert-warn p-4 flex gap-3">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div><p class="text-sm font-bold text-amber-300 mb-1">Alertas de stock crítico</p><p class="text-sm text-slate-400">El Dashboard de Compras muestra el contador de artículos en stock crítico. También se refleja en el Reporte de Control de Insumos.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ REPORTE — CITAS ══ -->
+        <div id="section-reporte-citas" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📈 Reportes</div>
+                <h1 class="text-4xl font-black text-white mb-4">Reporte — Gestión de Citas</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Análisis detallado del rendimiento de la agenda: ausentismo, distribución de citas por doctor y horas de mayor demanda.</p>
+            </div>
+            <div class="space-y-3 mb-8">
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">📊</div><div><p class="font-bold text-white text-sm">Tasa de asistencia</p><p class="text-xs text-slate-400">Porcentaje de citas completadas vs. canceladas o no presentadas en el período</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">👨‍⚕️</div><div><p class="font-bold text-white text-sm">Distribución por doctor</p><p class="text-xs text-slate-400">Cuántas citas atendió cada odontólogo en el período seleccionado</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">🕐</div><div><p class="font-bold text-white text-sm">Horas y días pico</p><p class="text-xs text-slate-400">Identificación de los horarios y días de mayor demanda de la clínica</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">⏱️</div><div><p class="font-bold text-white text-sm">Tiempo promedio de atención</p><p class="text-xs text-slate-400">Duración promedio de las consultas completadas</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">❌</div><div><p class="font-bold text-white text-sm">Análisis de no-shows</p><p class="text-xs text-slate-400">Pacientes con mayor frecuencia de inasistencia, para tomar acciones preventivas</p></div></div>
+            </div>
+        </div>
+
+        <!-- ══ REPORTE — PACIENTES ══ -->
+        <div id="section-reporte-pacientes" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📈 Reportes</div>
+                <h1 class="text-4xl font-black text-white mb-4">Reporte — Legajo de Pacientes</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Estadísticas demográficas, crecimiento del padrón y trazabilidad de las historias clínicas.</p>
+            </div>
+            <div class="space-y-3 mb-8">
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">📈</div><div><p class="font-bold text-white text-sm">Nuevos pacientes por período</p><p class="text-xs text-slate-400">Evolución mensual del alta de nuevos pacientes con comparativo</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">👥</div><div><p class="font-bold text-white text-sm">Demografía</p><p class="text-xs text-slate-400">Distribución por edad, género y zona geográfica</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">🦷</div><div><p class="font-bold text-white text-sm">Procedimientos más realizados</p><p class="text-xs text-slate-400">Ranking de tratamientos por frecuencia e ingreso generado</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">📋</div><div><p class="font-bold text-white text-sm">Trazabilidad de historias</p><p class="text-xs text-slate-400">Actividad clínica del período: consultas registradas, diagnósticos, recetas</p></div></div>
+            </div>
+        </div>
+
+        <!-- ══ REPORTE — INVENTARIO ══ -->
+        <div id="section-reporte-inventario" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">📈 Reportes</div>
+                <h1 class="text-4xl font-black text-white mb-4">Reporte — Control de Insumos</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Seguimiento del stock de materiales e insumos: artículos críticos, próximos a vencer y valoración total del inventario.</p>
+            </div>
+            <div class="space-y-3 mb-8">
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">🚨</div><div><p class="font-bold text-white text-sm">Artículos en stock crítico</p><p class="text-xs text-slate-400">Listado de insumos cuyo stock está por debajo del mínimo configurado</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">📅</div><div><p class="font-bold text-white text-sm">Productos próximos a vencer</p><p class="text-xs text-slate-400">Alertas de vencimiento para materiales con fecha de caducidad</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">💰</div><div><p class="font-bold text-white text-sm">Valoración del inventario</p><p class="text-xs text-slate-400">Valor total del stock disponible según precios de última compra</p></div></div>
+                <div class="flex items-center gap-4 p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl"><div class="text-2xl">🔄</div><div><p class="font-bold text-white text-sm">Ciclos de reposición sugeridos</p><p class="text-xs text-slate-400">Recomendaciones de compra basadas en consumo promedio y stock mínimo</p></div></div>
+            </div>
+        </div>
+
+        <!-- ══ CONFIG — CAJAS ══ -->
+        <div id="section-config-cajas" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">⚙️ Configuración</div>
+                <h1 class="text-4xl font-black text-white mb-4">Gestión de Cajas</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Configuración de los puntos de cobro (terminales de caja) de la clínica. Cada terminal puede asignarse a un usuario específico o dejarse de acceso libre.</p>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Crear una terminal de caja</h2>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Nombre identificador</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Nombre de la terminal. Ej: "CAJA PRINCIPAL PB", "CAJA RECEPCIÓN".</span></div>
+                <div class="field-row"><span class="field-name">Notas operativas</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Descripción de la ubicación o uso específico de la terminal.</span></div>
+                <div class="field-row"><span class="field-name">Agente responsable</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Si se asigna un usuario, <strong class="text-white">solo ese usuario</strong> podrá abrir y operar esa caja. Si se deja vacío, cualquier usuario con permisos puede usarla.</span></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Métricas del panel</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-2xl mb-2">🖥️</p><p class="text-xs font-bold text-white">Total terminales</p><p class="text-xs text-slate-400">Cajas registradas</p></div>
+                <div class="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-center"><p class="text-2xl mb-2">✅</p><p class="text-xs font-bold text-emerald-400">Cajas abiertas</p><p class="text-xs text-slate-400">Operativas ahora</p></div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl text-center"><p class="text-2xl mb-2">👤</p><p class="text-xs font-bold text-white">Agentes asignados</p><p class="text-xs text-slate-400">Con responsable</p></div>
+            </div>
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Visibilidad del administrador</p><p class="text-sm text-slate-400">Los perfiles administrativos tienen visibilidad global sobre todas las terminales, independientemente de la asignación de responsable.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ WHATSAPP ══ -->
+        <div id="section-whatsapp" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">💬 Módulo</div>
+                <h1 class="text-4xl font-black text-white mb-4">WhatsApp</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Módulo de mensajería para enviar recordatorios automáticos de citas y mensajes manuales a los pacientes a través de WhatsApp Business.</p>
+            </div>
+
+            <div class="alert-info p-4 flex gap-3 mb-8">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Acceso por rol</p><p class="text-sm text-slate-400">El módulo WhatsApp es accesible para roles <strong class="text-white">SuperAdmin</strong>, <strong class="text-white">Admin</strong> y <strong class="text-white">Secretaria</strong>. Solo aparece en el menú si el módulo está habilitado para la empresa activa (SuperAdmin siempre lo ve).</p></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Panel de mensajes</h2>
+            <p class="text-slate-400 text-sm mb-4">La pantalla principal muestra el historial de los últimos 100 mensajes enviados a pacientes de la empresa activa.</p>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Paciente</span><div class="flex gap-2 mt-1"></div><span class="field-desc">Nombre completo del paciente al que se envió el mensaje.</span></div>
+                <div class="field-row"><span class="field-name">Teléfono</span><div class="flex gap-2 mt-1"></div><span class="field-desc">Número de destino del mensaje.</span></div>
+                <div class="field-row"><span class="field-name">Mensaje</span><div class="flex gap-2 mt-1"></div><span class="field-desc">Texto del recordatorio o mensaje enviado.</span></div>
+                <div class="field-row"><span class="field-name">Estado</span><div class="flex gap-2 mt-1"></div><span class="field-desc"><span class="px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded text-xs font-bold">ENVIADO</span> · <span class="px-2 py-0.5 bg-red-500/10 text-red-400 rounded text-xs font-bold">ERROR</span> · <span class="px-2 py-0.5 bg-slate-500/10 text-slate-400 rounded text-xs font-bold">PENDIENTE</span></span></div>
+                <div class="field-row"><span class="field-name">Fecha de envío</span><div class="flex gap-2 mt-1"></div><span class="field-desc">Fecha y hora del envío en formato <span class="inline-code">YYYY-MM-DD HH:MM</span>.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Recordatorios automáticos</h2>
+            <p class="text-slate-400 text-sm mb-4">El sistema ejecuta automáticamente un proceso que detecta las citas próximas y envía recordatorios a los pacientes que tienen activado el opt-in de WhatsApp.</p>
+            <div class="space-y-3 mb-6">
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl">
+                    <p class="font-bold text-white text-sm mb-1">¿Cuándo se envían?</p>
+                    <p class="text-xs text-slate-400">Se envían a las citas con estado <strong class="text-white">PENDIENTE</strong> que caen dentro del período de anticipación configurado (por defecto 24 horas). Solo se envía a pacientes con <strong class="text-white">Recordatorios WhatsApp</strong> activado en su ficha.</p>
+                </div>
+                <div class="p-4 bg-navy-700/40 border border-white/[0.06] rounded-xl">
+                    <p class="font-bold text-white text-sm mb-1">Botón "Ejecutar ahora"</p>
+                    <p class="text-xs text-slate-400">Permite lanzar manualmente el proceso de recordatorios para la empresa activa, sin esperar el próximo ciclo automático.</p>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Envío manual de mensajes</h2>
+            <p class="text-slate-400 text-sm mb-4">Botón <strong class="text-white">Enviar mensaje</strong> para enviar un mensaje libre a cualquier número de WhatsApp.</p>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+                <div class="field-row"><span class="field-name">Teléfono</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Número de destino. Formatos aceptados: <span class="inline-code">09XXXXXXXX</span> · <span class="inline-code">5959XXXXXXXX</span> · <span class="inline-code">+5959XXXXXXXX</span>. Se muestra error si el formato no es válido.</span></div>
+                <div class="field-row"><span class="field-name">Mensaje</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Texto libre del mensaje a enviar.</span></div>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-4">Eliminar registros del log</h2>
+            <div class="alert-warn p-4 flex gap-3 mb-6">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div><p class="text-sm font-bold text-amber-300 mb-1">Solo SuperAdmin</p><p class="text-sm text-slate-400">El botón de eliminar en cada fila del historial solo es visible para usuarios SuperAdmin. Elimina el registro permanentemente de la base de datos.</p></div>
+            </div>
+
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Opt-in de pacientes</p><p class="text-sm text-slate-400">Para que un paciente reciba recordatorios automáticos debe tener: (1) teléfono principal con formato válido registrado, y (2) el checkbox <strong class="text-white">Recordatorios WhatsApp</strong> activado en su ficha de datos básicos.</p></div>
+            </div>
+        </div>
+
+        <!-- ══ CONFIG — WHATSAPP ══ -->
+        <div id="section-config-whatsapp" class="doc-section">
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-xs text-blue-400 font-semibold mb-4">⚙️ Configuración</div>
+                <h1 class="text-4xl font-black text-white mb-4">WhatsApp Business</h1>
+                <p class="text-lg text-slate-400 leading-relaxed">Integración con la API de WhatsApp Business de Meta para enviar recordatorios automáticos de citas a los pacientes.</p>
+            </div>
+            <div class="alert-warn p-4 flex gap-3 mb-8">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div><p class="text-sm font-bold text-amber-300 mb-1">Solo SuperAdmin</p><p class="text-sm text-slate-400">Esta configuración solo es accesible para usuarios con rol SuperAdmin. Requiere credenciales de Meta WhatsApp Cloud API.</p></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Campos de configuración</h2>
+            <div class="rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
+                <div class="field-row"><span class="field-name">Estado del módulo</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Toggle para habilitar o deshabilitar el envío de mensajes de WhatsApp para la empresa activa.</span></div>
+                <div class="field-row"><span class="field-name">Phone Number ID</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">ID del número de teléfono de WhatsApp Business. Se obtiene desde Meta Business Manager → WhatsApp → Phone Numbers.</span></div>
+                <div class="field-row"><span class="field-name">WABA ID</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">WhatsApp Business Account ID. Identificador de la cuenta de negocio en Meta.</span></div>
+                <div class="field-row"><span class="field-name">Access Token</span><div class="flex gap-2 mt-1"><span class="field-req">requerido</span></div><span class="field-desc">Token de larga duración del System User de Meta Business. Por seguridad, no se muestra una vez guardado.</span></div>
+                <div class="field-row"><span class="field-name">Horas de anticipación</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Cuántas horas antes de la cita se envía el recordatorio. Rango: 1 a 72 horas. Por defecto: 24 horas.</span></div>
+                <div class="field-row"><span class="field-name">Plantilla de recordatorio</span><div class="flex gap-2 mt-1"><span class="field-opt">opcional</span></div><span class="field-desc">Texto del mensaje a enviar. Soporta variables dinámicas: <span class="inline-code">{nombre}</span> <span class="inline-code">{fecha}</span> <span class="inline-code">{hora}</span> <span class="inline-code">{doctor}</span>. La pantalla muestra una vista previa del mensaje con datos de ejemplo.</span></div>
+            </div>
+            <h2 class="text-xl font-black text-white mb-4">Ejemplo de mensaje</h2>
+            <div class="p-5 bg-emerald-500/5 border border-emerald-500/15 rounded-2xl mb-8">
+                <p class="text-xs font-bold text-emerald-400 mb-2 uppercase tracking-widest">Vista previa del recordatorio</p>
+                <p class="text-sm text-slate-300 leading-relaxed">Hola <strong>Juan Pérez</strong>, te recordamos tu cita el <strong>28/02/2026</strong> a las <strong>10:30</strong> con Dr/a. <strong>García</strong>. Cualquier consulta comunicate con nosotros.</p>
+            </div>
+            <div class="alert-info p-4 flex gap-3">
+                <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><p class="text-sm font-bold text-blue-300 mb-1">Requisito Meta API</p><p class="text-sm text-slate-400">Para enviar mensajes de recordatorio (business-initiated), Meta requiere templates aprobados (HSM). Solicitá la aprobación en tu Meta Business Manager antes de activar el módulo.</p></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-16 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-slate-500">© 2026 Denta · Documentación v2.0</p>
+            <a href="index.html#contacto" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">¿Necesitás ayuda? Contactanos →</a>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Grupos padre → sub-items
+    const parentGroups = {
+        'pacientes': 'pacientes-group',
+        'odontograma': 'pacientes-group',
+        'historia': 'pacientes-group',
+        'tratamientos': 'pacientes-group',
+        'facturacion': 'factura-group',
+        'caja': 'factura-group',
+        'compras': 'compras-group',
+        'compras-articulos': 'compras-group',
+        'compras-facturas': 'compras-group',
+        'compras-inventario': 'compras-group',
+        'reportes': 'reportes-group',
+        'reporte-citas': 'reportes-group',
+        'reporte-pacientes': 'reportes-group',
+        'reporte-inventario': 'reportes-group',
+        'whatsapp': '',
+        'usuarios': 'config-group',
+        'gestion-roles': 'config-group',
+        'config-cajas': 'config-group',
+        'config-whatsapp': 'config-group',
+    };
+
+    function toggleParent(groupId) {
+        const sub = document.getElementById('nav-' + groupId);
+        const arrow = document.getElementById('arrow-' + groupId);
+        sub.classList.toggle('open');
+        arrow.classList.toggle('open');
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + id).classList.add('active');
+
+        // Reset nav items
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.classList.remove('active', 'text-blue-400');
+            btn.classList.add('text-slate-400');
+        });
+        document.querySelectorAll('.nav-sub-item').forEach(btn => {
+            btn.classList.remove('active', 'text-blue-400');
+            btn.classList.add('text-slate-400');
+        });
+
+        // Activate correct item
+        document.querySelectorAll('.nav-item, .nav-sub-item').forEach(btn => {
+            if (btn.getAttribute('onclick') === `showSection('${id}')`) {
+                btn.classList.add('active', 'text-blue-400');
+                btn.classList.remove('text-slate-400');
+            }
+        });
+
+        // Auto-open parent group if sub-item
+        if (parentGroups[id]) {
+            const groupId = parentGroups[id];
+            const sub = document.getElementById('nav-' + groupId);
+            const arrow = document.getElementById('arrow-' + groupId);
+            if (sub && !sub.classList.contains('open')) {
+                sub.classList.add('open');
+                arrow.classList.add('open');
+            }
+        }
+
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('open');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    document.getElementById('sidebar-btn').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebar-overlay').classList.toggle('open');
+    });
+    document.getElementById('sidebar-overlay').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.remove('open');
+        this.classList.remove('open');
+    });
+</script>
+</body>
+</html>
