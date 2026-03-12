@@ -331,6 +331,7 @@ export const whatsappService = {
     getStatus:       (empresaId) => axios.get(`${WA_SERVER}/status`, { params: { empresa_id: empresaId } }),
     conectar:        (empresaId) => axios.post(`${WA_SERVER}/connect`, { empresa_id: empresaId }),
     desconectar:     (empresaId) => axios.post(`${WA_SERVER}/disconnect`, { empresa_id: empresaId }),
+    resetSesion:     (empresaId) => axios.post(`${WA_SERVER}/reset`,      { empresa_id: empresaId }),
     getServerConfig: (empresaId) => axios.get(`${WA_SERVER}/server-config`, { params: { empresa_id: empresaId } }),
     saveServerConfig:(data)      => axios.post(`${WA_SERVER}/server-config`, data),
     enviarMensaje:   (data)      => axios.post(`${WA_SERVER}/send`, data),
